@@ -17,9 +17,10 @@ sources:
 
   - id: rtp_noticias
     name: "RTP Notícias"
-    # Único media PT com RSS oficial ainda ativo.
+    # RSS oficial: rtp.pt/noticias/rss (feed geral).
+    # Existem também feeds por categoria: /pais, /mundo, /desporto, /economia, /cultura
     type: rss
-    url: "https://www.rtp.pt/noticias/rss/feeds"
+    url: "https://www.rtp.pt/noticias/rss"
     language: pt
     category: public_broadcaster
     schedule_interval_minutes: 30
