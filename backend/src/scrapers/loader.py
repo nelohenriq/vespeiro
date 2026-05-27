@@ -17,6 +17,11 @@ SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     "dn": PortugalMediaSpider,
     "sic_noticias": PortugalMediaSpider,
     "eco": PortugalMediaSpider,
+    "cnn_portugal": PortugalMediaSpider,
+    "tsf": PortugalMediaSpider,
+    "renascenca": PortugalMediaSpider,
+    "sapo_24": PortugalMediaSpider,
+    "nam": PortugalMediaSpider,
 }
 
 
