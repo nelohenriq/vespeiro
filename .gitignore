@@ -28,3 +28,9 @@ Thumbs.db
 
 # Project specific
 backups/*.json
+
+# Tool config (Claude, Codebuff, etc.)
+.agents/
+.openclaude/
+.remember/
+skills-lock.json
