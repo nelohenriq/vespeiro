@@ -105,3 +105,49 @@ sources:
     category: mainstream
     schedule_interval_minutes: 30
     extraction_strategy: trafilatura
+
+  - id: cnn_portugal
+    name: "CNN Portugal"
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:cnnportugal.iol.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: tsf
+    name: "TSF — Rádio Notícias"
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:tsf.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: renascenca
+    name: "Rádio Renascença"
+    # RSS oficial ativo: https://rr.pt/rssfeed-ultimas
+    type: rss
+    url: "https://rr.pt/rssfeed-ultimas"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: sapo_24
+    name: "SAPO 24"
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:24noticias.sapo.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: nam
+    name: "Notícias ao Minuto"
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:noticiasaominuto.com&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
