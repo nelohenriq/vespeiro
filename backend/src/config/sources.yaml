@@ -1,0 +1,90 @@
+sources:
+  - id: lusa
+    name: "Lusa — Agência de Notícias"
+    type: rss
+    url: "https://www.lusa.pt/rss"
+    language: pt
+    category: agency
+    schedule_interval_minutes: 15
+    extraction_strategy: trafilatura
+
+  - id: rtp_noticias
+    name: "RTP Notícias"
+    type: scrape
+    url: "https://www.rtp.pt/noticias"
+    language: pt
+    category: public_broadcaster
+    schedule_interval_minutes: 30
+    extraction_strategy: newspaper4k
+
+  - id: publico
+    name: "Público"
+    type: rss
+    url: "https://www.publico.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: observador
+    name: "Observador"
+    type: rss
+    url: "https://observador.pt/feed/"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: expresso
+    name: "Expresso"
+    type: rss
+    url: "https://expresso.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: cm_jornal
+    name: "Correio da Manhã"
+    type: rss
+    url: "https://www.cmjornal.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: jn
+    name: "Jornal de Notícias"
+    type: rss
+    url: "https://www.jn.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: dn
+    name: "Diário de Notícias"
+    type: rss
+    url: "https://www.dn.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: sic_noticias
+    name: "SIC Notícias"
+    type: rss
+    url: "https://sicnoticias.pt/rss"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: eco
+    name: "ECO — Economia Online"
+    type: rss
+    url: "https://eco.sapo.pt/feed/"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
