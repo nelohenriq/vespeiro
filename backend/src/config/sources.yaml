@@ -1,17 +1,25 @@
+# ──────────────────────────────────────────────────
+# Project Vespeiro — Source Definitions
+# Strategy: RSS real (RTP) + Google News RSS (restantes) + light scrape (Lusa)
+# Custo: $0 — todas as fontes são gratuitas e não requerem API keys
+# ──────────────────────────────────────────────────
+
 sources:
   - id: lusa
     name: "Lusa — Agência de Notícias"
-    type: rss
-    url: "https://www.lusa.pt/rss"
+    # Sem RSS público (B2B pago). Google News RSS capta conteúdo syndicado.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:lusa.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: agency
-    schedule_interval_minutes: 15
+    schedule_interval_minutes: 30
     extraction_strategy: trafilatura
 
   - id: rtp_noticias
     name: "RTP Notícias"
-    type: scrape
-    url: "https://www.rtp.pt/noticias"
+    # Único media PT com RSS oficial ainda ativo.
+    type: rss
+    url: "https://www.rtp.pt/noticias/rss/feeds"
     language: pt
     category: public_broadcaster
     schedule_interval_minutes: 30
@@ -19,8 +27,9 @@ sources:
 
   - id: publico
     name: "Público"
-    type: rss
-    url: "https://www.publico.pt/rss"
+    # RSS oficial descontinuado ~2022. Google News RSS como alternativa.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:publico.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -28,8 +37,9 @@ sources:
 
   - id: observador
     name: "Observador"
-    type: rss
-    url: "https://observador.pt/feed/"
+    # Sem RSS oficial.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:observador.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -37,8 +47,9 @@ sources:
 
   - id: expresso
     name: "Expresso"
-    type: rss
-    url: "https://expresso.pt/rss"
+    # RSS oficial descontinuado.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:expresso.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -46,8 +57,9 @@ sources:
 
   - id: cm_jornal
     name: "Correio da Manhã"
-    type: rss
-    url: "https://www.cmjornal.pt/rss"
+    # RSS oficial atrás de login.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:cmjornal.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -55,8 +67,9 @@ sources:
 
   - id: jn
     name: "Jornal de Notícias"
-    type: rss
-    url: "https://www.jn.pt/rss"
+    # Sem RSS público.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:jn.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -64,8 +77,9 @@ sources:
 
   - id: dn
     name: "Diário de Notícias"
-    type: rss
-    url: "https://www.dn.pt/rss"
+    # Sem RSS público.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:dn.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -73,8 +87,9 @@ sources:
 
   - id: sic_noticias
     name: "SIC Notícias"
-    type: rss
-    url: "https://sicnoticias.pt/rss"
+    # Sem RSS público.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:sicnoticias.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -82,8 +97,9 @@ sources:
 
   - id: eco
     name: "ECO — Economia Online"
-    type: rss
-    url: "https://eco.sapo.pt/feed/"
+    # Sem RSS público.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:eco.sapo.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30

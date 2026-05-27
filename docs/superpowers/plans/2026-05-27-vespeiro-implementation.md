@@ -535,14 +535,15 @@ git commit -m "feat: database schema with all models + alembic migration"
 
 ---
 
-### Task 0.4: Lusa Scraper
+### Task 0.4: Lusa Scraper (Google News RSS)
+
+**Estratégia:** Lusa não tem RSS público (serviço B2B pago). Usamos **Google News RSS** (`site:lusa.pt`) que capta o conteúdo syndicado. Isto resolve o problema sem scraping complexo.
 
 **Files:**
 - Create: `backend/src/scrapers/__init__.py`
 - Create: `backend/src/scrapers/base.py`
 - Create: `backend/src/scrapers/spiders/__init__.py`
 - Create: `backend/src/scrapers/spiders/lusa.py`
-- Modify: `backend/src/config/sources.yaml` (add RSS feed URL detail)
 - Create: `backend/src/scrapers/extractors.py`
 
 - [ ] **Step 1: Create base spider class**
@@ -570,8 +571,8 @@ class BaseSpider(ABC):
     """Base class for all scrapers. All spiders must implement this."""
 
     @abstractmethod
-    async def fetch(self, source_id: str) -> list[ScrapedArticle]:
-        """Fetch articles from source. Returns list of ScrapedArticle."""
+    async def fetch(self, source_id: str, url: str) -> list[ScrapedArticle]:
+        """Fetch articles from source URL. Returns list of ScrapedArticle."""
         ...
 ```
 
@@ -597,7 +598,6 @@ def compute_hash(text: str) -> str:
 def parse_date(date_str: str | None) -> datetime | None:
     if not date_str:
         return None
-    # Try common date formats
     from dateutil import parser
     try:
         return parser.parse(date_str)
@@ -605,34 +605,36 @@ def parse_date(date_str: str | None) -> datetime | None:
         return None
 ```
 
-- [ ] **Step 3: Create Lusa spider (RSS + web fallback)**
+- [ ] **Step 3: Create Lusa spider (Google News RSS)**
 
 ```python
 # backend/src/scrapers/spiders/lusa.py
+"""Lusa spider — usa Google News RSS porque Lusa não tem RSS público.
+URL vem do sources.yaml: https://news.google.com/rss/search?q=site:lusa.pt&hl=pt-PT
+"""
 import feedparser
 import httpx
 from datetime import datetime
 from src.scrapers.base import BaseSpider, ScrapedArticle
-from src.scrapers.extractors import extract_content, compute_hash
+from src.scrapers.extractors import extract_content, parse_date
 
 
 class LusaSpider(BaseSpider):
     def __init__(self):
-        self.rss_url = "https://www.lusa.pt/rss"
         self.http_client = httpx.AsyncClient(timeout=30.0)
 
-    async def fetch(self, source_id: str) -> list[ScrapedArticle]:
+    async def fetch(self, source_id: str, url: str) -> list[ScrapedArticle]:
         articles = []
         try:
-            response = await self.http_client.get(self.rss_url)
+            response = await self.http_client.get(url)
             feed = feedparser.parse(response.text)
 
-            for entry in feed.entries[:50]:  # Limit to 50 per run
+            for entry in feed.entries[:50]:
                 article_url = entry.get("link", "")
                 title = entry.get("title", "")
                 published = entry.get("published", "")
 
-                # Try to get full content via web scraping
+                # Try to get full content via trafilatura
                 content_text = None
                 if article_url:
                     try:
@@ -655,14 +657,6 @@ class LusaSpider(BaseSpider):
             await self.http_client.aclose()
 
         return articles
-
-
-def parse_date(date_str: str) -> datetime | None:
-    from dateutil import parser
-    try:
-        return parser.parse(date_str)
-    except Exception:
-        return None
 ```
 
 - [ ] **Step 4: Create test for Lusa spider**
@@ -671,12 +665,16 @@ def parse_date(date_str: str) -> datetime | None:
 # backend/tests/test_scrapers.py
 import pytest
 from src.scrapers.spiders.lusa import LusaSpider
+from src.config import load_sources
 
 
 @pytest.mark.asyncio
 async def test_lusa_spider_fetches_articles():
+    config = load_sources()
+    lusa_cfg = next(s for s in config.sources if s.id == "lusa")
+    
     spider = LusaSpider()
-    articles = await spider.fetch("lusa")
+    articles = await spider.fetch("lusa", lusa_cfg.url)
     assert len(articles) > 0
     assert articles[0].title is not None
     assert articles[0].url.startswith("http")
@@ -686,68 +684,62 @@ async def test_lusa_spider_fetches_articles():
 
 ```bash
 cd backend && pytest tests/test_scrapers.py -v
-Expected: PASS (at least 1 article fetched from Lusa RSS)
+Expected: PASS (at least 1 article fetched from Google News RSS for Lusa)
 ```
 
 ```bash
 git add backend/src/scrapers/ backend/tests/
-git commit -m "feat: Lusa RSS + web scraper with article extraction"
+git commit -m "feat: Lusa scraper via Google News RSS (no public feed available)"
 ```
 
 ---
 
-### Task 0.5: Portuguese Media Spiders
+### Task 0.5: Portuguese Media Spiders (Google News RSS)
+
+**Estratégia:** A maioria dos media PT abandonou RSS oficial. Usamos **Google News RSS** para todos exceto RTP (que tem RSS real). Ambos os tipos são parsed com `feedparser` — o formato XML é idêntico. A diferença está só no URL, que vem do `sources.yaml`.
 
 **Files:**
 - Create: `backend/src/scrapers/spiders/portugal_media.py`
 - Modify: `backend/tests/test_scrapers.py`
 
-- [ ] **Step 1: Create aggregator spider for Portuguese media outlets**
+- [ ] **Step 1: Create generic RSS spider that handles both types**
 
 ```python
 # backend/src/scrapers/spiders/portugal_media.py
+"""Generic RSS spider for Portuguese media outlets.
+Handles both:
+- type: rss (RTP — feed oficial)
+- type: google_news_rss (restantes — Google News RSS)
+Ambos emitem RSS XML standard, parsed com feedparser.
+"""
 import feedparser
 import httpx
+from datetime import datetime
 from src.scrapers.base import BaseSpider, ScrapedArticle
-
-
-# Outlet definitions: id → RSS URL
-PORTUGAL_RSS_FEEDS = {
-    "rtp_noticias": "https://www.rtp.pt/noticias/rss",
-    "publico": "https://www.publico.pt/rss",
-    "observador": "https://observador.pt/feed/",
-    "expresso": "https://expresso.pt/rss",
-    "cm_jornal": "https://www.cmjornal.pt/rss",
-    "jn": "https://www.jn.pt/rss",
-    "dn": "https://www.dn.pt/rss",
-    "sic_noticias": "https://sicnoticias.pt/rss",
-    "eco": "https://eco.sapo.pt/feed/",
-}
+from src.scrapers.extractors import parse_date
 
 
 class PortugalMediaSpider(BaseSpider):
     def __init__(self):
         self.http_client = httpx.AsyncClient(timeout=30.0)
 
-    async def fetch(self, source_id: str) -> list[ScrapedArticle]:
-        rss_url = PORTUGAL_RSS_FEEDS.get(source_id)
-        if not rss_url:
-            return []
-
+    async def fetch(self, source_id: str, url: str) -> list[ScrapedArticle]:
+        """Fetch articles from any RSS-compatible URL.
+        Works for both real RSS and Google News RSS."""
         articles = []
         try:
-            response = await self.http_client.get(rss_url)
+            response = await self.http_client.get(url)
             feed = feedparser.parse(response.text)
 
-            for entry in feed.entries[:30]:  # Limit per source
+            for entry in feed.entries[:30]:
                 articles.append(ScrapedArticle(
                     external_id=entry.get("id"),
                     url=entry.get("link", ""),
                     title=entry.get("title", ""),
                     content_text=entry.get("summary"),
-                    summary=entry.get("summary", "")[:500],
+                    summary=str(entry.get("summary", ""))[:500],
                     author=None,
-                    published_at=None,  # Will be parsed by pipeline
+                    published_at=parse_date(entry.get("published", "")),
                     language="pt",
                 ))
         finally:
@@ -760,11 +752,31 @@ class PortugalMediaSpider(BaseSpider):
 
 ```python
 # In tests/test_scrapers.py (append)
+import pytest
+from src.scrapers.spiders.portugal_media import PortugalMediaSpider
+from src.config import load_sources
+
+
 @pytest.mark.asyncio
-async def test_portugal_media_spider():
-    from src.scrapers.spiders.portugal_media import PortugalMediaSpider
+async def test_portugal_media_spider_gnrss():
+    """Test Google News RSS for Público."""
+    config = load_sources()
+    pub_cfg = next(s for s in config.sources if s.id == "publico")
+    
     spider = PortugalMediaSpider()
-    articles = await spider.fetch("publico")
+    articles = await spider.fetch("publico", pub_cfg.url)
+    assert len(articles) > 0
+    assert articles[0].title
+
+
+@pytest.mark.asyncio
+async def test_portugal_media_spider_rss():
+    """Test real RSS for RTP."""
+    config = load_sources()
+    rtp_cfg = next(s for s in config.sources if s.id == "rtp_noticias")
+    
+    spider = PortugalMediaSpider()
+    articles = await spider.fetch("rtp_noticias", rtp_cfg.url)
     assert len(articles) > 0
     assert articles[0].title
 ```
@@ -773,7 +785,7 @@ async def test_portugal_media_spider():
 
 ```bash
 git add backend/src/scrapers/spiders/portugal_media.py backend/tests/
-git commit -m "feat: Portuguese media RSS scrapers (9 outlets)"
+git commit -m "feat: PT media spider via Google News RSS (9 outlets + RTP real RSS)"
 ```
 
 ---

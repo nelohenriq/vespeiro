@@ -6,6 +6,7 @@ from pathlib import Path
 
 class SourceType(str, Enum):
     RSS = "rss"
+    GOOGLE_NEWS_RSS = "google_news_rss"
     SCRAPE = "scrape"
     API = "api"
     SITEMAP = "sitemap"
