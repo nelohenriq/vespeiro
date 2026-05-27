@@ -96,6 +96,23 @@
 - [ ] 0.13.1 Criar `.github/workflows/backup.yml` (export semanal metadados → GitHub)
 - [ ] 0.13.2 Commit
 
+### 0.14 — ERC Publicidade Institucional do Estado
+- [ ] 0.14.1 Criar `src/public_sources/__init__.py`
+- [ ] 0.14.2 Criar `src/public_sources/erc_advertising.py` (discover PDFs, extract tables)
+- [ ] 0.14.3 Criar teste (`tests/test_erc_advertising.py`)
+- [ ] 0.14.4 Commit
+
+### 0.15 — dados.gov.pt CKAN Data Portal
+- [ ] 0.15.1 Criar `src/public_sources/dados_gov_pt.py` (REST API client)
+- [ ] 0.15.2 Criar teste (`tests/test_dados_gov_pt.py`)
+- [ ] 0.15.3 Commit
+
+### 0.16 — Media Ownership Reference Dataset
+- [ ] 0.16.1 Criar `src/config/ownership.yaml` (11 outlets mapeados)
+- [ ] 0.16.2 Criar `src/config/ownership.py` (Pydantic models)
+- [ ] 0.16.3 Criar teste (`tests/test_ownership.py`)
+- [ ] 0.16.4 Commit
+
 ---
 
 ## 🎯 Fase 1 — Análise Lusa (7 tarefas)
@@ -163,12 +180,12 @@
 
 | Fase | Total | ✅ Feitas | Progresso |
 |------|-------|-----------|-----------|
-| Fase 0 — Fundação | 46 | 0 | 0% |
+| Fase 0 — Fundação | 57 | 0 | 0% |
 | Fase 1 — Análise Lusa | 7 | 0 | 0% |
 | Fase 2 — Espelho Partido | 8 | 0 | 0% |
 | Fase 3 — Ecossistema Estado | 9 | 0 | 0% |
 | Fase 4 — Exposição Pública | 5 | 0 | 0% |
-| **Total** | **75** | **0** | **0%** |
+| **Total** | **86** | **0** | **0%** |
 
 ---
 

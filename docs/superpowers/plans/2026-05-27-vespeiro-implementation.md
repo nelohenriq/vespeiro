@@ -126,6 +126,7 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pyyaml>=6.0.0",
     "jinja2>=3.1.0",
+    "pdfplumber>=0.11.0",
     "numpy>=1.26.0",
     "supabase>=2.0.0",
 ]
@@ -1669,6 +1670,592 @@ jobs:
 ```bash
 git add .github/workflows/backup.yml
 git commit -m "feat: weekly backup workflow exporting metadata to GitHub repo"
+```
+
+### Task 0.14: ERC — Publicidade Institucional do Estado (Scraper de PDF)
+
+**Porquê:** A ERC regula a publicidade institucional do Estado português. Publica relatórios mensais com **quanto cada entidade pública gasta em publicidade e em que meios**. Isto é ouro para cruzar com cobertura editorial.
+
+**Fonte:** `https://www.erc.pt/pt/estudos/publicidade--/relatorio-sobre-publicidade-institucional-do-estado-/`
+
+**Formato:** PDFs mensais com tabelas estruturadas.
+
+**Files:**
+- Create: `backend/src/public_sources/__init__.py`
+- Create: `backend/src/public_sources/erc_advertising.py`
+- Create: `backend/tests/test_erc_advertising.py`
+
+- [ ] **Step 1: Create public_sources package**
+
+```python
+# backend/src/public_sources/__init__.py
+"""Public data sources beyond news scraping.
+
+Each module fetches structured data from Portuguese public entities:
+- ERC: Government advertising spending per media outlet
+- dados.gov.pt: Open data portal API
+
+All sources are free and require no API keys.
+"""
+```
+
+- [ ] **Step 2: Create ERC advertising scraper**
+
+```python
+# backend/src/public_sources/erc_advertising.py
+"""
+Scraper for ERC Institutional Advertising Reports.
+
+Source: https://www.erc.pt/pt/estudos/publicidade--/relatorio-sobre-publicidade-institucional-do-estado-/
+
+These monthly PDF reports contain:
+- Which government entities bought advertising
+- Which media outlets received the spending
+- Amount spent per campaign
+
+Strategy:
+1. Fetch the listing page to discover PDF URLs
+2. Download new PDFs (skip already-downloaded)
+3. Extract tables from PDFs using pdfplumber
+4. Return structured data (entity, outlet, amount, date)
+"""
+import httpx
+import re
+from pathlib import Path
+from datetime import datetime
+from dataclasses import dataclass
+
+
+@dataclass
+class AdvertisingRecord:
+    entity: str          # e.g. "Repartição do Estado"
+    media_outlet: str    # e.g. "RTP1", "Público", "Facebook"
+    campaign: str        # e.g. "Campanha de Vacinação"
+    amount_cents: int    # Amount in euro cents (avoid float precision)
+    month: str           # ISO month: "2026-05"
+    source_url: str      # PDF URL for audit trail
+
+
+ERC_BASE_URL = "https://www.erc.pt"
+ERC_REPORTS_PAGE = "/pt/estudos/publicidade--/relatorio-sobre-publicidade-institucional-do-estado-/"
+
+PDFS_DIR = Path("data/erc_pdfs")
+
+
+def discover_monthly_reports() -> list[dict]:
+    """Fetch the ERC page and extract all PDF report links."""
+    with httpx.Client(timeout=15.0) as client:
+        resp = client.get(f"{ERC_BASE_URL}{ERC_REPORTS_PAGE}")
+        resp.raise_for_status()
+
+    # Find PDF links: typically "PIE_2025_04.pdf" or similar pattern
+    pdf_links = []
+    pattern = r'href=["\']([^"\']+\.pdf)["\']'
+    for match in re.finditer(pattern, resp.text):
+        pdf_url = match.group(1)
+        if pdf_url.startswith("/"):
+            pdf_url = f"{ERC_BASE_URL}{pdf_url}"
+        pdf_links.append({
+            "url": pdf_url,
+            "filename": Path(pdf_url).name,
+        })
+
+    return pdf_links
+
+
+def download_pdf(url: str, filename: str) -> Path | None:
+    """Download a PDF report if not already cached."""
+    PDFS_DIR.mkdir(parents=True, exist_ok=True)
+    local_path = PDFS_DIR / filename
+
+    if local_path.exists():
+        return local_path
+
+    with httpx.Client(timeout=30.0) as client:
+        resp = client.get(url)
+        if resp.status_code != 200:
+            return None
+        local_path.write_bytes(resp.content)
+
+    return local_path
+
+
+def _extract_month_from_filename(filename: str) -> str:
+    """Extract ISO month from filename like 'PIE_2025_04.pdf' → '2025-04'."""
+    import re as _re
+    match = _re.search(r'(\d{4})[_-]?(\d{2})', filename)
+    if match:
+        return f"{match.group(1)}-{match.group(2)}"
+    return filename
+
+
+def extract_advertising_data(pdf_path: Path, original_url: str = "") -> list[AdvertisingRecord]:
+    """Extract structured advertising data from a PDF report.
+    
+    Uses pdfplumber to extract tables.
+    Expected columns: Entity, Media Outlet, Campaign, Amount (€)
+    """
+    import pdfplumber
+
+    records = []
+    month = _extract_month_from_filename(pdf_path.name)
+
+    try:
+        with pdfplumber.open(pdf_path) as pdf:
+            for page in pdf.pages:
+                tables = page.extract_tables()
+                if not tables:
+                    continue
+                for table in tables:
+                    if not table or len(table) < 2:
+                        continue
+                    for row in table[1:]:  # Skip header
+                        if not row or len(row) < 4:
+                            continue
+                        entity = (row[0] or "").strip()
+                        outlet = (row[1] or "").strip()
+                        campaign = (row[2] or "").strip()
+                        amount_str = (row[3] or "0").strip()
+
+                        if not entity or not outlet:
+                            continue
+
+                        # Parse amount (e.g. "1 234,56 €" → 123456 cents)
+                        amount_clean = (
+                            amount_str.replace("€", "")
+                            .replace(" ", "")
+                            .replace(".", "")
+                            .replace(",", ".")
+                        )
+                        try:
+                            amount_cents = int(float(amount_clean) * 100)
+                        except (ValueError, TypeError):
+                            amount_cents = 0
+
+                        records.append(AdvertisingRecord(
+                            entity=entity,
+                            media_outlet=outlet,
+                            campaign=campaign,
+                            amount_cents=amount_cents,
+                            month=month,
+                            source_url=original_url or str(pdf_path),
+                        ))
+    except Exception as exc:
+        print(f"  ⚠️ Failed to extract {pdf_path.name}: {exc}")
+
+    return records
+
+
+def get_all_advertising() -> list[AdvertisingRecord]:
+    """Full pipeline: discover → download → extract all available reports."""
+    reports = discover_monthly_reports()
+    all_records = []
+
+    for report in reports[:3]:  # Limit to 3 most recent to avoid overload
+        try:
+            local_path = download_pdf(report["url"], report["filename"])
+            if local_path:
+                records = extract_advertising_data(local_path, original_url=report["url"])
+                print(f"  Extracted {len(records)} records from {report['filename']}")
+                all_records.extend(records)
+        except Exception as exc:
+            print(f"  ⚠️ Failed to process {report['filename']}: {exc}")
+
+    return all_records
+```
+
+- [ ] **Step 3: Create test**
+
+```python
+# backend/tests/test_erc_advertising.py
+import pytest
+from src.public_sources.erc_advertising import discover_monthly_reports
+
+
+def test_discover_reports():
+    """Test that we can connect to ERC and find PDF links."""
+    reports = discover_monthly_reports()
+    assert len(reports) > 0
+    for r in reports:
+        assert r["url"].startswith("http")
+        assert r["filename"].endswith(".pdf")
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+pip install pdfplumber  # Or add to pyproject.toml
+git add backend/src/public_sources/ backend/tests/test_erc_advertising.py
+git commit -m "feat: ERC institutional advertising scraper (PDF→structured data)"
+```
+
+---
+
+### Task 0.15: dados.gov.pt — CKAN Data Portal Integration
+
+**Porquê:** O portal de dados abertos do governo (`dados.gov.pt`) contém dezenas de datasets sobre comunicação, transparência, e media. A API REST permite descobrir e descarregar programaticamente.
+
+**API Base:** `https://dados.gov.pt/api/1/datasets/`
+
+**Files:**
+- Create: `backend/src/public_sources/dados_gov_pt.py`
+- Create: `backend/tests/test_dados_gov_pt.py`
+
+- [ ] **Step 1: Create dados.gov.pt API client**
+
+```python
+# backend/src/public_sources/dados_gov_pt.py
+"""
+Client for dados.gov.pt — Portuguese Open Data Portal.
+
+Uses the CKAN-compatible REST API:
+- Search datasets: GET /api/1/datasets/?q=<query>
+- Pagination: Uses 'next' link in response
+- httpx auto-encodes query params when passed as dict
+
+Relevant search terms:
+- comunicação social
+- media / imprensa
+- publicidade institucional
+- transparência
+"""
+import httpx
+from pathlib import Path
+from dataclasses import dataclass
+
+
+@dataclass
+class Dataset:
+    id: str
+    title: str
+    description: str
+    organization: str
+    resources: list[dict]
+    url: str
+
+
+API_BASE = "https://dados.gov.pt/api/1/datasets/"
+
+
+def search_datasets(query: str, max_results: int = 20) -> list[Dataset]:
+    """Search for datasets by keyword.
+    httpx auto-encodes query params — no manual quoting needed.
+    """
+    datasets = []
+    params = {"q": query, "rows": max_results}
+
+    with httpx.Client(timeout=15.0) as client:
+        resp = client.get(API_BASE, params=params)
+        resp.raise_for_status()
+        data = resp.json()
+
+        for item in data.get("data", []):
+            ds = Dataset(
+                id=item.get("id", ""),
+                title=item.get("title", ""),
+                description=item.get("notes", ""),
+                organization=item.get("organization", {}).get("title", ""),
+                resources=[
+                    {"url": r.get("url", ""), "format": r.get("format", ""), "description": r.get("description", "")}
+                    for r in item.get("resources", [])
+                    if r.get("url")
+                ],
+                url=item.get("page_url", ""),
+            )
+            datasets.append(ds)
+
+        # Pagination: follow 'next' link if present
+        next_url = data.get("next_page") or data.get("links", {}).get("next")
+        while next_url and len(datasets) < max_results:
+            resp = client.get(next_url)
+            resp.raise_for_status()
+            data = resp.json()
+            for item in data.get("data", []):
+                ds = Dataset(
+                    id=item.get("id", ""),
+                    title=item.get("title", ""),
+                    description=item.get("notes", ""),
+                    organization=item.get("organization", {}).get("title", ""),
+                    resources=[
+                        {"url": r.get("url", ""), "format": r.get("format", ""), "description": r.get("description", "")}
+                        for r in item.get("resources", [])
+                        if r.get("url")
+                    ],
+                    url=item.get("page_url", ""),
+                )
+                datasets.append(ds)
+            next_url = data.get("next_page") or (data.get("links", {}).get("next") if "links" in data else None)
+
+    return datasets
+
+
+def download_resource(url: str, local_path: str) -> bool:
+    """Download a dataset resource (CSV, JSON, etc.) to local file."""
+    with httpx.Client(timeout=60.0) as client:
+        resp = client.get(url)
+        if resp.status_code != 200:
+            return False
+        Path(local_path).write_bytes(resp.content)
+    return True
+```
+
+- [ ] **Step 2: Create test**
+
+```python
+# backend/tests/test_dados_gov_pt.py
+import pytest
+from src.public_sources.dados_gov_pt import search_datasets
+
+
+def test_search_communication():
+    """Test that the API returns results for relevant queries."""
+    datasets = search_datasets("comunicação", max_results=5)
+    assert len(datasets) > 0
+    for ds in datasets:
+        assert ds.id
+        assert ds.title
+
+
+def test_search_media():
+    datasets = search_datasets("media", max_results=5)
+    assert len(datasets) > 0
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add backend/src/public_sources/dados_gov_pt.py backend/tests/test_dados_gov_pt.py
+git commit -m "feat: dados.gov.pt CKAN API client for open data discovery"
+```
+
+---
+
+### Task 0.16: Media Ownership Reference Dataset
+
+**Porquê:** Saber quem é dono de cada media é fundamental para análise de concentração e viés editorial.
+
+**Estratégia:** Em vez de scraping complexo de PDFs da ERC, criamos um dataset de referência YAML com a estrutura acionária principal. Isto é informação semi-estática (muda pouco) e pode ser atualizada manualmente.
+
+**Fontes:**
+- ERC — Listagem de Registos (`https://www.erc.pt/pt/registo-de-ocs/listagem-de-registos-`)
+- Euromedia Ownership Monitor — `https://media-ownership.eu/2025-edition/country-reports/portugal/`
+- Conhecimento público (imprensa especializada)
+
+**Files:**
+- Create: `backend/src/config/ownership.yaml`
+- Create: `backend/src/config/ownership.py` (Pydantic models)
+- Create: `backend/tests/test_ownership.py`
+
+- [ ] **Step 1: Create Media Ownership reference YAML**
+
+```yaml
+# backend/src/config/ownership.yaml
+# Media ownership reference dataset for Portugal.
+# Source: ERC registo, Euromedia Ownership Monitor, imprensa especializada.
+# Last updated: 2026-05
+#
+# Cada entrada mapeia um outlet ao seu grupo económico.
+
+outlets:
+  - id: rtp_noticias
+    name: "RTP — Rádio e Televisão de Portugal"
+    owner: "Estado Português"
+    owner_group: "Setor Público Estatal"
+    type: public_broadcaster
+    country: PT
+    notes: "Empresa pública. Financiada por Taxa de Contribuição Audiovisual + publicidade."
+
+  - id: sic_noticias
+    name: "SIC / SIC Notícias"
+    owner: "Impresa"
+    owner_group: "Grupo Impresa"
+    ultimate_owner: "Paulo Junqueiro / BPI"
+    type: commercial_tv
+    country: PT
+    notes: "Propriedade da Impresa (antigo grupo Pinto Balsemão). Controlo acionista atual: Paulo Junqueiro via BPI."
+
+  - id: tvi
+    name: "TVI / CNN Portugal"
+    owner: "Media Capital"
+    owner_group: "Grupo Media Capital"
+    ultimate_owner: "Pluralis (ex-Grupo Ongoing / Mário Ferreira)"
+    type: commercial_tv
+    country: PT
+    notes: "CNN Portugal é o canal de notícias do grupo Media Capital."
+
+  - id: publico
+    name: "Público"
+    owner: "Sonae"
+    owner_group: "Grupo Sonae"
+    ultimate_owner: "Família Azevedo"
+    type: newspaper
+    country: PT
+    notes: "Comprado pela Sonae em 2022 à antiga dona (Belmiro de Azevedo)."
+
+  - id: observador
+    name: "Observador"
+    owner: "Observador ON AIR"
+    owner_group: "Grupo Observador"
+    ultimate_owner: "Vários acionistas (capital aberto em crowdfunding)"
+    type: digital_native
+    country: PT
+    notes: "Nativo digital. Fundado por José Manuel Fernandes. Modelo de subscrição + publicidade."
+
+  - id: expresso
+    name: "Expresso"
+    owner: "Impresa"
+    owner_group: "Grupo Impresa"
+    ultimate_owner: "Paulo Junqueiro / BPI"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do mesmo grupo da SIC (Impresa)."
+
+  - id: cm_jornal
+    name: "Correio da Manhã"
+    owner: "Cofina Media"
+    owner_group: "Grupo Cofina"
+    ultimate_owner: "Família Fino (Paulo Fernandes)"
+    type: newspaper
+    country: PT
+    notes: "Propriedade da Cofina Media. Inclui CMTV. Vendida recentemente ao consórcio de Paulo Fernandes."
+
+  - id: jn
+    name: "Jornal de Notícias"
+    owner: "Global Media Group"
+    owner_group: "Global Media Group"
+    ultimate_owner: "Marco Galinha / Notícias do Mundo"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do Global Media Group (ex-Controlinveste). Inclui DN, TSF."
+
+  - id: dn
+    name: "Diário de Notícias"
+    owner: "Global Media Group"
+    owner_group: "Global Media Group"
+    ultimate_owner: "Marco Galinha / Notícias do Mundo"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do Global Media Group, com JN e TSF."
+
+  - id: eco
+    name: "ECO — Economia Online"
+    owner: "Trust in News"
+    owner_group: "Grupo Trust in News"
+    ultimate_owner: "Luís Santos"
+    type: digital_native
+    country: PT
+    notes: "Nativo digital de economia. Propriedade do grupo Trust in News (ex-Newscorp?)."
+
+  - id: lusa
+    name: "Lusa — Agência de Notícias"
+    owner: "Estado Português + Media"
+    owner_group: "Setor Público Estatal + Privado"
+    ultimate_owner: "Estado (50%) + Associados (50%: Global Media, Impresa, Cofina, Público, Media Capital)"
+    type: news_agency
+    country: PT
+    notes: "Agência de notícias pública. Capital misto: 50% Estado, 50% associados (media privados)."
+```
+
+- [ ] **Step 2: Create Pydantic models for ownership data**
+
+```python
+# backend/src/config/ownership.py
+from enum import Enum
+from pydantic import BaseModel
+import yaml
+from pathlib import Path
+
+
+class MediaType(str, Enum):
+    NEWSPAPER = "newspaper"
+    COMMERCIAL_TV = "commercial_tv"
+    PUBLIC_BROADCASTER = "public_broadcaster"
+    DIGITAL_NATIVE = "digital_native"
+    NEWS_AGENCY = "news_agency"
+    RADIO = "radio"
+    MAGAZINE = "magazine"
+
+
+class MediaOutlet(BaseModel):
+    id: str
+    name: str
+    owner: str
+    owner_group: str
+    ultimate_owner: str | None = None
+    type: MediaType
+    country: str = "PT"
+    notes: str | None = None
+
+
+class OwnershipConfig(BaseModel):
+    outlets: list[MediaOutlet]
+
+
+def load_ownership() -> OwnershipConfig:
+    config_path = Path(__file__).parent / "ownership.yaml"
+    with open(config_path) as f:
+        data = yaml.safe_load(f)
+    return OwnershipConfig.model_validate(data)
+
+
+def get_owner(outlet_id: str) -> MediaOutlet | None:
+    """Look up ownership info for a media outlet by ID."""
+    config = load_ownership()
+    for outlet in config.outlets:
+        if outlet.id == outlet_id:
+            return outlet
+    return None
+
+
+def get_group_outlets(owner_group: str) -> list[MediaOutlet]:
+    """Get all outlets belonging to a given owner group."""
+    config = load_ownership()
+    return [o for o in config.outlets if o.owner_group == owner_group]
+```
+
+- [ ] **Step 3: Create test**
+
+```python
+# backend/tests/test_ownership.py
+from src.config.ownership import load_ownership, get_owner
+
+
+def test_load_ownership():
+    config = load_ownership()
+    assert len(config.outlets) > 0
+    assert any(o.type == "newspaper" for o in config.outlets)
+
+
+def test_get_owner_found():
+    outlet = get_owner("publico")
+    assert outlet is not None
+    assert outlet.owner == "Sonae"
+    assert outlet.owner_group == "Grupo Sonae"
+
+
+def test_get_owner_not_found():
+    assert get_owner("nonexistent") is None
+
+
+def test_lusa_ownership():
+    outlet = get_owner("lusa")
+    assert outlet is not None
+    assert "Estado" in outlet.owner
+
+
+def test_impresa_group_concentration():
+    """Verify that SIC and Expresso share the same owner group."""
+    sic = get_owner("sic_noticias")
+    expresso = get_owner("expresso")
+    assert sic is not None and expresso is not None
+    assert sic.owner_group == expresso.owner_group == "Grupo Impresa"
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add backend/src/config/ownership.yaml backend/src/config/ownership.py backend/tests/test_ownership.py
+git commit -m "feat: media ownership reference dataset for Portugal (11 outlets)"
 ```
 
 ---
