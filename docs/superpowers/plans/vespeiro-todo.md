@@ -68,14 +68,15 @@
 - [ ] 0.7.3 Testar e commit
 
 ### 0.8 — Story Matching (cosine similarity + DBSCAN, $0)
-- [ ] 0.8.1 Criar `src/pipeline/matcher.py` (cosine similarity + DBSCAN)
-- [ ] 0.8.2 Criar teste (clustering, matching)
-- [ ] 0.8.3 Testar e commit
+- [x] 0.8.1 Criar `src/pipeline/matcher.py` (cosine similarity + DBSCAN)
+- [x] 0.8.2 Criar teste (clustering, matching)
+- [x] 0.8.3 Testar e commit (21 testes)
 
 ### 0.9 — Sentiment Analysis (pysentimiento, local CPU, $0)
-- [ ] 0.9.1 Criar `src/pipeline/sentiment.py` (pysentimiento wrapper)
-- [ ] 0.9.2 Criar teste (sentiment em PT, ES, EN)
-- [ ] 0.9.3 Testar e commit
+- [x] 0.9.1 Criar `src/pipeline/sentiment.py` (pysentimiento wrapper)
+- [x] 0.9.2 Criar teste (sentiment em PT, ES, EN)
+- [x] 0.9.3 Testar e commit (13 testes)
+- [x] 0.9.4 Refactor comparator.py para usar SentimentAnalyzer do pipeline (eliminar cache duplicada)
 
 ### 0.10 — GitHub Actions Workflows (substitui APScheduler + servidor)
 - [ ] 0.10.1 Criar `src/scrapers/loader.py` (spider registry)
@@ -180,12 +181,12 @@
 
 | Fase | Total | ✅ Feitas | Progresso |
 |------|-------|-----------|-----------|
-| Fase 0 — Fundação | 57 | 0 | 0% |
+| Fase 0 — Fundação | 58 | 7 | 12% |
 | Fase 1 — Análise Lusa | 7 | 0 | 0% |
 | Fase 2 — Espelho Partido | 8 | 0 | 0% |
 | Fase 3 — Ecossistema Estado | 9 | 0 | 0% |
 | Fase 4 — Exposição Pública | 5 | 0 | 0% |
-| **Total** | **86** | **0** | **0%** |
+| **Total** | **87** | **7** | **8%** |
 
 ---
 

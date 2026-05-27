@@ -1,10 +1,37 @@
 """Compare two articles across multiple dimensions: omission, framing, quotes, headline."""
 
 import re
+import logging
 from datetime import datetime, timezone
+
 from src.analysis.divergence.models import (
     Fact, Quotation, ExtractedArticle, DivergenceReport,
 )
+
+logger = logging.getLogger(__name__)
+
+
+# ── Model cache ──────────────────────────────────────────────────────────────
+
+_SENTENCE_MODEL = None
+
+
+def _get_sentence_model():
+    """Lazy-load the multilingual sentence embedding model."""
+    global _SENTENCE_MODEL
+    if _SENTENCE_MODEL is None:
+        try:
+            from sentence_transformers import SentenceTransformer
+            _SENTENCE_MODEL = SentenceTransformer(
+                "intfloat/multilingual-e5-large",
+            )
+        except Exception:
+            logger.warning(
+                "sentence-transformers not available; "
+                "headline divergence will use word-overlap fallback",
+            )
+            _SENTENCE_MODEL = False  # sentinel
+    return _SENTENCE_MODEL if _SENTENCE_MODEL is not False else None
 
 
 # ── Fact matching helpers ───────────────────────────────────────────────────
@@ -158,8 +185,8 @@ def compare_articles(
         if orig_score is not None and pt_score is not None:
             sentiment_shift = pt_score - orig_score
 
-    # 4. Headline divergence (placeholder — will use embeddings from Phase 0.7)
-    headline_divergence = _compute_headline_divergence_placeholder(
+    # 4. Headline divergence (embedding-based cosine similarity)
+    headline_divergence = _compute_headline_divergence(
         original.title, portuguese_version.title,
     )
 
@@ -206,7 +233,31 @@ def compare_articles(
     )
 
 
-# ── Internal helpers ────────────────────────────────────────────────────────
+# ── Sentiment helpers ──────────────────────────────────────────────────────
+
+
+def analyze_sentiment(text: str, language: str = "pt") -> dict | None:
+    """Analyze sentiment of a text using pysentimiento.
+
+    Delegates to :class:`src.pipeline.sentiment.SentimentAnalyzer` — the
+    canonical pipeline service. All pysentimiento models are cached globally
+    so the same models are never loaded twice in the same process.
+
+    Args:
+        text: The text to analyze.
+        language: Language code ("pt", "en", or "es").
+
+    Returns:
+        Dict with "sentiment" and "probas" keys, or None if unavailable.
+    """
+    try:
+        from src.pipeline.sentiment import SentimentAnalyzer
+        analyzer = SentimentAnalyzer()
+        return analyzer.analyze(text, lang=language)
+    except Exception as exc:
+        logger.warning("Sentiment analysis failed: %s", exc)
+        return None
+
 
 def _sentiment_to_score(sentiment: dict) -> float | None:
     """Convert pysentimiento output to a float score: POS=+1, NEU=0, NEG=-1."""
@@ -222,14 +273,33 @@ def _sentiment_to_score(sentiment: dict) -> float | None:
     return None
 
 
-def _compute_headline_divergence_placeholder(title_a: str, title_b: str) -> float:
-    """Placeholder: simple word-overlap-based divergence.
+def _compute_headline_divergence(title_a: str, title_b: str) -> float:
+    """Compute headline divergence using embedding-based cosine similarity.
 
-    Will be replaced by embedding-based cosine similarity when Phase 0.7 is built.
+    Uses multilingual-e5-large for cross-language comparison (PT ↔ EN).
+    Falls back to word-overlap Jaccard when sentence-transformers is unavailable.
+
+    Returns 0.0 (identical) to 1.0 (completely different).
     """
     if not title_a or not title_b:
         return 0.0
 
+    model = _get_sentence_model()
+    if model is not None:
+        try:
+            emb_a = model.encode(title_a, normalize_embeddings=True)
+            emb_b = model.encode(title_b, normalize_embeddings=True)
+            # Cosine similarity for normalized embeddings = dot product
+            similarity = float(emb_a @ emb_b)
+            # Clamp to [0, 1] range
+            similarity = max(0.0, min(1.0, similarity))
+            return 1.0 - similarity
+        except Exception as exc:
+            logger.warning(
+                "Embedding failed (%s); falling back to Jaccard", exc,
+            )
+
+    # Fallback: word-overlap Jaccard
     words_a = set(w.lower() for w in title_a.split() if len(w) > 2)
     words_b = set(w.lower() for w in title_b.split() if len(w) > 2)
 
@@ -240,5 +310,4 @@ def _compute_headline_divergence_placeholder(title_a: str, title_b: str) -> floa
     union = words_a | words_b
     jaccard = len(intersection) / len(union) if union else 0.0
 
-    # Invert: higher Jaccard = lower divergence
     return 1.0 - jaccard
