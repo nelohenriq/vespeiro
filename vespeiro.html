@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Project Vespeiro - Architecture</title>
+  <style>
+    :root {
+      --bg: #0a0e27;
+      --card: #141a3d;
+      --accent: #00d4aa;
+      --warning: #ffb347;
+      --alert: #ff4757;
+      --text: #e0e6ed;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 40px;
+    }
+    header { text-align: center; margin-bottom: 50px; }
+    h1 { color: var(--accent); margin-bottom: 5px; }
+    .subtitle { color: #8892b0; font-size: 1.2rem; }
+    
+    .layer { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 60px; }
+    .card { background: var(--card); padding: 20px; border-radius: 8px; border-left: 4px solid var(--accent); width: 220px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+    h3 { margin-top: 0; font-size: 0.9rem; color: #fff; }
+    p { font-size: 0.8rem; color: #a0a8c0; margin-bottom: 0; }
+    
+    .layer-label { text-align: center; font-weight: bold; letter-spacing: 2px; color: #556080; margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Project Vespeiro</h1>
+    <div class="subtitle">Media Narrative Intelligence Platform — Contra-Vigilância Medática</div>
+  </header>
+
+  <div class="layer-label">INPUT LAYER (DATA SOURCES)</div>
+  <div class="layer">
+    <div class="card"><h3>LUSA</h3><p>State Agency (RSS/API)</p></div>
+    <div class="card" style="border-left-color: var(--warning);"><h3>Portuguese Media</h3><p>Massive Scraping</p></div>
+    <div class="card" style="border-left-color: var(--warning);"><h3>International Media</h3><p>Global Feeds</p></div>
+    <div class="card"><h3>Gov/Parliament</h3><p>Open Data</p></div>
+    <div class="card" style="border-left-color: var(--alert);"><h3>Social Media</h3><p>Real-time APIs</p></div>
+  </div>
+
+  <div class="layer-label">PROCESSING LAYER (ANALYSIS ENGINE)</div>
+  <div class="layer">
+    <div class="card"><h3>Ingestion</h3><p>Normalization/Dedupe</p></div>
+    <div class="card"><h3>Story Matching</h3><p>Cross-Lang Embeddings</p></div>
+    <div class="card"><h3>Lusa Dependency</h3><p>Source Attribution %</p></div>
+    <div class="card" style="border-left-color: var(--warning);"><h3>Silence Detector</h3><p>Coverage Gaps</p></div>
+    <div class="card" style="border-left-color: var(--accent);"><h3>Framing Analyzer</h3><p>Sentiment/Spin</p></div>
+    <div class="card"><h3>Narrative Drift</h3><p>Evolution Tracker</p></div>
+  </div>
+
+  <div class="layer-label">OUTPUT LAYER (PRESENTATION)</div>
+  <div class="layer">
+    <div class="card"><h3>Dashboard</h3><p>Real-time analytics</p></div>
+    <div class="card" style="border-left-color: var(--warning);"><h3>Silence Report</h3><p>Daily Gaps</p></div>
+    <div class="card" style="border-left-color: var(--alert);"><h3>Alert System</h3><p>Discord/Telegram</p></div>
+    <div class="card"><h3>Public API</h3><p>Research tools</p></div>
+    <div class="card"><h3>Archive</h3><p>Historical DB</p></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/home/codespace/.openclaude/bin/claude-code plugin:*)",
+      "Bash(/home/codespace/.openclaude/bin/openclaude plugin:*)",
+      "Bash(gh api:*)",
+      "Bash(curl -fsSL https://raw.githubusercontent.com/JuliusBrussee/caveman/main/install.sh)",
+      "Bash(bash)",
+      "Bash(openclaude plugin:*)",
+      "Bash(claude plugin:*)",
+      "Bash(/usr/local/share/nvm/versions/node/v24.14.0/lib/node_modules/@gitlawb/openclaude/bin/openclaude plugin:*)",
+      "Bash(node /tmp/tmp.LdCw7VoL7K/bin/install.js --dry-run)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(find /home/codespace/.openclaude -path *caveman* -name *.json -o -path *caveman* -name command*)",
+      "Bash(find /home/codespace/.openclaude -name plugin.json -exec cat {})",
+      "Bash(2)",
+      "Bash(python3 -c \"import json,sys; content=sys.stdin.read\\(\\); d=json.loads\\(''''[''''+content.replace\\(''''}{'''',''''},{''''\\)+'''']''''\\); [print\\(json.dumps\\(x,indent=2\\)\\) for x in d if x.get\\(''''name'''',''''''''\\).lower\\(\\).find\\(''''caveman''''\\)>=0]\")",
+      "Bash(find /home/codespace/.openclaude/plugins -name installed*)",
+      "Bash(find /home/codespace/.openclaude/plugins -name *.json)",
+      "Bash(mkdir -p /tmp/tmp.2lLObnBoNC/repo/plugins/caveman/.claude-plugin)",
+      "Bash(cp /tmp/tmp.2lLObnBoNC/repo/plugins/caveman/.codex-plugin/plugin.json /tmp/tmp.2lLObnBoNC/repo/plugins/caveman/.claude-plugin/plugin.json)",
+      "Bash(npx:*)",
+      "Bash(CAVEMAN_DIR=\"/home/codespace/.openclaude/plugins/cache/claude-plugins-official/caveman/0.1.0\")",
+      "Bash(mkdir -p \"$CAVEMAN_DIR/.claude-plugin\")",
+      "Bash(mkdir -p \"$CAVEMAN_DIR/skills\")",
+      "Bash(cp /tmp/tmp.2lLObnBoNC/repo/plugins/caveman/.codex-plugin/plugin.json \"$CAVEMAN_DIR/.claude-plugin/plugin.json\")",
+      "Bash(cp -r /tmp/tmp.2lLObnBoNC/repo/plugins/caveman/skills/* \"$CAVEMAN_DIR/skills/\")"
+    ]
+  }
+}
