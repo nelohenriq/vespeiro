@@ -37,3 +37,11 @@ backups/*.json
 .openclaude/
 .remember/
 skills-lock.json
+
+# ── Node / Frontend ────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/tsconfig.app.tsbuildinfo
+
+# Generated data files (not committed to repo)
+frontend/public/stats.json

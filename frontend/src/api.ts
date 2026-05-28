@@ -8,7 +8,9 @@ interface UseStatsResult {
   refetch: () => void;
 }
 
-export function useStats(statsPath = "/stats.json"): UseStatsResult {
+export function useStats(statsPath?: string): UseStatsResult {
+  const base = import.meta.env.BASE_URL ?? "/";
+  const resolvedPath = statsPath ?? `${base}stats.json`;
   const [stats, setStats] = useState<StatsPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +19,7 @@ export function useStats(statsPath = "/stats.json"): UseStatsResult {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(statsPath);
+      const res = await fetch(resolvedPath);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const data: StatsPayload = await res.json();
       setStats(data);
@@ -27,7 +29,7 @@ export function useStats(statsPath = "/stats.json"): UseStatsResult {
     } finally {
       setLoading(false);
     }
-  }, [statsPath]);
+  }, [resolvedPath]);
 
   useEffect(() => {
     fetchStats();
