@@ -1,0 +1,107 @@
+{
+  "story_cluster_id": "demo-cluster",
+  "original_source_id": "lusa",
+  "portuguese_outlet_id": "publico",
+  "analyzed_at": "2026-05-28T12:06:24.211242+00:00",
+  "overall_divergence_score": 0.4593145366004863,
+  "fact_omission_score": 0.7,
+  "sentiment_shift": 0.0,
+  "quote_fidelity": 0.0,
+  "headline_divergence": 0.0715726830024318,
+  "omitted_facts": [
+    {
+      "text": "2.3 milh\u00f5es de euros",
+      "category": "money",
+      "span_start": 84,
+      "span_end": 104
+    },
+    {
+      "text": "milh\u00f5es",
+      "category": "number",
+      "span_start": 88,
+      "span_end": 96
+    },
+    {
+      "text": "tr\u00eas",
+      "category": "number",
+      "span_start": 267,
+      "span_end": 272
+    },
+    {
+      "text": "Lisboa",
+      "category": "location",
+      "span_start": 357,
+      "span_end": 363
+    },
+    {
+      "text": "Organiza\u00e7\u00e3o Mundial de Sa\u00fade",
+      "category": "org",
+      "span_start": 406,
+      "span_end": 434
+    },
+    {
+      "text": "Pedro Costa",
+      "category": "person",
+      "span_start": 457,
+      "span_end": 468
+    },
+    {
+      "text": "30%",
+      "category": "pct",
+      "span_start": 531,
+      "span_end": 534
+    }
+  ],
+  "preserved_facts": [
+    {
+      "text": "um",
+      "category": "number",
+      "span_start": 71,
+      "span_end": 74
+    },
+    {
+      "text": "PRR",
+      "category": "location",
+      "span_start": 168,
+      "span_end": 171
+    },
+    {
+      "text": "Uni\u00e3o Europeia",
+      "category": "org",
+      "span_start": 386,
+      "span_end": 400
+    }
+  ],
+  "altered_quotes": [
+    {
+      "original": "esta verba vai permitir contratar 500 enfermeiros e equipar tr\u00eas hospitais com novos equipamentos de oncologia",
+      "portuguese": null,
+      "speaker": null,
+      "status": "omitted"
+    },
+    {
+      "original": "o objetivo \u00e9 reduzir as listas de espera em 30% at\u00e9 ao final do ano",
+      "portuguese": null,
+      "speaker": null,
+      "status": "omitted"
+    }
+  ],
+  "headline_original": "Governo anuncia 2.3M\u20ac para a sa\u00fade",
+  "headline_portuguese": "Governo anuncia investimento na sa\u00fade",
+  "original_sentiment": {
+    "sentiment": "NEU",
+    "probas": {
+      "NEG": 0.05607858672738075,
+      "NEU": 0.831743061542511,
+      "POS": 0.11217828094959259
+    }
+  },
+  "portuguese_sentiment": {
+    "sentiment": "NEU",
+    "probas": {
+      "NEG": 0.05496935918927193,
+      "NEU": 0.8698550462722778,
+      "POS": 0.07517558336257935
+    }
+  }
+}

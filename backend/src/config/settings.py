@@ -14,6 +14,10 @@ class Settings(BaseSettings):
     google_api_key: str = ""  # From .env: GOOGLE_API_KEY
     google_custom_search_cx: str = ""  # From .env: GOOGLE_CUSTOM_SEARCH_CX
 
+    # Telegram bot (Jornal do Contra alerts)
+    telegram_bot_token: str = ""  # From .env: TELEGRAM_BOT_TOKEN
+    telegram_chat_id: str = ""  # From .env: TELEGRAM_CHAT_ID
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

@@ -1,107 +1,118 @@
 #!/usr/bin/env python3
-"""Generate daily stats.json for the Vespeiro dashboard.
+"""
+Vespeiro — Daily stats generator.
 
-Reads divergence reports from ``reports/divergence/*.json`` (produced by
-``run_analysis.py``) and optionally queries the project database for
-source/article metrics. Produces a single ``stats.json`` consumed by the
-React frontend dashboard.
+Generates stats.json — the single source of truth for the Vespeiro frontend
+dashboard. Runs queries against the local SQLite (or Supabase) database and
+aggregates divergence reports to produce all platform metrics.
 
 Usage:
-    # No-database mode (divergence reports only)
-    python run_stats.py
+    python run_stats.py                                # Default: writes to ../frontend/public/stats.json
+    python run_stats.py --output path/to/stats.json    # Custom output path
+    python run_stats.py --reports-dir reports/divergence  # Custom divergence reports directory
+    python run_stats.py --db sqlite+aiosqlite:///custom.db  # Custom database URL
+    python run_stats.py --no-db                        # Skip DB queries (divergence-only mode)
 
-    # Custom output path
-    python run_stats.py --output /tmp/stats.json
-
-    # Custom reports directory
-    python run_stats.py --reports-dir custom/reports/dir
-
-    # With database (requires SQLite/Supabase configured)
-    python run_stats.py --db
+Pipeline: init DB → StatsGenerator.collect() → write stats.json → print summary
 """
+from __future__ import annotations
 
 import argparse
+import asyncio
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
-# ── Entrypoint ──────────────────────────────────────────────────────────────
+# Ensure backend is on sys.path
+sys.path.insert(0, str(Path(__file__).parent))
 
 
-async def main() -> None:
-    parser = _build_parser()
-    args = parser.parse_args()
+async def run(
+    output_path: Path,
+    db_url: str | None,
+    reports_dir: str,
+) -> int:
+    """Generate stats.json and write it to *output_path*.
 
-    # Lazy-load StatsGenerator (avoids slow imports at module level)
+    Returns:
+        0 on success, 1 on failure.
+    """
     from src.stats.generator import StatsGenerator
+    from src.stats.models import StatsPayload
 
-    # ── Optional DB session ─────────────────────────────────────────────────
+    # ── DB session (optional) ───────────────────────────────────────────────
     db_session = None
-    if args.db:
-        print("🔌 Connecting to database…")
-        try:
-            from src.db.session import create_engine_and_session
-            from src.config.settings import settings
+    if db_url is not None:
+        from src.db.session import create_engine_and_session, Base
+        from sqlalchemy.ext.asyncio import AsyncSession
 
-            _, session_factory = create_engine_and_session(settings.database_url)
-            db_session = session_factory()
-        except Exception as exc:
-            print(f"⚠️  Failed to connect to database: {exc}")
-            print("   Stats will be generated without DB-backed metrics.")
-            db_session = None
+        # Ensure data directory exists for SQLite
+        if db_url.startswith("sqlite"):
+            path_part = (
+                db_url.replace("sqlite+aiosqlite:///", "")
+                .replace("sqlite:///", "")
+            )
+            Path(path_part).parent.mkdir(parents=True, exist_ok=True)
 
-    # Resolve reports directory (absolute path relative to project root)
-    if args.reports_dir:
-        reports_path = Path(args.reports_dir)
+        engine, session_factory = create_engine_and_session(db_url)
+
+        # Ensure tables exist
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+
+        db_session = session_factory()
+        print(f"   🗄️  DB: {db_url}")
     else:
-        # Default: reports/divergence/ relative to project root
-        # run_stats.py lives in backend/, so go up one level
-        reports_path = Path(__file__).resolve().parent.parent / "reports" / "divergence"
+        print("   🗄️  DB: skipped (--no-db mode)")
+        engine = None
 
-    # ── Generator ──────────────────────────────────────────────────────────
-    generator = StatsGenerator(
-        db_session=db_session,
-        reports_dir=reports_path,
-    )
+    # ── Generate stats ──────────────────────────────────────────────────────
+    print(f"   📊 Reports dir: {reports_dir}")
+    print()
 
-    print("📊 Collecting metrics…")
-    payload = await generator.collect()
+    generator = StatsGenerator(db_session=db_session, reports_dir=reports_dir)
 
-    # ── Serialize ──────────────────────────────────────────────────────────
-    json_str = payload.model_dump_json(indent=2)
+    try:
+        payload: StatsPayload = await generator.collect()
+    except Exception as exc:
+        print(f"❌ Stats generation failed: {exc}")
+        return 1
+    finally:
+        if engine is not None:
+            if db_session is not None:
+                await db_session.close()
+            await engine.dispose()
 
-    # ── Output path ─────────────────────────────────────────────────────────
-    if args.output:
-        output_path = Path(args.output)
-    else:
-        # Default: frontend/public/stats.json relative to project root
-        # run_stats.py lives in backend/, so go up one level
-        output_path = Path(__file__).resolve().parent.parent / "frontend" / "public" / "stats.json"
-
+    # ── Write output ────────────────────────────────────────────────────────
     output_path.parent.mkdir(parents=True, exist_ok=True)
+    json_str = payload.model_dump_json(indent=2, by_alias=True)
     output_path.write_text(json_str, encoding="utf-8")
 
     # ── Summary ─────────────────────────────────────────────────────────────
-    file_size_kb = len(json_str) / 1024
+    size_kb = len(json_str) / 1024
     print(f"✅ stats.json written to {output_path}")
-    print(f"   Size: {file_size_kb:.1f} KB")
-    print(f"   Generated at: {payload.generated_at.isoformat()}")
-    print(f"   Sources: {payload.sources.total} total, {payload.sources.active} active")
-    print(f"   Articles: {payload.sources.articles_total} total, {payload.sources.articles_today} today")
-    if payload.divergence.global_avg is not None:
-        print(f"   Divergence (global avg): {payload.divergence.global_avg:.1%}")
-    else:
-        print("   Divergence (global avg): N/A (no reports found)")
-    print(f"   Divergence outlets: {len(payload.divergence.per_outlet)}")
-    print(f"   Timeline days: {len(payload.timelines.dates_7d)}")
+    print(f"   Size: {size_kb:.1f} KB")
+    print(f"   Generated: {payload.generated_at.isoformat()}")
+    print()
 
-    # ── Cleanup ─────────────────────────────────────────────────────────────
-    if db_session is not None:
-        await db_session.close()
+    # Quick summary of key metrics
+    s = payload.sources
+    print(f"📊 Summary:")
+    print(f"   Sources:  {s.active}/{s.total} active")
+    print(f"   Articles: {s.articles_total} total, {s.articles_today} today")
+    if payload.lusa_dependency.global_pct is not None:
+        print(f"   Lusa dependency: {payload.lusa_dependency.global_pct:.1f}%")
+    if payload.divergence.global_avg is not None:
+        print(f"   Divergence avg:  {payload.divergence.global_avg:.0%}")
+    print(f"   Silence today:   {payload.silence.today}")
+    print(f"   Reports loaded:  {len(payload.divergence.per_outlet)} outlets")
+
+    return 0
 
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Generate daily stats.json for the Vespeiro dashboard",
+        description="Generate Vespeiro daily stats.json",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -109,26 +120,61 @@ def _build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--output", "-o",
         default=None,
-        help="Output path for stats.json (default: frontend/public/stats.json)",
+        help="Output path for stats.json (default: ../frontend/public/stats.json)",
     )
     parser.add_argument(
         "--reports-dir",
-        default=None,
-        help="Path to divergence report JSON files (default: reports/divergence/)",
+        default="reports/divergence",
+        help="Directory with divergence report JSON files (default: reports/divergence)",
     )
     parser.add_argument(
         "--db",
+        default=None,
+        help=(
+            "Database URL (default: from settings — sqlite+aiosqlite:///data/vespeiro.db). "
+            "Use --no-db to skip DB queries."
+        ),
+    )
+    parser.add_argument(
+        "--no-db",
         action="store_true",
-        help="Enable database-backed metrics (source counts, article counts, system health)",
+        help="Skip all database queries (divergence-only mode, uses --reports-dir)",
     )
 
     return parser
 
 
+def main() -> None:
+    parser = _build_parser()
+    args = parser.parse_args()
+
+    # Resolve output path
+    if args.output:
+        output = Path(args.output)
+    else:
+        # Default: frontend/public/stats.json relative to project root
+        output = Path(__file__).parent.parent / "frontend" / "public" / "stats.json"
+
+    # Resolve reports dir
+    reports = args.reports_dir
+
+    # Resolve database URL
+    if args.no_db:
+        db_url = None
+    elif args.db:
+        db_url = args.db
+    else:
+        from src.config.settings import settings
+        db_url = settings.database_url
+
+    # Run
+    exit_code = asyncio.run(run(
+        output_path=output,
+        db_url=db_url,
+        reports_dir=reports,
+    ))
+    sys.exit(exit_code)
+
+
 if __name__ == "__main__":
-    import asyncio
-
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
-    asyncio.run(main())
+    main()
