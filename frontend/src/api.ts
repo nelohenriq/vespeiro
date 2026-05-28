@@ -16,28 +16,30 @@ export function useStats(statsPath?: string): UseStatsResult {
   const [error, setError] = useState<string | null>(null);
 
   const fetchStats = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
-      const res = await fetch(resolvedPath);
+      const res = await fetch(resolvedPath, { cache: "no-cache" });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const data: StatsPayload = await res.json();
       setStats(data);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Failed to load stats";
       setError(msg);
-    } finally {
-      setLoading(false);
     }
   }, [resolvedPath]);
 
   useEffect(() => {
-    fetchStats();
-    const interval = setInterval(fetchStats, 30_000); // auto-refresh every 30s
+    fetchStats().finally(() => setLoading(false));
+    const interval = setInterval(fetchStats, 30_000);
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  return { stats, loading, error, refetch: fetchStats };
+  const refetch = useCallback(() => {
+    setLoading(true);
+    fetchStats().finally(() => setLoading(false));
+  }, [fetchStats]);
+
+  return { stats, loading, error, refetch };
 }
 
 export function formatDate(iso: string): string {
