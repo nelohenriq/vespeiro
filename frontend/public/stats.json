@@ -1,18 +1,33 @@
 {
-  "generated_at": "2026-05-28T16:46:01.578115Z",
+  "generated_at": "2026-05-28T17:08:27.937019Z",
   "version": "1.0",
   "sources": {
     "total": 26,
     "active": 26,
-    "articles_total": 221,
-    "articles_today": 111,
+    "articles_total": 671,
+    "articles_today": 561,
     "articles_per_source": {
+      "ap": 30,
+      "bbc": 30,
+      "cm_jornal": 30,
+      "cnn_portugal": 30,
+      "dn": 30,
+      "eco": 30,
+      "elpais": 30,
+      "expresso": 30,
+      "guardian": 30,
+      "jn": 30,
       "lusa": 76,
+      "nam": 30,
+      "observador": 30,
       "portugal_gov": 30,
       "presidencia": 30,
       "publico": 30,
       "renascenca": 25,
-      "rtp_noticias": 30
+      "rtp_noticias": 30,
+      "sapo_24": 30,
+      "sic_noticias": 30,
+      "tsf": 30
     },
     "per_category": {
       "agency": {
@@ -27,13 +42,13 @@
       },
       "international": {
         "sources": 5,
-        "articles": 0,
-        "articles_today": 0
+        "articles": 120,
+        "articles_today": 120
       },
       "mainstream": {
         "sources": 13,
-        "articles": 55,
-        "articles_today": 55
+        "articles": 385,
+        "articles_today": 385
       },
       "official_gazette": {
         "sources": 2,
@@ -58,8 +73,48 @@
     }
   },
   "lusa_dependency": {
-    "global_pct": 0.0,
+    "global_pct": 0.4,
     "per_outlet": {
+      "cm_jornal": {
+        "pct": 3.3,
+        "stories": 30,
+        "lusa_derived": 1
+      },
+      "cnn_portugal": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "dn": {
+        "pct": 3.3,
+        "stories": 30,
+        "lusa_derived": 1
+      },
+      "eco": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "expresso": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "jn": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "nam": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "observador": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
       "portugal_gov": {
         "pct": 0.0,
         "stories": 30,
@@ -81,6 +136,21 @@
         "lusa_derived": 0
       },
       "rtp_noticias": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "sapo_24": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "sic_noticias": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "tsf": {
         "pct": 0.0,
         "stories": 30,
         "lusa_derived": 0
@@ -139,9 +209,100 @@
     ]
   },
   "silence": {
-    "today": 0,
-    "avg_7d": 0.0,
-    "top_silenced": []
+    "today": 109,
+    "avg_7d": 15.6,
+    "top_silenced": [
+      {
+        "title": "Sturgeon says she was deceived, betrayed and lied to over Murrell embezzlement",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Opportunities shrinking for too many young people, says major report on 'lost generation'",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "'I've applied for more than 400 roles' - how young people are facing the job shortage",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Prostate cancer screening only for 'a few thousand' high risk men",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Two more boys die in latest heatwave water deaths",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Iran says it targeted American base after fresh US strikes",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Are US and Iran close to peace or sliding back to war?",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Starmer defends policy decisions as he hits back at Blair",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Learning from Ukraine, Hezbollah is now using fibre-optic drones to hit Israel",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Man killed by train after escaping vehicle on way to court",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      }
+    ]
   },
   "timelines": {
     "lusa_dependency_7d": [
@@ -151,7 +312,7 @@
       0.0,
       0.0,
       0.0,
-      0.0
+      0.5
     ],
     "divergence_avg_7d": [
       0.0,
@@ -169,7 +330,7 @@
       0,
       0,
       110,
-      111
+      561
     ],
     "silence_daily_7d": [
       0,
@@ -178,7 +339,7 @@
       0,
       0,
       0,
-      0
+      109
     ],
     "dates_7d": [
       "2026-05-22",
@@ -194,7 +355,7 @@
     "uptime_pct": 100.0,
     "sources_healthy": 26,
     "sources_failing": 0,
-    "last_scrape": "2026-05-28T11:57:55.556584",
+    "last_scrape": "2026-05-28T17:06:31.890874",
     "last_error": null
   },
   "personnel": {

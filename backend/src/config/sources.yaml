@@ -156,8 +156,8 @@ sources:
 
   - id: reuters
     name: "Reuters"
-    type: rss
-    url: "https://www.reuters.com/arc/outboundfeeds/newsletter/"
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:reuters.com&hl=en&ceid=US:en"
     language: en
     category: international
     schedule_interval_minutes: 60
