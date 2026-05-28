@@ -1,5 +1,5 @@
 import type { StatsPayload } from "../types";
-import { formatDate, formatNumber, pct } from "../api";
+import { formatDate, formatNumber } from "../api";
 
 interface Props {
   stats: StatsPayload;
@@ -38,7 +38,7 @@ export default function TransparencyMethodology({ stats }: Props) {
         </div>
         <div className="transparency-stat-card">
           <span className="transparency-stat-value">
-            {pct(stats.lusa_dependency.global_pct ?? 0)}
+            {(stats.lusa_dependency.global_pct ?? 0).toFixed(1)}%
           </span>
           <span className="transparency-stat-label">Lusa dependency</span>
         </div>

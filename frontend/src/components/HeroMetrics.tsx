@@ -8,6 +8,10 @@ interface HeroMetricsProps {
 export default function HeroMetrics({ stats }: HeroMetricsProps) {
   const { sources, divergence, lusa_dependency, silence } = stats;
 
+  const lusaDisplay = lusa_dependency.global_pct != null
+    ? lusa_dependency.global_pct.toFixed(0) + "%"
+    : "—";
+
   const items = [
     {
       label: "Articles Total",
@@ -34,7 +38,7 @@ export default function HeroMetrics({ stats }: HeroMetricsProps) {
     },
     {
       label: "Lusa Dependency",
-      value: pct(lusa_dependency.global_pct, 0),
+      value: lusaDisplay,
       sub: lusa_dependency.per_outlet
         ? `${Object.keys(lusa_dependency.per_outlet).length} outlets`
         : "No data",
