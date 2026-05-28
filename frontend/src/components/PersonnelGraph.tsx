@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import {
+  select,
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  drag,
+} from "d3";
 import type { PersonnelNetworkMetrics } from "../types";
 
 interface PersonnelGraphProps {
@@ -12,7 +20,7 @@ export default function PersonnelGraph({ personnel }: PersonnelGraphProps) {
   useEffect(() => {
     if (!svgRef.current || personnel.nodes.length === 0) return;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
     svg.selectAll("*").remove();
 
     const width = 700;
@@ -30,18 +38,14 @@ export default function PersonnelGraph({ personnel }: PersonnelGraphProps) {
     const nodesData = personnel.nodes.map((n) => ({ ...n }));
     const edgesData = personnel.edges.map((e) => ({ ...e }));
 
-    const simulation = d3
-      .forceSimulation(nodesData as any)
+    const simulation = forceSimulation(nodesData as any)
       .force(
         "link",
-        d3
-          .forceLink(edgesData)
-          .id((d: any) => d.id)
-          .distance(100)
+        forceLink(edgesData).id((d: any) => d.id).distance(100)
       )
-      .force("charge", d3.forceManyBody().strength(-300))
-      .force("center", d3.forceCenter(width / 2, height / 2))
-      .force("collision", d3.forceCollide().radius(30));
+      .force("charge", forceManyBody().strength(-300))
+      .force("center", forceCenter(width / 2, height / 2))
+      .force("collision", forceCollide().radius(30));
 
     const defs = svg.append("defs");
     defs
@@ -72,8 +76,7 @@ export default function PersonnelGraph({ personnel }: PersonnelGraphProps) {
       .data(nodesData)
       .join("g")
       .call(
-        d3
-          .drag<SVGGElement, any>()
+        drag<SVGGElement, any>()
           .on("start", (event, d) => {
             if (!event.active) simulation.alphaTarget(0.3).restart();
             d.fx = d.x;

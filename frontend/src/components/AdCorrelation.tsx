@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import * as d3 from "d3";
+import { select, scaleLinear, extent, axisBottom, axisLeft, format as d3Format } from "d3";
 import type { CorrelationMetrics } from "../types";
 import { formatNumber } from "../api";
 
@@ -18,7 +18,7 @@ export default function AdCorrelation({ correlation }: AdCorrelationProps) {
     )
       return;
 
-    const svg = d3.select(svgRef.current);
+    const svg = select(svgRef.current);
     svg.selectAll("*").remove();
 
     const width = 560;
@@ -37,17 +37,15 @@ export default function AdCorrelation({ correlation }: AdCorrelationProps) {
       (o) => o.estimated_ad_spend_eur > 0 || o.gov_coverage_pct > 0
     );
 
-    const xExtent = d3.extent(data, (d) => d.estimated_ad_spend_eur) as [number, number];
-    const yExtent = d3.extent(data, (d) => d.gov_coverage_pct) as [number, number];
+    const xExtent = extent(data, (d) => d.estimated_ad_spend_eur) as [number, number];
+    const yExtent = extent(data, (d) => d.gov_coverage_pct) as [number, number];
 
-    const xScale = d3
-      .scaleLinear()
+    const xScale = scaleLinear()
       .domain([0, Math.max(xExtent[1], 1)])
       .range([0, innerW])
       .nice();
 
-    const yScale = d3
-      .scaleLinear()
+    const yScale = scaleLinear()
       .domain([0, Math.max(yExtent[1], 1)])
       .range([innerH, 0])
       .nice();
@@ -55,13 +53,13 @@ export default function AdCorrelation({ correlation }: AdCorrelationProps) {
     // Axes
     g.append("g")
       .attr("transform", `translate(0,${innerH})`)
-      .call(d3.axisBottom(xScale).ticks(5))
+      .call(axisBottom(xScale).ticks(5))
       .selectAll("text")
       .attr("fill", "#556080")
       .attr("font-size", "10px");
 
     g.append("g")
-      .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format(".0%")))
+      .call(axisLeft(yScale).ticks(5).tickFormat(d3Format(".0%")))
       .selectAll("text")
       .attr("fill", "#556080")
       .attr("font-size", "10px");
