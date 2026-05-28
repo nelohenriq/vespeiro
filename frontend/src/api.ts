@@ -9,7 +9,7 @@ interface UseStatsResult {
 }
 
 export function useStats(statsPath?: string): UseStatsResult {
-  const base = import.meta.env.BASE_URL ?? "/";
+  const base = (import.meta.env.BASE_URL ?? "/").replace(/\/?$/, "/");
   const resolvedPath = statsPath ?? `${base}stats.json`;
   const [stats, setStats] = useState<StatsPayload | null>(null);
   const [loading, setLoading] = useState(true);

@@ -1,7 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const base = process.env.BASE_PATH || "/";
+const rawBase = process.env.BASE_PATH || "/";
+const base = rawBase.endsWith("/") ? rawBase : `${rawBase}/`;
 
 export default defineConfig({
   base,
