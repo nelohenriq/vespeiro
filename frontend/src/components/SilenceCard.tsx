@@ -36,8 +36,8 @@ export default function SilenceCard({ stats }: SilenceCardProps) {
               <div className="silenced-content">
                 <span className="silenced-title">{story.title}</span>
                 <div className="silenced-meta">
-                  <span className="silenced-gap" style={{ color: story.gap_pct > 0.5 ? "#ef4444" : "#f59e0b" }}>
-                    {(story.gap_pct * 100).toFixed(0)}% coverage gap
+                  <span className="silenced-gap" style={{ color: story.gap_pct > 50 ? "#ef4444" : "#f59e0b" }}>
+                    {story.gap_pct.toFixed(0)}% coverage gap
                   </span>
                   <span className="silenced-sources">
                     {story.international_sources} intl · {story.pt_coverage} PT
