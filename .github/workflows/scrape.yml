@@ -1,0 +1,73 @@
+name: Scrape Sources
+
+on:
+  schedule:
+    # Lusa: every 30 minutes (high-volume news agency)
+    - cron: '*/30 * * * *'
+    # Portuguese media: hourly
+    # International: every 2 hours
+  workflow_dispatch:  # Manual trigger for testing
+    inputs:
+      source:
+        description: 'Source ID to scrape (or "all")'
+        required: true
+        default: 'lusa'
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Cache spaCy + sentence-transformers models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/spacy
+            ~/.cache/huggingface
+            ~/.cache/torch
+          key: nlp-models-${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -e .
+          python -m spacy download pt_core_news_lg 2>/dev/null || true
+
+      - name: Scrape sources
+        run: |
+          cd backend
+          if [ "${{ github.event.inputs.source }}" = "all" ] || [ "${{ github.event.inputs.source }}" = "" ]; then
+            # Lusa first (most important), then PT media, then international
+            sources=("lusa" "rtp_noticias" "publico" "observador" "expresso" \
+                     "cm_jornal" "jn" "dn" "sic_noticias" "eco" "cnn_portugal" \
+                     "tsf" "renascenca" "sapo_24" "nam")
+            for src in "${sources[@]}"; do
+              echo "--- $src ---"
+              python run_scrape.py "$src" || echo "⚠️ $src failed"
+            done
+          else
+            python run_scrape.py "${{ github.event.inputs.source }}"
+          fi
+
+      - name: Source Health Summary
+        run: |
+          cd backend && python -c "
+          from src.pipeline.monitor import print_health_summary
+          print_health_summary()"
+
+      - name: Write GHA Summary
+        run: |
+          cd backend && python -c "
+          from src.pipeline.monitor import write_gha_summary
+          write_gha_summary()"

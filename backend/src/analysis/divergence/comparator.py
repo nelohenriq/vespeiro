@@ -11,27 +11,29 @@ from src.analysis.divergence.models import (
 logger = logging.getLogger(__name__)
 
 
-# ── Model cache ──────────────────────────────────────────────────────────────
+# ── Shared pipeline services ────────────────────────────────────────────────
 
-_SENTENCE_MODEL = None
+_EMBEDDER = None
 
 
-def _get_sentence_model():
-    """Lazy-load the multilingual sentence embedding model."""
-    global _SENTENCE_MODEL
-    if _SENTENCE_MODEL is None:
+def _get_embedder():
+    """Lazy-load the shared EmbeddingService from the pipeline module.
+
+    Uses the same global model cache as :class:`src.pipeline.embedder.EmbeddingService`
+    so the SentenceTransformer model is never loaded twice in the same process.
+    """
+    global _EMBEDDER
+    if _EMBEDDER is None:
         try:
-            from sentence_transformers import SentenceTransformer
-            _SENTENCE_MODEL = SentenceTransformer(
-                "intfloat/multilingual-e5-large",
-            )
+            from src.pipeline.embedder import EmbeddingService
+            _EMBEDDER = EmbeddingService()
         except Exception:
             logger.warning(
-                "sentence-transformers not available; "
+                "EmbeddingService (sentence-transformers) not available; "
                 "headline divergence will use word-overlap fallback",
             )
-            _SENTENCE_MODEL = False  # sentinel
-    return _SENTENCE_MODEL if _SENTENCE_MODEL is not False else None
+            _EMBEDDER = False  # sentinel
+    return _EMBEDDER if _EMBEDDER is not False else None
 
 
 # ── Fact matching helpers ───────────────────────────────────────────────────
@@ -284,16 +286,16 @@ def _compute_headline_divergence(title_a: str, title_b: str) -> float:
     if not title_a or not title_b:
         return 0.0
 
-    model = _get_sentence_model()
-    if model is not None:
+    embedder = _get_embedder()
+    if embedder is not None:
         try:
-            emb_a = model.encode(title_a, normalize_embeddings=True)
-            emb_b = model.encode(title_b, normalize_embeddings=True)
-            # Cosine similarity for normalized embeddings = dot product
-            similarity = float(emb_a @ emb_b)
-            # Clamp to [0, 1] range
-            similarity = max(0.0, min(1.0, similarity))
-            return 1.0 - similarity
+            emb_a = embedder.embed_text(title_a)
+            emb_b = embedder.embed_text(title_b)
+            # If both returned non-zero vectors, compute similarity
+            if any(v != 0.0 for v in emb_a) and any(v != 0.0 for v in emb_b):
+                similarity = embedder.cosine_similarity(emb_a, emb_b)
+                similarity = max(0.0, min(1.0, similarity))
+                return 1.0 - similarity
         except Exception as exc:
             logger.warning(
                 "Embedding failed (%s); falling back to Jaccard", exc,

@@ -151,3 +151,128 @@ sources:
     category: mainstream
     schedule_interval_minutes: 30
     extraction_strategy: trafilatura
+
+  # ── International sources ────────────────────────────────────────────────
+
+  - id: reuters
+    name: "Reuters"
+    type: rss
+    url: "https://www.reuters.com/arc/outboundfeeds/newsletter/"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: bbc
+    name: "BBC News"
+    type: rss
+    url: "https://feeds.bbci.co.uk/news/rss.xml"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: guardian
+    name: "The Guardian"
+    type: rss
+    url: "https://www.theguardian.com/world/rss"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: ap
+    name: "Associated Press"
+    type: rss
+    url: "https://feeds.feedburner.com/AssociatedPressNews"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: elpais
+    name: "El País"
+    type: rss
+    url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"
+    language: es
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  # ── Government sources ────────────────────────────────────────────────
+
+  - id: portugal_gov
+    name: "Governo de Portugal — Comunicados"
+    # Sem RSS público. Google News RSS capta comunicados do governo indexados.
+    # Alternativa futura: scraping direto via sitemap (7,810 URLs, 1,068 comunicados).
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:portugal.gov.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: government
+    schedule_interval_minutes: 360
+    extraction_strategy: trafilatura
+
+  - id: presidencia
+    name: "Presidência da República"
+    # Sem RSS público. Google News RSS capta comunicados e intervenções.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:presidencia.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: government
+    schedule_interval_minutes: 360
+    extraction_strategy: trafilatura
+
+  # ── Diário da República (appointments) ─────────────────────────────────
+
+  - id: dre_appointments
+    name: "Diário da República — Nomeações (Media)"
+    # DRE é 100% client-side (OutSystems) sem API pública.
+    # Google Custom Search API descobre PDFs de nomeações para media bodies.
+    # Requer GOOGLE_API_KEY + GOOGLE_CUSTOM_SEARCH_CX no .env.
+    # Free tier: 100 queries/dia — suficiente para verificações semanais.
+    type: google_custom_search
+    url: "https://www.googleapis.com/customsearch/v1"
+    language: pt
+    category: official_gazette
+    schedule_interval_minutes: 10080  # Weekly (7 days)
+    extraction_strategy: trafilatura
+
+  - id: dre_general_appointments
+    name: "Diário da República — Nomeações (Comunicação Social)"
+    # Segunda source DRE focada em keywords mais abrangentes de
+    # comunicação social (concessões, licenças, cargos reguladores).
+    type: google_custom_search
+    url: "https://www.googleapis.com/customsearch/v1"
+    language: pt
+    category: official_gazette
+    schedule_interval_minutes: 10080  # Weekly
+    extraction_strategy: trafilatura
+
+  # ── Parliamentary debates ──────────────────────────────────────────────
+
+  - id: parlamento_debates
+    name: "Assembleia da República — DAR I Série (Debates Parlamentares)"
+    # Download DAR plenary debate PDFs via the confirmed-working export endpoint
+    # at debates.parlamento.pt.  Covers XIV–XVI Legislaturas (2019–2026).
+    # Text is extracted with pdfplumber and filtered for media relevance.
+    type: scrape
+    url: "http://debates.parlamento.pt/pagina/export"
+    language: pt
+    category: parliament
+    schedule_interval_minutes: 10080  # Weekly
+    extraction_strategy: trafilatura
+
+  # ── ERC Institutional Advertising Reports ───────────────────────────────
+
+  - id: erc_advertising
+    name: "ERC — Relatório sobre Publicidade Institucional do Estado"
+    # Monthly and annual reports published by ERC detailing State spending on
+    # institutional advertising across media outlets.  PDFs are downloaded
+    # from the ERC website and tables are extracted with pdfplumber.
+    # Covers 2015–present.
+    type: scrape
+    url: "https://www.erc.pt/pt/estudos/publicidade--/relatorio-sobre-publicidade-institucional-do-estado-/"
+    language: pt
+    category: regulator
+    schedule_interval_minutes: 10080  # Weekly
+    extraction_strategy: trafilatura

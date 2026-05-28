@@ -1,13 +1,12 @@
 """Extract structured facts, entities, and quotations from a single article."""
 
 import re
-import spacy
 from src.analysis.divergence.models import (
     Fact, FactCategory, Quotation, ExtractedArticle,
 )
 
-# Lazy-loaded spaCy models
-_nlp_cache: dict[str, spacy.Language] = {}
+# Lazy-loaded spaCy models (imported inside _get_nlp to avoid slow module-level import)
+_nlp_cache: dict[str, "spacy.Language"] = {}
 
 # ── Quotation attribution patterns ──────────────────────────────────────────
 
@@ -100,8 +99,10 @@ _NUMERAL_WORDS_PT = {
 
 # ── Internal helpers ────────────────────────────────────────────────────────
 
-def _get_nlp(language: str) -> spacy.Language | None:
+def _get_nlp(language: str) -> "spacy.Language | None":
     """Get or load a spaCy model for the given language."""
+    import spacy
+
     if language in _nlp_cache:
         return _nlp_cache[language]
 

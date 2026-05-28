@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-05-27T22:50:04.839182Z",
+  "version": "1.0",
+  "sources": {
+    "total": 0,
+    "active": 0,
+    "articles_total": 0,
+    "articles_today": 0,
+    "articles_per_source": {},
+    "per_category": {}
+  },
+  "lusa_dependency": {
+    "global_pct": null,
+    "per_outlet": {},
+    "per_topic": {}
+  },
+  "divergence": {
+    "global_avg": null,
+    "per_outlet": {},
+    "top_omitted_facts": []
+  },
+  "silence": {
+    "today": 0,
+    "avg_7d": 0.0,
+    "top_silenced": []
+  },
+  "timelines": {
+    "lusa_dependency_7d": [],
+    "divergence_avg_7d": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "articles_daily_7d": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    "silence_daily_7d": [],
+    "dates_7d": [
+      "2026-05-21",
+      "2026-05-22",
+      "2026-05-23",
+      "2026-05-24",
+      "2026-05-25",
+      "2026-05-26",
+      "2026-05-27"
+    ]
+  },
+  "system": {
+    "uptime_pct": 0.0,
+    "sources_healthy": 0,
+    "sources_failing": 0,
+    "last_scrape": null,
+    "last_error": null
+  }
+}

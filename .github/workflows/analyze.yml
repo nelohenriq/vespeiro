@@ -1,0 +1,169 @@
+name: Narrative Divergence Analysis
+
+on:
+  schedule:
+    # Run after scraping has had time to collect articles
+    - cron: '0 */6 * * *'   # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source ID for original (e.g., "lusa", "reuters")'
+        required: false
+        default: 'lusa'
+      outlet:
+        description: 'Outlet ID for Portuguese version (e.g., "publico", "observador")'
+        required: false
+        default: 'publico'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+
+    env:
+      REPORT_DIR: reports/divergence
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache NLP models
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/spacy
+            ~/.cache/huggingface
+            ~/.cache/torch
+          key: nlp-models-${{ runner.os }}
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -e .
+          python -m spacy download pt_core_news_lg 2>/dev/null || true
+          python -m spacy download en_core_web_lg 2>/dev/null || true
+
+      - name: Create reports directory
+        run: mkdir -p "$REPORT_DIR"
+
+      # ── Paired analysis (scheduled run) ──────────────────────────────────
+      - name: Run divergence — lusa → publico
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source lusa --outlet publico \
+            --cluster-id "gha-lusa-publico-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/lusa-publico.json" \
+            2>&1 || echo "⚠️ lusa→publico failed"
+
+      - name: Run divergence — lusa → observador
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source lusa --outlet observador \
+            --cluster-id "gha-lusa-observador-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/lusa-observador.json" \
+            2>&1 || echo "⚠️ lusa→observador failed"
+
+      - name: Run divergence — reuters → publico
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source reuters --outlet publico \
+            --cluster-id "gha-reuters-publico-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/reuters-publico.json" \
+            2>&1 || echo "⚠️ reuters→publico failed"
+
+      - name: Run divergence — lusa → expresso
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source lusa --outlet expresso \
+            --cluster-id "gha-lusa-expresso-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/lusa-expresso.json" \
+            2>&1 || echo "⚠️ lusa→expresso failed"
+
+      - name: Run divergence — lusa → dn
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source lusa --outlet dn \
+            --cluster-id "gha-lusa-dn-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/lusa-dn.json" \
+            2>&1 || echo "⚠️ lusa→dn failed"
+
+      - name: Run divergence — lusa → jn
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source lusa --outlet jn \
+            --cluster-id "gha-lusa-jn-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/lusa-jn.json" \
+            2>&1 || echo "⚠️ lusa→jn failed"
+
+      - name: Run divergence — reuters → observador
+        if: ${{ github.event_name == 'schedule' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source reuters --outlet observador \
+            --cluster-id "gha-reuters-observador-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/reuters-observador.json" \
+            2>&1 || echo "⚠️ reuters→observador failed"
+
+      # ── Manual trigger ───────────────────────────────────────────────────
+      - name: Run divergence — manual pair
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          cd backend && python run_analysis.py \
+            --source "${{ github.event.inputs.source }}" \
+            --outlet "${{ github.event.inputs.outlet }}" \
+            --cluster-id "gha-manual-$(date +%Y%m%d-%H%M)" \
+            --output "../$REPORT_DIR/manual.json" \
+            2>&1 || echo "⚠️ manual pair failed"
+
+      # ── Upload reports as artifacts ──────────────────────────────────────
+      - name: Upload divergence reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: divergence-reports
+          path: ${{ env.REPORT_DIR }}/
+          retention-days: 14
+
+      # ── Generate stats.json from reports ──────────────────────────────────
+      - name: Generate stats.json
+        if: always()
+        run: |
+          cd backend && python run_stats.py
+
+      # ── Commit stats.json to repo ────────────────────────────────────────
+      # Only runs if generate step succeeded — no if: always() so it won't run
+      # on non-existent file if generation failed.
+      - name: Commit stats.json
+        run: |
+          git config user.name "vespeiro-bot"
+          git config user.email "bot@vespeiro.pt"
+          git add frontend/public/stats.json
+          git diff --staged --quiet || git commit -m "chore: daily stats update [skip ci]"
+          git push
+
+      # ── GHA step summary ─────────────────────────────────────────────────
+      - name: Write GHA Summary
+        if: always()
+        run: |
+          {
+            echo '## 📊 Narrative Divergence Analysis'
+            echo ''
+            echo '| Pair | Report |'
+            echo '|------|--------|'
+            shopt -s nullglob
+          for f in "$REPORT_DIR"/*.json; do
+              name=$(basename "$f" .json)
+              echo "| $name | ✅ generated |"
+            done
+            echo ''
+          shopt -u nullglob
+          } >> "$GITHUB_STEP_SUMMARY"

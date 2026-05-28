@@ -1,0 +1,56 @@
+name: Database Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'  # Weekly: Sunday 3AM
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install supabase
+
+      - name: Export metadata to JSON
+        run: |
+          mkdir -p backups
+          python -c "
+          from supabase import create_client
+          import json, os
+
+          supabase = create_client(
+              os.environ['SUPABASE_URL'],
+              os.environ['SUPABASE_SERVICE_KEY']
+          )
+
+          # Export article summaries (not full text to respect copyright)
+          result = supabase.table('articles').select(
+              'id,url,title,summary,source_id,published_at,language'
+          ).execute()
+
+          with open('backups/articles_metadata.json', 'w') as f:
+              json.dump(result.data, f, indent=2, default=str)
+
+          print(f'Exported {len(result.data)} articles')
+          "
+
+      - name: Commit backup
+        run: |
+          git config user.name "vespeiro-bot"
+          git config user.email "bot@vespeiro.pt"
+          git add backups/
+          git diff --staged --quiet || git commit -m "chore: weekly metadata backup [skip ci]"
+          git push

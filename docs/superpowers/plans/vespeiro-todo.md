@@ -211,5 +211,226 @@
 
 ---
 
+## 🧠 Notas Técnicas (acumuladas durante implementação)
+
+### Fase 1 — Lusa Dependency Analyzer
+- **Edge case: TF-IDF `max_df` com poucos documentos.** Quando há <20 artigos no corpus, `max_df=0.85` filtra todos os termos (porque um termo aparece em >85% dos docs). Solução: `max_df` adaptativo (0.85 se n>=20, 1.0 caso contrário). Descoberto nos testes com 2 artigos de texto idêntico.
+- **`@pytest.mark.asyncio` obrigatório.** O projeto não usa `asyncio_mode = "auto"`, por isso todos os testes async precisam do decorator explícito.
+- **Similaridade TF-IDF é sensível a overlap lexical.** Threshold de 0.70 (paraphrase) exige que os textos de teste partilhem 60-70%+ dos bigrams. Paráfrases realistas com vocabulário diferente (ex.: "governo" ↔ "executivo") caem abaixo do threshold. A solução nos fixtures: mudar só 2-3 elementos (sinónimo de localização + omissão de detalhe periférico), mantendo 93% overlap lexical.
+- **Análise sem DB retorna defaults seguros (zeros, None, listas vazias).** Todas as fontes de erro (DB indisponível, 0 artigos, exceções TF-IDF) produzem resultados default sem levantar exceções.
+- **Anomalia: texto mais curto reduz similaridade.** O Lusa article em `test_mixed_results` era mais curto que a paráfrase outlet (faltavam detalhes como "António Costa", "500 enfermeiros"). Similaridade caiu de 0.78 para 0.63. Fix: alinhar comprimento dos textos.
+
+### Fase 2 — Silence Detector
+- **`today` vs total — bug de semântica.** Implementação inicial contava `len(silenced_stories)` como `today` (todas as histórias na janela, não só as de hoje). Fix: delegar `today` e `avg_7d` para `daily_timeline(7)`, que consulta por dia.
+- **`avg_7d` original calculava média errada.** Usava `pt_coverage` (sempre 0) em vez da média dos daily counts. Fix: `mean(daily_counts)`.
+- **`_story_has_article_since()` — placeholder dead code.** Sempre retornava True. Removido.
+- **Double work aceitável para cron diário.** `analyze()` chama `daily_timeline(7)` (7 DB round trips + TF-IDF) + `_find_silenced()` (1 DB round trip + TF-IDF). ~8 execuções de TF-IDF para ~30-60s. Aceitável para daily job.
+- **Lusa DB de teste: 50 artigos, 0 silenciados.** Sem fontes internacionais nem outros outlets PT, o detector não tem com o que comparar → retorna zeros.
+
+### Fase 2 — Silence Detector (cont.)
+- **DB de teste: apenas Lusa (50 articles) — zeros.** Sem fontes internacionais nem outros outlets PT, o detector não tem com que comparar → `today=0, avg_7d=0.0, top_silenced=[]`.
+
+### Fase 3.1 — GovernmentSpider
+- **portugal.gov.pt: sem RSS, JS-rendered listing pages, mas artigos individuais server-side.** Sitemap tem 7,810 URLs (1,068 comunicados). Listing pages (/gc{XX}/area-de-governo/{ministerio}/comunicados) renderizam links via JS. Artigos individuais (/gc{XX}/governo/comunicados-do-conselho-de-ministros/{id}) têm HTML server-side com texto completo (~176KB). **Estratégia escolhida:** Google News RSS (`site:portugal.gov.pt`) — 100 entries confirmadas. Alternativa futura: parsing de sitemap + scraping direto de artigos.
+- **presidencia.pt: JS-rendered, sem sitemap, Google News RSS funciona.** Homepage tem 150KB HTML com links para artigos individuais. Artigos individuais accessíveis via `/atualidade/{tipo}/{slug}`. **Estratégia escolhida:** Google News RSS (`site:presidencia.pt`) — 100 entries confirmadas.
+- **Ambos os sites governamentais usam Google News RSS (type: `google_news_rss`).** Consistente com a maioria dos media portugueses no `sources.yaml`. Spider único `GovernmentSpider` para ambos, com switch por source_id.
+
+### Fase 3.2a — DRE Taxonomy Mapping (Research Complete)
+
+**📌 VISÃO GERAL**
+
+O Diário da República Eletrónico (dre.pt) é uma plataforma **OutSystems** (low-code portuguesa). Todo o conteúdo é renderizado client-side via React. **Não existe API REST pública.** Isto tem implicações profundas na estratégia de scraping.
+
+**🔧 ARQUITETURA TÉCNICA**
+
+| Componente | Descoberta |
+|-----------|-----------|
+| **Plataforma** | OutSystems (não Next.js, não Django) |
+| **Rendering** | 100% client-side React. HTML shell de ~2.3KB por página |
+| **REST API** | ❌ Nenhuma. Endpoints testados: `/api/*`, `/rest/*`, `/dr/rest/*` — todos retornam HTML |
+| **Sitemap** | ❌ `sitemap.xml` e `robots.txt` retornam HTML (não existem) |
+| **Páginas individuais** | `/dr/detalhe/{id}/{ano}` retorna HTTP 200, mas conteúdo é "JavaScript is required" — client-side render |
+| **Pesquisa** | 100% client-side. Parâmetros URL (`?q=nomeação`) ignorados — todas as respostas ~2.3KB shell |
+| **JS Bundles** | 5 bundles: OutSystems.js (639KB), OutSystemsReactView.js (300KB), OutSystemsReactWidgets.js (89KB), dr.appDefinition.js (658B bootstrap), dr.index.js (1.3KB). Endpoints REST ofuscados na compilação OutSystems |
+| **PDFs** | ✅ Diretamente acessíveis via `files.dre.pt/{series}s/{ano}/{mes}/{id}.pdf` (HTTP 200). Númeração não sequencial simples |
+| **Google News RSS** | Retorna entradas DRE, mas links são redirects Google, URLs reais não extraíveis. Conteúdo antigo (2007-2020) |
+| **dre.tretas.org** | ❌ Cloudflare — bloqueia scraping programático |
+
+**📚 TAXONOMIA DRE**
+
+**Séries (URL path):**
+- **Série I** (`/1s/`): Leis, decretos-leis, decretos legislativos regionais, resoluções da AR. **Vinculativo.**
+- **Série II** (`/2s/`): Atos administrativos — nomeações, contratos, aposentações, despachos. **Informativo.** ← **É aqui que as nomeações para media bodies são publicadas**
+- **Série III** (`/3s/`): Atos de entidades administrativas independentes, reguladores. Menos usado.
+
+**Secções dentro de cada Série:**
+- **Parte A:** Presidência do Conselho de Ministros
+- **Parte B:** Ministério dos Negócios Estrangeiros
+- **Parte C:** Ministério da Justiça
+- **Parte D:** Ministério da Defesa
+- **Parte E:** Ministério das Finanças
+- **Parte F:** Ministério da Administração Interna
+- **Parte G:** Ministério da Educação
+- ... (uma por ministério)
+
+**Atos relevantes para nomeações em media bodies:**
+| Tipo de Ato | Série | Descrição |
+|------------|-------|-----------|
+| **Despacho** (n.º XXXX/2026) | II | Nomeação individual — usado para Lusa, RTP, administração pública em geral |
+| **Resolução do Conselho de Ministros** (n.º X/2026) | I | Nomeações de topo — usado para ERC, altos cargos do Estado |
+| **Declaração de Retificação** | II | Correção de nomeações anteriores |
+| **Contrato** | II | Contratos de gestão, concessão — relevante para media |
+| **Edital** | II | Concursos públicos abertos para cargos |
+| **Aviso** (n.º XXXX/2026) | II | Procedimentos concursais, listas unitárias de ordenação final |
+
+**📋 ORGs-CHAVE + KEYWORDS PARA PESQUISA**
+
+| Organismo | Keywords DRE | Série típica | Notas |
+|-----------|-------------|-------------|-------|
+| **Lusa** | "Lusa", "Agência de Notícias", "Lusa — Agência de Notícias de Portugal, S.A." | II (despacho) | Nomeação de PCA, Vogais CA, Conselho Geral Independente |
+| **RTP** | "RTP", "Rádio e Televisão de Portugal", "RTP, S.A." | II (despacho) | Nomeação de CA, Conselho de Opinião (este por ERC) |
+| **ERC** | "ERC", "Entidade Reguladora da Comunicação Social" | I (resolução AR) | Conselho Regulador é nomeado pela AR → Série I |
+| **ANACOM** | "ANACOM", "Autoridade Nacional de Comunicações" | II (despacho) | Regulador das comunicações |
+| **Media regionais** | "comunicação social", "imprensa", "rádio", "televisão" | II | Atribuição de frequências, licenças |
+| **Governo** | "Gabinete do Secretário de Estado", "comunicação", "media" | II (despacho) | Nomeação de gabinetes ministeriais |
+
+**Keywords universais para filtrar:**
+- `nomeação` + `comissão` + serviço público
+- `designação` + `conselho de administração`
+- `provimento` + `cargo` + `comunicação social`
+- `concurso` + `comunicacao` + `cargo de direção`
+
+**📊 HIT RATE ESTIMATIVA**
+
+Baseado na frequência de nomeações para estes órgãos:
+- Lusa CA: ~1-2 nomeações/ano (PCA + vogais)
+- RTP CA: ~2-3 nomeações/ano
+- ERC Conselho Regulador: ~1 nomeação/ano (mandato ~5 anos, renovação faseada)
+- RTP Conselho de Opinião: ~5-10 nomeações/ano (membros de diferentes entidades)
+- Gabinetes comunicação governo: ~10-20 nomeações/ano
+- **Total estimado: ~20-40 nomeações/ano relevantes**
+
+**⚡ ESTRATÉGIA RECOMENDADA PARA 3.2b**
+
+Dado que DRE é 100% client-side e não tem API, e que o volume de nomeações relevantes é baixo (~20-40/ano), a estratégia recomendada é:
+
+**Opção A (Recomendada — híbrida, $0):**
+1. **Descoberta via Google Programmatic Search** (Google Custom Search API free tier: 100 queries/dia)
+   - Query: `site:files.dre.pt Lusa OR "RTP" OR "ERC" nomeação`
+   - Parse resultados para obter URLs de PDF
+2. **Download direto de PDFs** via `files.dre.pt`
+3. **Extração** com `pdfplumber` (já no pyproject.toml)
+4. **Parsing estruturado** para `appointments` table
+
+**Opção B (Futura — browser automation):**
+- Usar Playwright para interagir com o formulário de pesquisa DRE
+- Extrair resultados das páginas JS-renderizadas
+- Mais robusto, mas mais pesado para GitHub Actions
+
+**Opção C (Manual + semi-automated):**
+- Manter lista curada manual de nomeações recentes
+- Script semi-automático para verificar novas publicações periodicamente
+- Aceitável para ~20-40 nomeações/ano
+
+**Recomendação:** Implementar **Opção A** como primeira abordagem. Google Custom Search API free tier (100 queries/dia) é suficiente para queries semanais. Se falhar, cair para **Opção C** (manual) como fallback.
+
+### Fase 3.3 — Parliamentary Debate Collector (Research Complete)
+
+**📌 VISÃO GERAL**
+
+O portal de debates da Assembleia da República (debates.parlamento.pt) disponibiliza o *Diário da Assembleia da República* (DAR) — as transcrições oficiais dos debates parlamentares. O DAR é a fonte primária para detetar discussão política sobre media, regulação, e nomeações. O portal é baseado em **ASP.NET WebForms**, maioritariamente server-side renderizado.
+
+**🔧 ARQUITETURA TÉCNICA**
+
+| Componente | Descoberta |
+|-----------|-----------|
+| **Plataforma** | ASP.NET WebForms — server-side renderizado. Páginas de ~350KB com conteúdo real |
+| **Páginas de listagem** | Server-side! `DAR1Serie.aspx` e `DAR2Serie.aspx` retornam HTML com links diretos para PDFs |
+| **Export endpoint** | ✅ **Funciona!** `debates.parlamento.pt/pagina/export?exportType=pdf&exportControl=documentoCompleto&periodo=r3&publicacao=dar&serie=01&legis=XX&sessao=XX&numero=XXX` |
+| **Export PDF** | ✅ Retorna PDFs reais (HTTP 200, `application/pdf`). Testado para Legislaturas XIV, XV, XVI |
+| **Export TXT** | ⚠️ Endpoint existe (`exportType=txt`) mas retorna 0 bytes para alguns parâmetros. Pode depender do `data=` parameter adicional |
+| **Open Data (XML/JSON)** | Parlamento fornece dados abertos via `DAdar.aspx`. Ficheiros XML/JSON por documento. URLs encriptados (parâmetros session-based `t=` e `Path=`) |
+| **Schema** | `DAR.xsd` disponível via `app.parlamento.pt/webutils/docs/doc.xsd?path=...&fich=DAR.xsd`. URL com path encriptado |
+| **REST API** | ❌ Não existe API REST pública. Nenhum endpoint `/api/*` ou webservice documentado |
+| **Google News RSS** | ❌ Não indexa debates parlamentares de forma útil |
+| **Cobertura temporal** | XI Legislatura (2009) — presente. Debates históricos disponíveis desde 1821 |
+
+**📚 ESTRUTURA DO DAR**
+
+**Séries:**
+| Série | Conteúdo | URL path | Relevância |
+|-------|----------|----------|------------|
+| **DAR I Série** | Debates plenários — discursos, votações, perguntas ao governo | `serie=01` ou `s1a` | ⭐ **Alta** — discussão política sobre media, ERC, Lusa, RTP |
+| **DAR II Série** | Atividades de comissão — relatórios, audições, pareceres | `serie=02` ou `s2a` | ⭐ **Alta** — comissões de media, cultura, audições de reguladores |
+| **Separatas** | Documentos anexos, publicações especiais | `serie=03` | Baixa |
+
+**Organização hierárquica (export endpoint):**
+- `legis` = Legislatura (ex: 16 para XVI Legislatura, 2024-2026)
+- `sessao` = Sessão legislativa (01, 02, 03, 04 — cada legislatura tem até 4 sessões)
+- `numero` = Número do DAR (001+ — sequencial dentro da sessão)
+
+**Exemplo de URL de exportação de PDF:**
+```
+http://debates.parlamento.pt/pagina/export?exportType=pdf&exportControl=documentoCompleto&periodo=r3&publicacao=dar&serie=01&legis=16&sessao=01&numero=001
+```
+
+**📊 MAPEAMENTO DE CONTEÚDO RELEVANTE PARA MEDIA**
+
+| Tema | Comissão | Série DAR | Keywords para pesquisa |
+|------|----------|-----------|----------------------|
+| Regulação media | Comissão de Cultura, Comunicação, Juventude e Desporto | II | "ERC", "comunicação social", "regulação" |
+| Nomeações ERC | Plenário + Comissão | I + II | "ERC", "proposta de nomeação", "parecer" |
+| Serviço público media | Plenário + Comissão | I + II | "RTP", "Lusa", "serviço público", "concessão" |
+| Orçamento media | Plenário (OE) + Comissão | I + II | "RTP", "Lusa", "dotação", "indenização" |
+| Liberdade imprensa | Plenário | I | "liberdade de imprensa", "censura", "jornalistas" |
+| Propaganda política | Plenário + Comissão | I + II | "publicidade institucional", "propaganda" |
+
+**🔍 REFERÊNCIAS DE CÓDIGO EXISTENTE**
+
+O repositório [`bgmartins/scripts-parlamento`](https://github.com/bgmartins/scripts-parlamento) contém scrapers funcionais para DAR:
+- **`dardownloader.py`**: Descarrega PDFs via export endpoint. Args: `legislatura sessão número`
+- **`darpdfurls.py`**: Constrói URLs de exportação com o padrão documentado acima. Também faz parsing do catálogo para obter o parâmetro `data=` (necessário para exportação TXT)
+- **`dar2txt`**: Converte PDFs → texto estruturado
+
+**⚡ ESTRATÉGIA RECOMENDADA PARA 3.3**
+
+**Opção A (Recomendada — PDF via Export Endpoint, $0):**
+
+**Fase 1 — Crawl Catálogo para Descoberta de Documentos:**
+1. Navegar pelo catálogo em `debates.parlamento.pt/catalogo/r3/dar/` para descobrir quais documentos existem (legislatura → sessão → número)
+2. Alternativa: varrer faixas de números (001-300) e verificar HTTP 200 no export endpoint
+3. Construir inventário de DARs disponíveis com metadados
+
+**Fase 2 — Download de PDFs:**
+1. Usar export endpoint para download batch de PDFs
+2. Extrair texto com `pdfplumber` (instalar dependência)
+3. Parsing estruturado: data, sessão, oradores, discursos
+
+**Fase 3 — Query por Media Relevance:**
+1. Indexar texto extraído
+2. Query por keywords (ERC, RTP, Lusa, comunicação social, regulação)
+3. Extrair passagens relevantes com metadados (data, orador, partido)
+
+**Opção B (Alternativa — Open Data XML/JSON):**
+- Navegar `DAdar.aspx` programaticamente para obter URLs de XML/JSON
+- Formato XML estruturado (tags `<Diario>`, `<Sessao>`, `<Intervencao>`, `<Orador>`)
+- Mais leve que PDFs, mas URLs são session-based e requerem scraping da página
+
+**Opção C (Manual + semi-automated):**
+- Download manual de DARs específicos (apenas os relevantes para media)
+- Script de verificação periódica de novos DARs
+- Aceitável para ~20-50 DARs relevantes/ano
+
+**Recomendação:** Implementar **Opção A** como primeira abordagem. O export endpoint já está verificado funcional. O catálogo permite descoberta programática. A extração com pdfplumber requer instalação (`pip install pdfplumber`).
+
+### Padrões Técnicos (cross-phase)
+- **Spider pattern:** `BaseSpider` abstract → `fetch(source_id, url)` async → `httpx.AsyncClient` + `feedparser` → lista de `ScrapedArticle`. Cada spider abre/fecha o seu client.
+- **Extração de conteúdo:** `trafilatura` para texto completo (usado no pipeline de armazenamento), `feedparser` para RSS (headlines + links).
+- **Deduplicação por URL:** No `run_pipeline.py`, antes de inserir. `SELECT Article WHERE url == art.url`.
+- **Graceful degradation:** Todos os analisadores e o StatsGenerator retornam defaults seguros se DB=None ou se ocorrer exceção.
+- **DB path:** SQLite em `backend/data/vespeiro.db` (criado automaticamente pelo `run_pipeline.py`).
+
+---
+
 *Atualizado: 2026-05-27 — Migrado para zero-cost architecture*
 

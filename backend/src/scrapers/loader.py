@@ -4,6 +4,11 @@ from src.config import SourceConfig
 from src.scrapers.base import BaseSpider
 from src.scrapers.spiders.lusa import LusaSpider
 from src.scrapers.spiders.portugal_media import PortugalMediaSpider
+from src.scrapers.spiders.international import InternationalSpider
+from src.scrapers.spiders.government import GovernmentSpider
+from src.scrapers.spiders.dre import DRESpider
+from src.scrapers.spiders.parliament import ParliamentSpider
+from src.scrapers.spiders.erc_advertising import ERCAdvertisingSpider
 
 
 SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
@@ -22,6 +27,22 @@ SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     "renascenca": PortugalMediaSpider,
     "sapo_24": PortugalMediaSpider,
     "nam": PortugalMediaSpider,
+    # International sources
+    "reuters": InternationalSpider,
+    "bbc": InternationalSpider,
+    "guardian": InternationalSpider,
+    "ap": InternationalSpider,
+    "elpais": InternationalSpider,
+    # Government sources
+    "portugal_gov": GovernmentSpider,
+    "presidencia": GovernmentSpider,
+    # Diário da República (Google Custom Search)
+    "dre_appointments": DRESpider,
+    "dre_general_appointments": DRESpider,
+    # Parliamentary debates
+    "parlamento_debates": ParliamentSpider,
+    # ERC Institutional Advertising Reports
+    "erc_advertising": ERCAdvertisingSpider,
 }
 
 

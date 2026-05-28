@@ -177,11 +177,31 @@ frontend/public/
   "divergence": {
     "global_avg": 0.42,
     "per_outlet": {
-      "publico": { "avg": 0.38, "stories": 142, "avg_omission": 0.35, "avg_quote_fidelity": 0.72 },
-      "expresso": { "avg": 0.52, "stories": 98, "avg_omission": 0.48, "avg_quote_fidelity": 0.58 },
-      "cm_jornal": { "avg": 0.71, "stories": 176, "avg_omission": 0.65, "avg_quote_fidelity": 0.41 },
-      "observador": { "avg": 0.33, "stories": 88, "avg_omission": 0.30, "avg_quote_fidelity": 0.78 },
-      "rtp_noticias": { "avg": 0.28, "stories": 165, "avg_omission": 0.25, "avg_quote_fidelity": 0.81 }
+      "publico": {
+        "avg": 0.38, "stories": 142,
+        "avg_omission": 0.35, "avg_sentiment_shift": 0.08,
+        "avg_quote_fidelity": 0.72, "avg_headline_divergence": 0.28
+      },
+      "expresso": {
+        "avg": 0.52, "stories": 98,
+        "avg_omission": 0.48, "avg_sentiment_shift": 0.14,
+        "avg_quote_fidelity": 0.58, "avg_headline_divergence": 0.42
+      },
+      "cm_jornal": {
+        "avg": 0.71, "stories": 176,
+        "avg_omission": 0.65, "avg_sentiment_shift": 0.22,
+        "avg_quote_fidelity": 0.41, "avg_headline_divergence": 0.55
+      },
+      "observador": {
+        "avg": 0.33, "stories": 88,
+        "avg_omission": 0.30, "avg_sentiment_shift": 0.05,
+        "avg_quote_fidelity": 0.78, "avg_headline_divergence": 0.19
+      },
+      "rtp_noticias": {
+        "avg": 0.28, "stories": 165,
+        "avg_omission": 0.25, "avg_sentiment_shift": 0.03,
+        "avg_quote_fidelity": 0.81, "avg_headline_divergence": 0.15
+      }
     },
     "top_omitted_facts": [
       { "text": "2.3 milhões de euros", "count": 12, "category": "money" },
@@ -247,10 +267,14 @@ class OutletDependency(BaseModel):
     lusa_derived: int
 
 class OutletDivergence(BaseModel):
+    """Aggregated divergence metrics per outlet.
+    Mapped from the actual OutletDivergenceSummary (src.analysis.divergence.models)."""
     avg: float
     stories: int
     avg_omission: float
+    avg_sentiment_shift: float
     avg_quote_fidelity: float
+    avg_headline_divergence: float
 
 class SilencedStory(BaseModel):
     title: str
@@ -278,6 +302,9 @@ class LusaDependencyMetrics(BaseModel):
     per_topic: dict[str, float] = {}
 
 class DivergenceMetrics(BaseModel):
+    """Aggregated divergence metrics across all outlets.
+    Populated by StatsGenerator._divergence_metrics() which delegates
+    to aggregate_summary() from src.analysis.divergence.reporter."""
     global_avg: float | None = None
     per_outlet: dict[str, OutletDivergence] = {}
     top_omitted_facts: list[OmittedFact] = []
@@ -400,43 +427,66 @@ GROUP BY s.category;
 ```
 
 **`_divergence_metrics()`**
+
+The actual aggregation logic lives in `reporter.aggregate_summary()` from the divergence module. The stats generator delegates to it:
+
 ```python
 def _divergence_metrics(self) -> DivergenceMetrics:
-    reports = self._load_divergence_reports()
+    from src.analysis.divergence.reporter import aggregate_summary
+    from src.analysis.divergence.models import DivergenceReport
+
+    reports = self._load_divergence_reports()  # list[DivergenceReport]
     if not reports:
         return DivergenceMetrics()
 
-    per_outlet = {}
+    # Group reports by outlet
+    per_outlet: dict[str, list[DivergenceReport]] = {}
     for r in reports:
-        outlet = r.portuguese_outlet_id
-        if outlet not in per_outlet:
-            per_outlet[outlet] = []
-        per_outlet[outlet].append(r)
+        per_outlet.setdefault(r.portuguese_outlet_id, []).append(r)
 
+    # Delegate to aggregate_summary() for each outlet
+    now = datetime.now(timezone.utc)
+    week_ago = now - timedelta(days=7)
     outlet_metrics = {}
-    for outlet, reps in per_outlet.items():
-        scores = [r.overall_divergence_score for r in reps if r.overall_divergence_score is not None]
-        omissions = [r.fact_omission_score for r in reps if r.fact_omission_score is not None]
-        quotes = [r.quote_fidelity for r in reps if r.quote_fidelity is not None]
-        outlet_metrics[outlet] = OutletDivergence(
-            avg=sum(scores)/len(scores) if scores else 0.0,
-            stories=len(reps),
-            avg_omission=sum(omissions)/len(omissions) if omissions else 0.0,
-            avg_quote_fidelity=sum(quotes)/len(quotes) if quotes else 0.0,
+    for outlet_id, reps in per_outlet.items():
+        summary = aggregate_summary(reps, outlet_id, week_ago, now)
+        outlet_metrics[outlet_id] = OutletDivergence(
+            avg=(
+                sum(r.overall_divergence_score for r in reps
+                    if r.overall_divergence_score is not None) /
+                max(len([r for r in reps if r.overall_divergence_score is not None]), 1)
+            ),
+            stories=summary.stories_analyzed,
+            avg_omission=summary.avg_omission,
+            avg_sentiment_shift=summary.avg_sentiment_shift,
+            avg_quote_fidelity=summary.avg_quote_fidelity,
+            avg_headline_divergence=summary.avg_headline_divergence,
         )
 
-    all_scores = [r.overall_divergence_score for r in reports if r.overall_divergence_score is not None]
-    global_avg = sum(all_scores)/len(all_scores) if all_scores else None
+    all_scores = [
+        r.overall_divergence_score for r in reports
+        if r.overall_divergence_score is not None
+    ]
+    global_avg = sum(all_scores) / len(all_scores) if all_scores else None
 
     # Top omitted facts
-    fact_counter = Counter()
+    fact_counter: dict[str, int] = {}
     for r in reports:
         for f in r.omitted_facts:
-            fact_counter[(f.text, f.category.value)] += 1
+            fact_counter[f.text] = fact_counter.get(f.text, 0) + 1
     top_facts = [
-        OmittedFact(text=t, count=c, category=cat)
-        for (t, cat), c in fact_counter.most_common(10)
+        OmittedFact(text=txt, count=cnt, category="")
+        for txt, cnt in sorted(fact_counter.items(), key=lambda x: -x[1])[:10]
     ]
+    for tf in top_facts:
+        # Infer category from first matching fact
+        for r in reports:
+            for f in r.omitted_facts:
+                if f.text == tf.text:
+                    tf.category = f.category.value
+                    break
+            if tf.category:
+                break
 
     return DivergenceMetrics(
         global_avg=global_avg,
@@ -524,6 +574,104 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+### 4.4 Divergence Report JSON Format
+
+The divergence analysis pipeline (`run_analysis.py`) produces individual `DivergenceReport` JSON files (output by `reporter.report_to_json()`), one per source→outlet pair per run. These are the **raw inputs** that the stats generator aggregates.
+
+#### Single-Report Schema (from `report_to_json()`)
+
+```json
+{
+  "story_cluster_id": "gha-lusa-publico-20260527-1200",
+  "original_source_id": "lusa",
+  "portuguese_outlet_id": "publico",
+  "analyzed_at": "2026-05-27T12:00:00+00:00",
+
+  "overall_divergence_score": 0.46,
+  "fact_omission_score": 0.57,
+  "sentiment_shift": -0.12,
+  "quote_fidelity": 0.67,
+  "headline_divergence": 0.38,
+
+  "omitted_facts": [
+    {
+      "text": "2.3 milhões de euros",
+      "category": "money",
+      "span_start": 42,
+      "span_end": 63
+    }
+  ],
+  "preserved_facts": [
+    {
+      "text": "Lisboa",
+      "category": "location",
+      "span_start": 105,
+      "span_end": 111
+    }
+  ],
+  "altered_quotes": [
+    {
+      "original": "esta verba vai permitir contratar 500 enfermeiros",
+      "portuguese": "ALTERED OR OMITTED",
+      "speaker": "primeiro-ministro",
+      "status": "altered"
+    }
+  ],
+  "headline_original": "Governo anuncia 2.3M€ para a saúde",
+  "headline_portuguese": "Governo anuncia investimento na saúde",
+
+  "original_sentiment": {
+    "sentiment": "NEU",
+    "probas": {
+      "POS": 0.35,
+      "NEG": 0.15,
+      "NEU": 0.50
+    }
+  },
+  "portuguese_sentiment": {
+    "sentiment": "POS",
+    "probas": {
+      "POS": 0.45,
+      "NEG": 0.10,
+      "NEU": 0.45
+    }
+  }
+}
+```
+
+#### Data Flow: GHA Reports → Stats Aggregation
+
+```
+analyze.yml (every 6h)
+  │
+  ├── python run_analysis.py --source lusa --outlet publico
+  │     └── reports/divergence/lusa-publico.json
+  ├── python run_analysis.py --source lusa --outlet observador
+  │     └── reports/divergence/lusa-observador.json
+  ├── python run_analysis.py --source reuters --outlet publico
+  │     └── reports/divergence/reuters-publico.json
+  ├── python run_analysis.py --source lusa --outlet expresso
+  │     └── reports/divergence/lusa-expresso.json
+  ├── python run_analysis.py --source lusa --outlet dn
+  │     └── reports/divergence/lusa-dn.json
+  ├── python run_analysis.py --source lusa --outlet jn
+  │     └── reports/divergence/lusa-jn.json
+  └── python run_analysis.py --source reuters --outlet observador
+        └── reports/divergence/reuters-observador.json
+          
+stats.yml (daily 09:00)
+  │
+  └── run_stats.py
+        ├── StatsGenerator._divergence_metrics()
+        │     ├── loads all reports/divergence/*.json
+        │     ├── groups by portuguese_outlet_id
+        │     ├── calls aggregate_summary() per outlet
+        │     └── produces DivergenceMetrics
+        │
+        └── frontend/public/stats.json
+              └── divergence field: { global_avg, per_outlet, top_omitted_facts }
+```
+
 ---
 
 ## 5. Pipeline Integration
@@ -566,9 +714,34 @@ jobs:
           git push
 ```
 
-### Merging with Existing analyze.yml
+### Existing divergence analysis workflow: `analyze.yml`
 
-O workflow `stats.yml` pode ser um workflow separado ou um job adicional no `analyze.yml` existente. Recomenda-se **separado** para clareza e independência de falhas.
+The divergence analysis pipeline already runs as a **separate schedule** from the stats generator:
+
+```yaml
+# .github/workflows/analyze.yml (already built)
+name: Narrative Divergence Analysis
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'   # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      source:
+        description: 'Source ID for original'
+        default: 'lusa'
+      outlet:
+        description: 'Outlet ID for Portuguese version'
+        default: 'publico'
+```
+
+This workflow runs **7 source→outlet pairs** each execution:
+- lusa → publico, lusa → observador, lusa → expresso, lusa → dn, lusa → jn
+- reuters → publico, reuters → observador
+
+Reports are saved as JSON files to `reports/divergence/` and uploaded as GHA artifacts (14-day retention).
+
+The stats generator (`stats.yml`) is a **separate workflow** that runs daily at 09:00, reads these JSON reports, aggregates them, and commits `stats.json`. Separation ensures that a failure in one pipeline doesn't block the other.
 
 ### Storage
 
@@ -661,7 +834,7 @@ def sample_divergence_reports():
 | Phase | Required By | Status | Notes |
 |-------|-------------|--------|-------|
 | **Phase 0.3 — DB Schema** | StatsGenerator | ✅ Built | `sources`, `articles` tables |
-| **Phase 0.6 — Intl Sources** | StatsGenerator | ❌ Missing | Needed for `per_category` international stats |
+| **Phase 0.6 — Intl Sources** | StatsGenerator | ✅ Built | International spiders in `spiders/international.py` (Reuters, BBC, Guardian, AP, El País) |
 | **Divergence Analyzer** | StatsGenerator | ✅ Built | `DivergenceReport` → divergence metrics |
 | **Phase 1 — Lusa Dependency** | StatsGenerator | ❌ Missing | `lusa_dependency.*` = placeholder |
 | **Phase 2 — Silence Detection** | StatsGenerator | ❌ Missing | `silence.*` = placeholder |
@@ -672,7 +845,7 @@ def sample_divergence_reports():
 |-------|------|--------|------------|
 | 1 | `models.py` | Pydantic models | Nada |
 | 2 | `generator.py` (source_metrics + system_health) | DB queries funcionais | DB schema |
-| 3 | `generator.py` (divergence_metrics) | Agregação de divergence reports | Divergence Analyzer |
+| 3 | `generator.py` (divergence_metrics) | Agregação de divergence reports | Divergence Analyzer + `analyze.yml` JSON reports |
 | 4 | `generator.py` (lusa + silence placeholders) | Defaults seguros | Nada |
 | 5 | `generator.py` (timelines) | Histórico 7 dias | DB schema |
 | 6 | `run_stats.py` | Entrypoint funcional | Nada |

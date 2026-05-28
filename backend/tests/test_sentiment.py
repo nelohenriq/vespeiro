@@ -1,12 +1,60 @@
 """Tests for the pipeline sentiment analysis module."""
 
+import time
 import pytest
 from src.pipeline.sentiment import SentimentAnalyzer
 
 
-@pytest.fixture
-def analyzer() -> SentimentAnalyzer:
+# ── Fixtures ────────────────────────────────────────────────────────────────
+
+
+@pytest.fixture(scope="module")
+def module_analyzer() -> SentimentAnalyzer:
+    """Module-scoped fixture: model loads once, shared across all tests."""
     return SentimentAnalyzer()
+
+
+@pytest.fixture
+def analyzer(module_analyzer: SentimentAnalyzer) -> SentimentAnalyzer:
+    """Alias for convenience; avoids re-creating instance."""
+    return module_analyzer
+
+
+# ── Lazy-loading verification ──────────────────────────────────────────────
+
+
+class TestLazyLoading:
+    """Verify that importing and instantiating SentimentAnalyzer is instant.
+
+    The pysentimiento model is only loaded on the first ``analyze()`` call,
+    not on import or construction.  This guarantees that test runners can
+    discover and collect these tests without waiting for model downloads.
+    """
+
+    def test_import_is_fast(self) -> None:
+        """Importing SentimentAnalyzer should not load pysentimiento."""
+        import sys
+
+        # Clear cached module to force a real fresh import
+        for mod in list(sys.modules.keys()):
+            if "pipeline.sentiment" in mod:
+                del sys.modules[mod]
+
+        start = time.monotonic()
+        from src.pipeline.sentiment import SentimentAnalyzer  # noqa: F811
+        elapsed = time.monotonic() - start
+        assert elapsed < 1.0, f"Import took {elapsed:.2f}s — expected < 1s"
+
+    def test_init_is_fast(self) -> None:
+        """Creating a SentimentAnalyzer should not load pysentimiento."""
+        start = time.monotonic()
+        sa = SentimentAnalyzer()
+        elapsed = time.monotonic() - start
+        assert elapsed < 0.5, f"__init__ took {elapsed:.2f}s — expected < 0.5s"
+        assert sa is not None
+
+
+# ── Core functionality ─────────────────────────────────────────────────────
 
 
 class TestSentimentAnalyzer:

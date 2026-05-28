@@ -1,0 +1,126 @@
+# ──────────────────────────────────────────────────
+# Project Vespeiro — Media Ownership Reference Dataset
+# Fontes: ERC registo, Euromedia Ownership Monitor, imprensa especializada
+# Last updated: 2026-05
+#
+# Cada entrada mapeia um outlet ao seu grupo económico.
+# Informação semi-estática (muda pouco) — atualizar manualmente.
+# ──────────────────────────────────────────────────
+
+outlets:
+  - id: rtp_noticias
+    name: "RTP — Rádio e Televisão de Portugal"
+    owner: "Estado Português"
+    owner_group: "Setor Público Estatal"
+    ultimate_owner: null
+    type: public_broadcaster
+    country: PT
+    notes: "Empresa pública. Financiada por Taxa de Contribuição Audiovisual + publicidade."
+
+  - id: sic_noticias
+    name: "SIC / SIC Notícias"
+    owner: "Impresa"
+    owner_group: "Grupo Impresa"
+    ultimate_owner: "Paulo Junqueiro / BPI"
+    type: commercial_tv
+    country: PT
+    notes: "Propriedade da Impresa (antigo grupo Pinto Balsemão). Controlo acionista atual: Paulo Junqueiro via BPI."
+
+  - id: cnn_portugal
+    name: "CNN Portugal"
+    owner: "Media Capital"
+    owner_group: "Grupo Media Capital"
+    ultimate_owner: "Pluralis (ex-Grupo Ongoing / Mário Ferreira)"
+    type: commercial_tv
+    country: PT
+    notes: "Canal de notícias do grupo Media Capital. Substituiu a TVI24."
+
+  - id: publico
+    name: "Público"
+    owner: "Sonae"
+    owner_group: "Grupo Sonae"
+    ultimate_owner: "Família Azevedo"
+    type: newspaper
+    country: PT
+    notes: "Comprado pela Sonae em 2022. Anteriormente pertencia à antiga dona (Belmiro de Azevedo)."
+
+  - id: observador
+    name: "Observador"
+    owner: "Observador ON AIR"
+    owner_group: "Grupo Observador"
+    ultimate_owner: "Vários acionistas (capital aberto em crowdfunding)"
+    type: digital_native
+    country: PT
+    notes: "Nativo digital. Fundado por José Manuel Fernandes. Modelo de subscrição + publicidade."
+
+  - id: expresso
+    name: "Expresso"
+    owner: "Impresa"
+    owner_group: "Grupo Impresa"
+    ultimate_owner: "Paulo Junqueiro / BPI"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do mesmo grupo da SIC (Impresa). Semanário de referência."
+
+  - id: cm_jornal
+    name: "Correio da Manhã"
+    owner: "Cofina Media"
+    owner_group: "Grupo Cofina"
+    ultimate_owner: "Família Fino (Paulo Fernandes)"
+    type: newspaper
+    country: PT
+    notes: "Propriedade da Cofina Media. Inclui CMTV. Vendida recentemente ao consórcio de Paulo Fernandes."
+
+  - id: jn
+    name: "Jornal de Notícias"
+    owner: "Global Media Group"
+    owner_group: "Global Media Group"
+    ultimate_owner: "Marco Galinha / Notícias do Mundo"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do Global Media Group (ex-Controlinveste). Inclui DN e TSF."
+
+  - id: dn
+    name: "Diário de Notícias"
+    owner: "Global Media Group"
+    owner_group: "Global Media Group"
+    ultimate_owner: "Marco Galinha / Notícias do Mundo"
+    type: newspaper
+    country: PT
+    notes: "Propriedade do Global Media Group, com JN e TSF."
+
+  - id: tsf
+    name: "TSF — Rádio Notícias"
+    owner: "Global Media Group"
+    owner_group: "Global Media Group"
+    ultimate_owner: "Marco Galinha / Notícias do Mundo"
+    type: radio
+    country: PT
+    notes: "Estação de rádio noticiosa. Parte do Global Media Group com JN e DN."
+
+  - id: eco
+    name: "ECO — Economia Online"
+    owner: "Trust in News"
+    owner_group: "Grupo Trust in News"
+    ultimate_owner: "Luís Santos"
+    type: digital_native
+    country: PT
+    notes: "Nativo digital de economia. Propriedade do grupo Trust in News."
+
+  - id: renascenca
+    name: "Rádio Renascença"
+    owner: "Igreja Católica"
+    owner_group: "Igreja Católica em Portugal"
+    ultimate_owner: "Conferência Episcopal Portuguesa"
+    type: radio
+    country: PT
+    notes: "Emissora de rádio propriedade da Igreja Católica. Inclui a RFM."
+
+  - id: lusa
+    name: "Lusa — Agência de Notícias"
+    owner: "Estado Português + Associados"
+    owner_group: "Setor Público Estatal + Privado"
+    ultimate_owner: "Estado (50%) + Associados (50%: Global Media, Impresa, Cofina, Público, Media Capital)"
+    type: news_agency
+    country: PT
+    notes: "Agência de notícias pública. Capital misto: 50% Estado, 50% associados (media privados)."
