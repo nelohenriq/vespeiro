@@ -119,6 +119,3 @@ export default function App() {
         )}
       </main>
     </div>
-  );
-}
-// force-deploy: ensure latest build has all tabs
