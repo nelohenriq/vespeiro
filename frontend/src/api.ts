@@ -18,7 +18,7 @@ export function useStats(statsPath?: string): UseStatsResult {
   const fetchStats = useCallback(async () => {
     setError(null);
     try {
-      const res = await fetch(resolvedPath, { cache: "no-cache" });
+      const res = await fetch(`${resolvedPath}?t=${Date.now()}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
       const data: StatsPayload = await res.json();
       setStats(data);
