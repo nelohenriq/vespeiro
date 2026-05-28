@@ -1,0 +1,116 @@
+name: Daily Stats & Alert
+
+on:
+  schedule:
+    # Generate stats and send Jornal do Contra briefing at 09:00 UTC daily
+    - cron: '0 9 * * *'
+
+  workflow_dispatch:
+    inputs:
+      skip_telegram:
+        description: 'Skip Telegram alert (stats only)'
+        required: false
+        default: 'false'
+      send_test:
+        description: 'Send Telegram test message instead of daily briefing'
+        required: false
+        default: 'false'
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+
+    env:
+      DATABASE_URL: "sqlite+aiosqlite:///data/vespeiro.db"
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need full history to commit/push
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -e .
+          python -m spacy download pt_core_news_lg 2>/dev/null || true
+
+      - name: Restore reports artifact from latest analysis workflow
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          workflow: analyze.yml
+          name: divergence-reports
+          path: reports/divergence/
+          if_no_artifact_found: warn
+          check_artifacts: false
+
+      - name: Generate stats.json
+        id: stats
+        run: |
+          cd backend
+          python run_stats.py \
+            --reports-dir ../reports/divergence \
+            --output ../frontend/public/stats.json \
+            2>&1
+
+      - name: Verify stats.json
+        run: |
+          if [ ! -f frontend/public/stats.json ]; then
+            echo "❌ stats.json not generated!"
+            exit 1
+          fi
+          echo "✅ stats.json: $(wc -c < frontend/public/stats.json) bytes"
+          python -c "import json; d=json.load(open('frontend/public/stats.json')); print(f'Generated: {d[\"generated_at\"]}'); print(f'Sources: {d[\"sources\"][\"active\"]}/{d[\"sources\"][\"total\"]} active'); print(f'Articles: {d[\"sources\"][\"articles_total\"]} total')"
+
+      # ── Commit stats.json to repo ──────────────────────────────────────────
+      - name: Commit stats.json
+        run: |
+          git config user.name "vespeiro-bot"
+          git config user.email "bot@vespeiro.pt"
+          git add frontend/public/stats.json
+          if git diff --staged --quiet; then
+            echo "📄 No changes to stats.json — skipping commit"
+          else
+            git commit -m "chore: daily stats update [skip ci]"
+            git push
+            echo "✅ stats.json committed and pushed"
+          fi
+
+      # ── Telegram briefing (optional) ──────────────────────────────────────
+      - name: Send Telegram test message
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.send_test == 'true' && env.TELEGRAM_BOT_TOKEN != '' }}
+        run: |
+          cd backend && python run_alert.py --test
+
+      - name: Send daily Telegram briefing
+        if: ${{ (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.skip_telegram != 'true')) && env.TELEGRAM_BOT_TOKEN != '' }}
+        run: |
+          cd backend && python run_alert.py \
+            --daily \
+            --stats-path ../frontend/public/stats.json \
+            2>&1
+
+      # ── GHA step summary ─────────────────────────────────────────────────
+      - name: Write GHA Summary
+        if: always()
+        run: |
+          {
+            echo '## 📊 Daily Stats'
+            echo ''
+            echo '| Step | Status |'
+            echo '|------|--------|'
+            if [ -f frontend/public/stats.json ]; then
+              echo '| stats.json | ✅ generated |'
+              SIZE=$(wc -c < frontend/public/stats.json)
+              echo "| Size | $SIZE bytes |"
+            else
+              echo '| stats.json | ❌ failed |'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

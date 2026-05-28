@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="pt" prefix="og: https://ogp.me/ns#">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- ── Viewport & Theme ─────────────────────────────────────────────── -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#00d4aa" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- ── SEO Meta ─────────────────────────────────────────────────────── -->
+    <title>Vespeiro — Media Narrative Intelligence Dashboard</title>
+    <meta name="description" content="Dashboard em tempo real que monitoriza a divergência narrativa, a dependência da Lusa e a detecção de silêncio em 27 fontes de notícias portuguesas e internacionais." />
+    <meta name="keywords" content="media monitoring, narrative divergence, Lusa dependency, Portuguese media, news analysis, silence detection, media watchdog, Portugal, monitorização de media, divergência narrativa, dependência da Lusa" />
+    <meta name="author" content="Vespeiro Project" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="1 day" />
+
+    <!-- ── Open Graph (Facebook, LinkedIn, Discord) ─────────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Vespeiro" />
+    <meta property="og:title" content="Vespeiro — Media Narrative Intelligence Dashboard" />
+    <meta property="og:description" content="Dashboard em tempo real que monitoriza a divergência narrativa, a dependência da Lusa e a detecção de silêncio em 27 fontes de notícias portuguesas e internacionais." />
+    <meta property="og:locale" content="pt_PT" />
+    <meta property="og:image" content="%BASE_URL%og-image.svg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Vespeiro dashboard preview — media narrative intelligence metrics" />
+
+    <!-- ── Twitter Card ────────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Vespeiro — Media Narrative Intelligence Dashboard" />
+    <meta name="twitter:description" content="Dashboard em tempo real que monitoriza a divergência narrativa, a dependência da Lusa e a detecção de silêncio em 27 fontes de notícias portuguesas e internacionais." />
+    <meta name="twitter:image" content="%BASE_URL%og-image.svg" />
+    <meta name="twitter:image:alt" content="Vespeiro dashboard preview" />
+
+    <!-- ── Favicon ─────────────────────────────────────────────────────── -->
+    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <link rel="apple-touch-icon" href="%BASE_URL%favicon.svg" />
+    <link rel="mask-icon" href="%BASE_URL%favicon.svg" color="#00d4aa" />
+
+    <!-- ── Web Manifest (PWA) ──────────────────────────────────────────── -->
+    <link rel="manifest" href="%BASE_URL%manifest.json" />
+
+    <!-- ── Preconnect & Preload ────────────────────────────────────────── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+
+    <!-- ── Fonts ───────────────────────────────────────────────────────── -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" />
+    </noscript>
+
+    <!-- ── Structured Data (JSON-LD) ───────────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Vespeiro",
+      "description": "Media narrative intelligence dashboard tracking narrative divergence, Lusa media dependency, and silence detection across Portuguese and international news sources.",
+      "applicationCategory": "Data Visualization",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript. Modern browser.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "EUR"
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "Vespeiro Project"
+      }
+    }
+    </script>
+
+    <!-- ── Inline critical CSS to prevent FOUC ─────────────────────────── -->
+    <style>
+      body { margin: 0; background: #070b1a; color: #e0e6ed; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+      .app-loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+      .loading-spinner { width: 40px; height: 40px; margin: 0 auto 16px; border: 3px solid #1a2450; border-top-color: #00d4aa; border-radius: 50%; animation: spin 0.8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <!-- SSR loading fallback (shown before React hydrates) -->
+      <div class="app-loading">
+        <div style="text-align:center">
+          <div class="loading-spinner"></div>
+          <h2 style="font-weight:600;font-size:1.3rem">Vespeiro</h2>
+          <p style="color:#8892b0;margin-top:4px;font-size:0.85rem">A carregar o dashboard…</p>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="%BASE_URL%src/main.tsx"></script>
+
+    <!-- ── SPA 404 redirect for GitHub Pages ───────────────────────────── -->
+    <script>
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+      })();
+    </script>
+  </body>
+</html>

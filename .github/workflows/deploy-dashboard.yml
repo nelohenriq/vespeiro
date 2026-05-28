@@ -1,0 +1,129 @@
+name: Deploy Dashboard to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-dashboard.yml'
+      - '.github/workflows/stats.yml'   # stats.json updates trigger redeploy
+
+  schedule:
+    # Deploy daily at 09:30 UTC — 30 min after stats generation
+    - cron: '30 9 * * *'
+
+  workflow_dispatch:
+    inputs:
+      build_only:
+        description: 'Build only (skip deploy)'
+        required: false
+        default: 'false'
+
+# ── Permissions for GitHub Pages deployment ──────────────────────────────────
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# ── Concurrency: prevent overlapping deployments ─────────────────────────────
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  # ── Build job ──────────────────────────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+        id: pages_config
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Verify stats.json exists
+        run: |
+          if [ ! -f frontend/public/stats.json ]; then
+            echo "⚠️  stats.json not found — generating empty placeholder"
+            mkdir -p frontend/public
+            echo '{"generated_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","sources":{"total":0,"active":0,"articles_total":0,"articles_today":0,"articles_7d":0,"per_category":{},"top_sources":[],"articles_daily_7d":[],"articles_by_category_7d":[],"articles_by_category_30d":[]},"divergence":{"global_avg":null,"per_outlet":{},"omitted_facts":[]},"lusa_dependency":{"global_pct":null,"per_outlet":{},"per_topic":{}},"silence":{"today":0,"avg_7d":0,"top_silenced_stories":[]},"timelines":{"articles_daily_7d":[],"divergence_daily_7d":[]},"system":{"sources_total":0,"sources_active":0,"articles_total":0,"articles_today":0,"reports_count":0,"last_scrape":null,"last_error":null,"pipeline_status":"placeholder — no data yet"}}' > frontend/public/stats.json
+          else
+            echo "✅ stats.json: $(wc -c < frontend/public/stats.json) bytes"
+          fi
+
+      - name: Build
+        id: build
+        run: npm run build
+        working-directory: frontend
+        env:
+          BASE_PATH: ${{ steps.pages_config.outputs.base_path }}
+
+      - name: Upload build artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+      - name: Write GHA Summary
+        if: always()
+        run: |
+          {
+            echo '## 🏗️ Dashboard Build'
+            echo ''
+            echo '| Metric | Value |'
+            echo '|--------|-------|'
+            echo "| Repository | ${{ github.repository }} |"
+            echo "| Branch | ${{ github.ref_name }} |"
+            echo "| Commit | ${{ github.sha }} |"
+            echo "| Base path | /${{ github.event.repository.name }}/ |"
+            echo ''
+            ls -lh frontend/dist/ 2>/dev/null | awk '{print "|", $9, "|", $5, "|"}'
+            echo ''
+            echo '### 📦 Bundle sizes'
+            FILES=$(find frontend/dist/assets -type f 2>/dev/null)
+            for f in $FILES; do
+              name=$(basename "$f")
+              size=$(wc -c < "$f")
+              if echo "$f" | grep -qF '.js'; then
+                gzip_size=$(gzip -c "$f" | wc -c)
+                echo "| $name | $size B ($((gzip_size / 1024)) KB gzip) |"
+              else
+                echo "| $name | $size B |"
+              fi
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # ── Deploy job (only if build succeeds, unless build_only is set) ──────────
+  deploy:
+    if: ${{ github.event.inputs.build_only != 'true' }}
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Write GHA Summary
+        run: |
+          {
+            echo '## 🚀 Dashboard Deployed'
+            echo ''
+            echo "| Status | ✅ Live |"
+            echo "| URL | ${{ steps.deployment.outputs.page_url }} |"
+            echo "| Deployed at | $(date -u) |"
+          } >> "$GITHUB_STEP_SUMMARY"

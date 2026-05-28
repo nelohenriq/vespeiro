@@ -2,16 +2,28 @@ name: Scrape Sources
 
 on:
   schedule:
-    # Lusa: every 30 minutes (high-volume news agency)
+    # ── High-frequency news: every 30 min ──────────────────────────────────
+    # 16 Portuguese sources (Lusa + 15 PT media outlets)
     - cron: '*/30 * * * *'
-    # Portuguese media: hourly
-    # International: every 2 hours
-  workflow_dispatch:  # Manual trigger for testing
+
+    # ── International: every 2 hours ───────────────────────────────────────
+    # Reuters, BBC, Guardian, AP, El País
+    - cron: '0 */2 * * *'
+
+    # ── Government: every 6 hours ──────────────────────────────────────────
+    # portugal.gov.pt, presidencia.pt
+    - cron: '0 */6 * * *'
+
+    # ── Weekly batch: Monday 06:00 UTC ─────────────────────────────────────
+    # DRE (Google CSE — 100 queries/day limit), Parliament, ERC Advertising
+    - cron: '0 6 * * 1'
+
+  workflow_dispatch:
     inputs:
       source:
         description: 'Source ID to scrape (or "all")'
         required: true
-        default: 'lusa'
+        default: 'all'
 
 jobs:
   scrape:
@@ -20,6 +32,9 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+      DATABASE_URL: "sqlite+aiosqlite:///data/vespeiro.db"
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      GOOGLE_CUSTOM_SEARCH_CX: ${{ secrets.GOOGLE_CUSTOM_SEARCH_CX }}
 
     steps:
       - uses: actions/checkout@v4
@@ -29,14 +44,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Cache spaCy + sentence-transformers models
+      - name: Cache NLP models
         uses: actions/cache@v4
         with:
           path: |
             ~/.cache/spacy
             ~/.cache/huggingface
             ~/.cache/torch
-          key: nlp-models-${{ runner.os }}
+          key: nlp-models-${{ runner.os }}-${{ hashFiles('backend/pyproject.toml') }}
 
       - name: Install dependencies
         run: |
@@ -44,30 +59,101 @@ jobs:
           pip install -e .
           python -m spacy download pt_core_news_lg 2>/dev/null || true
 
-      - name: Scrape sources
+      - name: Determine source groups
+        id: groups
         run: |
-          cd backend
-          if [ "${{ github.event.inputs.source }}" = "all" ] || [ "${{ github.event.inputs.source }}" = "" ]; then
-            # Lusa first (most important), then PT media, then international
-            sources=("lusa" "rtp_noticias" "publico" "observador" "expresso" \
-                     "cm_jornal" "jn" "dn" "sic_noticias" "eco" "cnn_portugal" \
-                     "tsf" "renascenca" "sapo_24" "nam")
-            for src in "${sources[@]}"; do
-              echo "--- $src ---"
-              python run_scrape.py "$src" || echo "⚠️ $src failed"
-            done
+          # Map each cron schedule to the set of source groups it should scrape.
+          # workflow_dispatch always scrapes the requested source or "all".
+          # Scheduled runs scrape only the groups relevant to their cadence.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "source=${{ github.event.inputs.source }}" >> "$GITHUB_OUTPUT"
           else
-            python run_scrape.py "${{ github.event.inputs.source }}"
+            SCHEDULE="${{ github.event.schedule }}"
+            case "$SCHEDULE" in
+              "*/30 * * * *")
+                echo "source=news" >> "$GITHUB_OUTPUT" ;;
+              "0 */2 * * *")
+                echo "source=international" >> "$GITHUB_OUTPUT" ;;
+              "0 */6 * * *")
+                echo "source=government" >> "$GITHUB_OUTPUT" ;;
+              "0 6 * * 1")
+                echo "source=weekly" >> "$GITHUB_OUTPUT" ;;
+              *)
+                echo "source=all" >> "$GITHUB_OUTPUT" ;;
+            esac
           fi
 
-      - name: Source Health Summary
+      - name: Scrape sources
+        id: scrape
         run: |
-          cd backend && python -c "
-          from src.pipeline.monitor import print_health_summary
-          print_health_summary()"
+          cd backend
+          GROUP="${{ steps.groups.outputs.source }}"
+          echo "🔍 Scrape group: $GROUP"
+
+          # Source groups with their IDs
+          NEWS_SOURCES="lusa rtp_noticias publico observador expresso cm_jornal jn dn sic_noticias eco cnn_portugal tsf renascenca sapo_24 nam"
+          INTL_SOURCES="reuters bbc guardian ap elpais"
+          GOV_SOURCES="portugal_gov presidencia"
+          WEEKLY_SOURCES="dre_appointments dre_general_appointments parlamento_debates erc_advertising"
+          ALL_SOURCES="$NEWS_SOURCES $INTL_SOURCES $GOV_SOURCES $WEEKLY_SOURCES"
+
+          case "$GROUP" in
+            all)
+              SOURCES="$ALL_SOURCES" ;;
+            news)
+              SOURCES="$NEWS_SOURCES" ;;
+            international)
+              SOURCES="$INTL_SOURCES" ;;
+            government)
+              SOURCES="$GOV_SOURCES" ;;
+            weekly)
+              SOURCES="$WEEKLY_SOURCES" ;;
+            *)
+              # If a specific source ID was provided via workflow_dispatch
+              SOURCES="$GROUP" ;;
+          esac
+
+          echo "📋 Sources: $SOURCES"
+
+          SUCCESS=0
+          FAILED=0
+          TOTAL_ARTS=0
+          for src in $SOURCES; do
+            echo "--- $src ---"
+            # Capture full output so we can parse article count
+            output=$(python run_pipeline.py "$src" 2>&1)
+            echo "$output"
+            if echo "$output" | grep -qE '✅ [0-9]+ new articles'; then
+              SUCCESS=$((SUCCESS + 1))
+            else
+              echo "⚠️  $src failed"
+              FAILED=$((FAILED + 1))
+            fi
+            arts=$(echo "$output" | grep -oP '✅ \K\d+(?= new articles)' || echo "0")
+            TOTAL_ARTS=$((TOTAL_ARTS + arts))
+          done
+
+          echo "status=ok" >> "$GITHUB_OUTPUT"
+          echo "success=$SUCCESS" >> "$GITHUB_OUTPUT"
+          echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
+          echo "articles=$TOTAL_ARTS" >> "$GITHUB_OUTPUT"
 
       - name: Write GHA Summary
+        if: always()
         run: |
-          cd backend && python -c "
-          from src.pipeline.monitor import write_gha_summary
-          write_gha_summary()"
+          {
+            echo '## 📰 Scrape Results'
+            echo ''
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Group | ${{ steps.groups.outputs.source }} |"
+            echo "| Sources OK | ${{ steps.scrape.outputs.success }} |"
+            echo "| Sources failed | ${{ steps.scrape.outputs.failed }} |"
+            echo "| New articles | ${{ steps.scrape.outputs.articles }} |"
+            echo ''
+            echo '### ⚡ Next scheduled'
+            echo '- News (16 PT sources): every 30 min'
+            echo '- International (5): every 2 hours'
+            echo '- Government (2): every 6 hours'
+            echo '- Weekly (DRE, Parliament, ERC): Monday 06:00 UTC'
+          } >> "$GITHUB_STEP_SUMMARY"

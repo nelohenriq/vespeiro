@@ -1,23 +1,122 @@
 {
-  "generated_at": "2026-05-27T22:50:04.839182Z",
+  "generated_at": "2026-05-28T12:07:02.183154Z",
   "version": "1.0",
   "sources": {
-    "total": 0,
-    "active": 0,
-    "articles_total": 0,
-    "articles_today": 0,
-    "articles_per_source": {},
-    "per_category": {}
+    "total": 6,
+    "active": 6,
+    "articles_total": 221,
+    "articles_today": 111,
+    "articles_per_source": {
+      "lusa": 76,
+      "portugal_gov": 30,
+      "presidencia": 30,
+      "publico": 30,
+      "renascenca": 25,
+      "rtp_noticias": 30
+    },
+    "per_category": {
+      "agency": {
+        "sources": 1,
+        "articles": 76,
+        "articles_today": 26
+      },
+      "government": {
+        "sources": 2,
+        "articles": 60,
+        "articles_today": 0
+      },
+      "mainstream": {
+        "sources": 2,
+        "articles": 55,
+        "articles_today": 55
+      },
+      "public_broadcaster": {
+        "sources": 1,
+        "articles": 30,
+        "articles_today": 30
+      }
+    }
   },
   "lusa_dependency": {
-    "global_pct": null,
-    "per_outlet": {},
+    "global_pct": 0.0,
+    "per_outlet": {
+      "portugal_gov": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "presidencia": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "publico": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      },
+      "renascenca": {
+        "pct": 0.0,
+        "stories": 25,
+        "lusa_derived": 0
+      },
+      "rtp_noticias": {
+        "pct": 0.0,
+        "stories": 30,
+        "lusa_derived": 0
+      }
+    },
     "per_topic": {}
   },
   "divergence": {
-    "global_avg": null,
-    "per_outlet": {},
-    "top_omitted_facts": []
+    "global_avg": 0.4593145366004863,
+    "per_outlet": {
+      "publico": {
+        "avg": 0.4593145366004863,
+        "stories": 1,
+        "avg_omission": 0.7,
+        "avg_sentiment_shift": 0.0,
+        "avg_quote_fidelity": 0.0,
+        "avg_headline_divergence": 0.0715726830024318
+      }
+    },
+    "top_omitted_facts": [
+      {
+        "text": "2.3 milhões de euros",
+        "count": 1,
+        "category": "money"
+      },
+      {
+        "text": "milhões",
+        "count": 1,
+        "category": "number"
+      },
+      {
+        "text": "três",
+        "count": 1,
+        "category": "number"
+      },
+      {
+        "text": "Lisboa",
+        "count": 1,
+        "category": "location"
+      },
+      {
+        "text": "Organização Mundial de Saúde",
+        "count": 1,
+        "category": "org"
+      },
+      {
+        "text": "Pedro Costa",
+        "count": 1,
+        "category": "person"
+      },
+      {
+        "text": "30%",
+        "count": 1,
+        "category": "pct"
+      }
+    ]
   },
   "silence": {
     "today": 0,
@@ -25,8 +124,7 @@
     "top_silenced": []
   },
   "timelines": {
-    "lusa_dependency_7d": [],
-    "divergence_avg_7d": [
+    "lusa_dependency_7d": [
       0.0,
       0.0,
       0.0,
@@ -35,7 +133,25 @@
       0.0,
       0.0
     ],
+    "divergence_avg_7d": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.4593145366004863
+    ],
     "articles_daily_7d": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      110,
+      111
+    ],
+    "silence_daily_7d": [
       0,
       0,
       0,
@@ -44,22 +160,21 @@
       0,
       0
     ],
-    "silence_daily_7d": [],
     "dates_7d": [
-      "2026-05-21",
       "2026-05-22",
       "2026-05-23",
       "2026-05-24",
       "2026-05-25",
       "2026-05-26",
-      "2026-05-27"
+      "2026-05-27",
+      "2026-05-28"
     ]
   },
   "system": {
-    "uptime_pct": 0.0,
-    "sources_healthy": 0,
+    "uptime_pct": 100.0,
+    "sources_healthy": 6,
     "sources_failing": 0,
-    "last_scrape": null,
+    "last_scrape": "2026-05-28T11:57:55.556584",
     "last_error": null
   }
 }

@@ -1,0 +1,39 @@
+{
+  "name": "Vespeiro — Media Narrative Intelligence",
+  "short_name": "Vespeiro",
+  "description": "Real-time dashboard tracking narrative divergence, Lusa media dependency, and silence detection across Portuguese news media.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#070b1a",
+  "theme_color": "#00d4aa",
+  "orientation": "any",
+  "categories": ["news", "media", "data-visualization"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Overview",
+      "short_name": "Overview",
+      "description": "Dashboard overview with all metrics",
+      "url": "./?tab=overview"
+    },
+    {
+      "name": "Sources",
+      "short_name": "Sources",
+      "description": "Source metrics and breakdowns",
+      "url": "./?tab=sources"
+    },
+    {
+      "name": "Narrative",
+      "short_name": "Narrative",
+      "description": "Divergence, dependency, and silence analysis",
+      "url": "./?tab=narrative"
+    }
+  ]
+}
