@@ -54,7 +54,7 @@ export default function HeroMetrics({ stats }: HeroMetricsProps) {
     },
     {
       label: "System Health",
-      value: pct(stats.system.uptime_pct, 0),
+      value: `${stats.system.uptime_pct.toFixed(0)}%`,
       sub: `${stats.system.sources_healthy} healthy · ${stats.system.sources_failing} failing`,
       accent:
         stats.system.uptime_pct >= 90

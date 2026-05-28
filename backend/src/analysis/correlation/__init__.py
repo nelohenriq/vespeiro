@@ -199,21 +199,41 @@ class CorrelationAnalyzer:
 
         try:
             from sqlalchemy import select, func
-            from src.db.models import Article
+            from src.db.models import Article, Source
 
-            # Count articles per source
+            # Fetch media source IDs, then filter articles in Python
+            # to avoid SQLite string comparison quirks with IN/joins.
+            src_result = await self.db.execute(
+                select(Source.id).where(
+                    Source.category.in_(["mainstream", "agency"]),
+                )
+            )
+            media_source_ids = {row[0] for row in src_result.all()}
+
+            if not media_source_ids:
+                return {}
+
+            # Fetch all article source_id/count pairs (any text), filter in Python.
+            # Mainstream RSS scrapers only store summaries, not full content_text.
+            from sqlalchemy import or_
             result = await self.db.execute(
                 select(
                     Article.source_id,
                     func.count(Article.id).label("count"),
                 )
-                .where(Article.content_text.isnot(None))
+                .where(or_(
+                    Article.content_text.isnot(None),
+                    Article.summary.isnot(None),
+                ))
                 .group_by(Article.source_id)
             )
 
+            # Filter to only media outlet sources
             metrics: dict[str, dict] = {}
             for row in result.all():
                 source_id = row[0]
+                if source_id not in media_source_ids:
+                    continue
                 count = row[1]
 
                 # Check for government coverage
@@ -237,20 +257,21 @@ class CorrelationAnalyzer:
         if self.db is None:
             return 0
         try:
-            from sqlalchemy import select, func
+            from sqlalchemy import select, func, or_
             from src.db.models import Article
+
+            gov_terms = ["governo", "ministério", "primeiro-ministro",
+                         "presidente", "conselho de ministros"]
+
+            # Check both content_text and summary for gov terms
+            conditions = []
+            for term in gov_terms:
+                conditions.append(func.lower(func.coalesce(Article.content_text, Article.summary, "")).contains(term))
 
             result = await self.db.execute(
                 select(func.count(Article.id))
                 .where(Article.source_id == source_id)
-                .where(Article.content_text.isnot(None))
-                .where(
-                    func.lower(Article.content_text).contains("governo")
-                    | func.lower(Article.content_text).contains("ministério")
-                    | func.lower(Article.content_text).contains("primeiro-ministro")
-                    | func.lower(Article.content_text).contains("presidente")
-                    | func.lower(Article.content_text).contains("conselho de ministros")
-                )
+                .where(or_(*conditions))
             )
             return result.scalar() or 0
         except Exception:

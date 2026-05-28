@@ -333,7 +333,7 @@ class PersonnelNetworkBuilder:
 
             result = await self.db.execute(
                 select(Article.content_text, Article.title, Article.id)
-                .where(Article.source_id == "dre")
+                .where(Article.source_id.in_(["dre_appointments", "dre_general_appointments"]))
                 .where(Article.content_text.isnot(None))
                 .limit(200)
             )

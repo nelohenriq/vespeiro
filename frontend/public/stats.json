@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-28T19:07:07.157886Z",
+  "generated_at": "2026-05-28T20:14:50.157671Z",
   "version": "1.0",
   "sources": {
     "total": 26,
@@ -378,11 +378,281 @@
     "total_appointments": 0
   },
   "parliament_gap": {
-    "overall_gap_score": 0.0,
-    "total_parliament_docs": 0,
-    "total_media_articles": 0,
-    "topics": [],
-    "most_discussed_only_parliament": [],
+    "overall_gap_score": 1.0,
+    "total_parliament_docs": 72,
+    "total_media_articles": 410,
+    "topics": [
+      {
+        "topic": "reunião plenária",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de i série",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "presidente ex",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "sr presidente",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "o sr",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de redação",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de esquerda",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "é a",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "que todos",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "á r i",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "palavra o sr",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "e minutos",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "uma vez",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "jn"
+        ]
+      },
+      {
+        "topic": "não é",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "dn"
+        ]
+      },
+      {
+        "topic": "dia de",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "dn"
+        ]
+      },
+      {
+        "topic": "a primeira",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "observador"
+        ]
+      },
+      {
+        "topic": "do psd",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "partido socialista",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "sr deputado",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de forma",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do ps",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 2,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "expresso",
+          "eco"
+        ]
+      },
+      {
+        "topic": "o país",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 2,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca",
+          "sic_noticias"
+        ]
+      },
+      {
+        "topic": "eram horas e",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "psd e",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "palavra o",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de hoje",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "aplausos do",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "r i",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "horas e",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "publico"
+        ]
+      },
+      {
+        "topic": "iniciativa liberal",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      }
+    ],
+    "most_discussed_only_parliament": [
+      "reunião plenária",
+      "de i série",
+      "presidente ex",
+      "sr presidente",
+      "o sr",
+      "de redação",
+      "de esquerda",
+      "é a",
+      "que todos",
+      "á r i"
+    ],
     "most_covered_in_media": []
   },
   "ad_correlation": {
@@ -401,9 +671,9 @@
         "outlet_id": "sic_noticias",
         "outlet_name": "SIC / SIC Notícias",
         "estimated_ad_spend_eur": 3248.06,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.033,
         "owner_group": "Grupo Impresa",
         "owner": "Impresa"
       },
@@ -411,9 +681,9 @@
         "outlet_id": "cnn_portugal",
         "outlet_name": "CNN Portugal",
         "estimated_ad_spend_eur": 3809.98,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.067,
         "owner_group": "Grupo Media Capital",
         "owner": "Media Capital"
       },
@@ -421,7 +691,7 @@
         "outlet_id": "publico",
         "outlet_name": "Público",
         "estimated_ad_spend_eur": 3051.93,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
         "owner_group": "Grupo Sonae",
@@ -431,9 +701,9 @@
         "outlet_id": "expresso",
         "outlet_name": "Expresso",
         "estimated_ad_spend_eur": 2697.76,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.067,
         "owner_group": "Grupo Impresa",
         "owner": "Impresa"
       },
@@ -441,7 +711,7 @@
         "outlet_id": "cm_jornal",
         "outlet_name": "Correio da Manhã",
         "estimated_ad_spend_eur": 2230.37,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
         "owner_group": "Grupo Cofina",
@@ -451,9 +721,9 @@
         "outlet_id": "jn",
         "outlet_name": "Jornal de Notícias",
         "estimated_ad_spend_eur": 6068.97,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.033,
         "owner_group": "Global Media Group",
         "owner": "Global Media Group"
       },
@@ -461,9 +731,9 @@
         "outlet_id": "dn",
         "outlet_name": "Diário de Notícias",
         "estimated_ad_spend_eur": 0.0,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.167,
         "owner_group": "Global Media Group",
         "owner": "Global Media Group"
       },
@@ -471,9 +741,9 @@
         "outlet_id": "tsf",
         "outlet_name": "TSF — Rádio Notícias",
         "estimated_ad_spend_eur": 0.0,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.1,
         "owner_group": "Global Media Group",
         "owner": "Global Media Group"
       },
@@ -481,9 +751,9 @@
         "outlet_id": "observador",
         "outlet_name": "Observador",
         "estimated_ad_spend_eur": 0.0,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.067,
         "owner_group": "Grupo Observador",
         "owner": "Observador ON AIR"
       },
@@ -491,9 +761,9 @@
         "outlet_id": "renascenca",
         "outlet_name": "Rádio Renascença",
         "estimated_ad_spend_eur": 0.0,
-        "articles_count": 0,
+        "articles_count": 25,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.2,
         "owner_group": "Igreja Católica em Portugal",
         "owner": "Igreja Católica"
       },
@@ -501,23 +771,23 @@
         "outlet_id": "eco",
         "outlet_name": "ECO — Economia Online",
         "estimated_ad_spend_eur": 3587.92,
-        "articles_count": 0,
+        "articles_count": 30,
         "avg_sentiment": null,
-        "gov_coverage_pct": 0.0,
+        "gov_coverage_pct": 0.033,
         "owner_group": "Grupo Trust in News",
         "owner": "Trust in News"
       }
     ],
-    "r_spend_vs_articles": null,
-    "r_spend_vs_gov_coverage": null,
+    "r_spend_vs_articles": -0.4951,
+    "r_spend_vs_gov_coverage": -0.6975,
     "total_ad_spend_estimated": 31381.64,
-    "total_articles_analyzed": 0
+    "total_articles_analyzed": 325
   },
   "influence": {
-    "capture_score": 0.0,
+    "capture_score": 0.609,
     "personnel_density": 0.0,
-    "parliament_gap": 0.0,
-    "ad_correlation_strength": 0.0,
-    "summary": "Captura mínima: não foi detetada evidência significativa de captura do ecossistema mediático."
+    "parliament_gap": 1.0,
+    "ad_correlation_strength": 0.698,
+    "summary": "Captura moderada: existem conexões entre Estado e media que merecem atenção."
   }
 }

@@ -230,7 +230,7 @@ class ParliamentGapAnalyzer:
 
             result = await self.db.execute(
                 select(Article.content_text, Article.title, Article.id)
-                .where(Article.source_id == "parlamento")
+                .where(Article.source_id == "parlamento_debates")
                 .where(Article.content_text.isnot(None))
                 .limit(100)
             )
@@ -250,24 +250,39 @@ class ParliamentGapAnalyzer:
             from sqlalchemy import select
             from src.db.models import Article, Source
 
-            # Get all active PT media sources (excluding parliament, DRE, gov)
+            # Fetch media source IDs and all articles in parallel,
+            # then filter in Python to avoid SQLite string comparison quirks.
+            src_result = await self.db.execute(
+                select(Source.id).where(
+                    Source.category.in_(["mainstream", "agency", "international"]),
+                )
+            )
+            media_source_ids = {row[0] for row in src_result.all()}
+
+            if not media_source_ids:
+                return []
+
+            # Fetch articles with any text content (body or summary)
+            # Mainstream RSS scrapers only store summaries, not full text.
+            from sqlalchemy import or_
             result = await self.db.execute(
-                select(Article.content_text, Article.title, Article.id, Article.source_id)
-                .join(Source, Article.source_id == Source.id)
-                .where(Source.category.in_([
-                    "media", "news_agency", "tv", "radio", "newspaper",
-                ]))
-                .where(Article.content_text.isnot(None))
+                select(Article.content_text, Article.summary, Article.title, Article.id, Article.source_id)
+                .where(or_(
+                    Article.content_text.isnot(None),
+                    Article.summary.isnot(None),
+                ))
                 .limit(500)
             )
             return [
                 {
-                    "content_text": row[0],
-                    "title": row[1],
-                    "id": row[2],
-                    "source_id": row[3],
+                    # Use content_text if available, else fall back to summary
+                    "content_text": row[0] or row[1] or "",
+                    "title": row[2],
+                    "id": row[3],
+                    "source_id": row[4],
                 }
                 for row in result.all()
+                if row[4] in media_source_ids  # Python-side filter
             ]
         except Exception as exc:
             logger.warning("Failed to query media articles: %s", exc)
