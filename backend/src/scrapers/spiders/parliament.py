@@ -6,13 +6,11 @@ via the confirmed-working export endpoint at debates.parlamento.pt.
 
 Approach
 --------
-1. **Discovery** — Probe the export endpoint with HEAD requests across known
-   (legislature, session, number) ranges to find available documents.
-2. **Download** — For each available document, GET the PDF and extract text
-   with pdfplumber.
-3. **Media-relevance filtering** — Documents that mention media-related keywords
-   (ERC, RTP, Lusa, comunicação social, regulação, etc.) are kept; others are
-   skipped to keep volume manageable.
+Single-phase GET: iterates across known (legislature, session, number) ranges,
+does concurrent GETs, checks content-type, extracts PDF text with pdfplumber,
+and filters for media-relevant documents.  No separate HEAD discovery step
+because the Parliament server rejects GET after many HEAD requests on the same
+connection.
 
 Export URL pattern (verified working)::
 
@@ -39,6 +37,7 @@ Volume estimate: ~480 documents total, ~20–50 media-relevant per year.
 """
 from __future__ import annotations
 
+import asyncio
 import io
 import logging
 import re
@@ -124,17 +123,19 @@ def _is_media_relevant(text: str) -> bool:
 # ── Exported helpers (testable) ──────────────────────────────────────────────
 
 
-def extract_text_from_pdf(content: bytes) -> str | None:
+def extract_text_from_pdf(content: bytes, max_pages: int | None = None) -> str | None:
     """Extract text from a PDF byte stream using pdfplumber.
 
+    If ``max_pages`` is set, only the first N pages are extracted.
     Returns ``None`` if extraction fails.
     """
     import pdfplumber
 
     try:
         with pdfplumber.open(io.BytesIO(content)) as pdf:
+            pages = pdf.pages[:max_pages] if max_pages else pdf.pages
             text_parts: list[str] = []
-            for page in pdf.pages:
+            for page in pages:
                 page_text = page.extract_text()
                 if page_text:
                     text_parts.append(page_text)
@@ -204,122 +205,127 @@ def guess_published_date(legis: str, session: str, number: int) -> datetime | No
         return None
 
 
+_CONCURRENT_REQUESTS = 20
+_RELEVANCE_SCAN_PAGES = 5  # Only scan first N pages for media relevance (perf)
+
+
 # ── Spider ────────────────────────────────────────────────────────────────────
 
 
 class ParliamentSpider(BaseSpider):
     """Download DAR I Série debate transcripts and filter for media relevance.
 
-    The spider is designed for periodic (e.g. weekly) runs.  It probes the
-    export endpoint across known legislature/session/number ranges to discover
-    available documents, downloads PDFs for those found, extracts text with
-    pdfplumber, and retains only documents mentioning media-related keywords.
+    Uses a single-phase GET approach: concurrently GETs all candidate URLs,
+    checks content-type for PDFs, extracts text, and filters for media-relevant
+    documents.  No separate HEAD discovery step is used because the Parliament
+    export server rejects GET requests after many HEAD requests on the same
+    connection.
 
     The ``url`` parameter passed to :meth:`fetch` is ignored; discovery ranges
     are built from ``_DISCOVERY_RANGES``.
     """
 
     def __init__(self) -> None:
-        self.http_client = httpx.AsyncClient(
-            timeout=30.0, follow_redirects=True, headers=_HEADERS
-        )
-        # Cache of already-known URLs (safe for single fetch() call)
-        self._seen_urls: set[str] = set()
+        self._semaphore = asyncio.Semaphore(_CONCURRENT_REQUESTS)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
-        articles: list[ScrapedArticle] = []
-        self._seen_urls.clear()
+        # Build all candidate URLs
+        candidates: list[tuple[str, str, str, int]] = []
+        for legis, sessao, max_num in _DISCOVERY_RANGES:
+            for num in range(1, max_num + 1):
+                candidates.append(("01", legis, sessao, num))
 
+        logger.info(
+            "Parliament spider: probing %d candidate URLs (%d concurrent)…",
+            len(candidates), _CONCURRENT_REQUESTS,
+        )
+
+        # Single-phase: GET every candidate URL concurrently.
+        # Non-existent docs return 404 quickly; real PDFs get downloaded.
+        http_client = httpx.AsyncClient(
+            timeout=30.0,
+            follow_redirects=True,
+            headers=_HEADERS,
+            limits=httpx.Limits(max_keepalive_connections=0),
+        )
         try:
-            # Phase 1: Discover available documents
-            available: list[tuple[str, str, str, int]] = []
-            for legis, sessao, max_num in _DISCOVERY_RANGES:
-                batch = await self._discover_range("01", legis, sessao, max_num)
-                available.extend(batch)
+            tasks = [
+                self._fetch_one(http_client, serie, legis, sessao, numero, source_id)
+                for serie, legis, sessao, numero in candidates
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            if not available:
-                logger.info("Parliament spider: no documents found")
-                return []
+            articles: list[ScrapedArticle] = []
+            not_found = 0
+            errors = 0
+            skipped = 0
+            for result in results:
+                if isinstance(result, Exception):
+                    errors += 1
+                elif result is None:
+                    not_found += 1
+                elif result == "skip":
+                    skipped += 1
+                else:
+                    articles.append(result)
 
-            logger.info("Parliament spider: %d documents available, downloading…", len(available))
-
-            # Phase 2: Download, extract, filter
-            for serie, legis, sessao, numero in available:
-                try:
-                    article = await self._download_and_process(
-                        serie, legis, sessao, numero, source_id
-                    )
-                    if article is not None:
-                        articles.append(article)
-                except Exception as exc:
-                    logger.debug("Skipping %s/%s/%s/%03d: %s", serie, legis, sessao, numero, exc)
-                    continue
-
+            logger.info(
+                "Parliament spider: %d media-relevant, %d non-relevant, "
+                "%d not found, %d errors",
+                len(articles), skipped, not_found, errors,
+            )
         finally:
-            await self.http_client.aclose()
+            await http_client.aclose()
 
         return articles
 
-    async def _discover_range(
-        self, serie: str, legis: str, sessao: str, max_num: int
-    ) -> list[tuple[str, str, str, int]]:
-        """Probe the export endpoint with HEAD requests to find available documents.
-
-        Returns a list of ``(serie, legis, sessao, numero)`` tuples.
-        """
-        found: list[tuple[str, str, str, int]] = []
-        for num in range(1, max_num + 1):
-            url = build_export_url(serie, legis, sessao, num)
-            try:
-                resp = await self.http_client.head(url)
-                if resp.status_code == 200:
-                    found.append((serie, legis, sessao, num))
-            except Exception:
-                continue
-        return found
-
-    async def _download_and_process(
-        self, serie: str, legis: str, sessao: str, numero: int, source_id: str
-    ) -> ScrapedArticle | None:
-        """Download a DAR PDF, extract text, check relevance.
-
-        Returns a ``ScrapedArticle`` if the document is media-relevant,
-        otherwise ``None``.
-        """
+    async def _fetch_one(
+        self,
+        client: httpx.AsyncClient,
+        serie: str,
+        legis: str,
+        sessao: str,
+        numero: int,
+        source_id: str,
+    ) -> ScrapedArticle | str | None:
+        """GET a single candidate URL; return article, "skip", or None."""
         url = build_export_url(serie, legis, sessao, numero)
 
-        if url in self._seen_urls:
-            return None
-        self._seen_urls.add(url)
+        async with self._semaphore:
+            try:
+                resp = await client.get(url)
+            except Exception as exc:
+                logger.debug("GET failed for %s: %s", url, exc)
+                return None
 
-        # Download
-        resp = await self.http_client.get(url)
-        resp.raise_for_status()
+        if resp.status_code != 200:
+            return None
 
         content_type = resp.headers.get("content-type", "")
         if "pdf" not in content_type.lower():
             logger.debug("Non-PDF response at %s: %s", url, content_type)
             return None
 
-        # Extract
-        content_text = extract_text_from_pdf(resp.content)
-        if not content_text:
+        # Extract text from first N pages for relevance check (fast path)
+        scan_text = extract_text_from_pdf(resp.content, max_pages=_RELEVANCE_SCAN_PAGES)
+        if not scan_text:
             return None
 
         # Filter: only keep media-relevant documents
-        # (We also build the article for context even if not strictly relevant,
-        # but skip it to keep volume manageable.)
-        if not _is_media_relevant(content_text):
+        if not _is_media_relevant(scan_text):
+            return "skip"
+
+        # Media-relevant! Extract full text for storage
+        full_text = extract_text_from_pdf(resp.content)
+        if not full_text:
             return None
 
-        # Build title from metadata
+        # Build title and date
         title = _format_title(serie, legis, sessao, numero)
         pub_date = guess_published_date(legis, sessao, numero)
 
-        # Extract a snippet of the first ~500 chars for the summary
-        snippet = content_text[:500].strip()
-        # Clean up — take the first meaningful paragraph
-        snippet = snippet.replace("\n", " ").strip()
+        # Extract a snippet for the summary
+        snippet = full_text[:500].strip().replace("\n", " ").strip()
         if len(snippet) > 500:
             snippet = snippet[:497] + "..."
 
@@ -327,7 +333,7 @@ class ParliamentSpider(BaseSpider):
             external_id=url,
             url=url,
             title=title,
-            content_text=content_text,
+            content_text=full_text,
             summary=snippet,
             author="Assembleia da República",
             published_at=pub_date,

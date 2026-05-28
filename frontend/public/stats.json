@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-05-28T17:08:27.937019Z",
+  "generated_at": "2026-05-28T19:07:07.157886Z",
   "version": "1.0",
   "sources": {
     "total": 26,
     "active": 26,
-    "articles_total": 671,
-    "articles_today": 561,
+    "articles_total": 775,
+    "articles_today": 665,
     "articles_per_source": {
       "ap": 30,
       "bbc": 30,
@@ -14,16 +14,19 @@
       "dn": 30,
       "eco": 30,
       "elpais": 30,
+      "erc_advertising": 2,
       "expresso": 30,
       "guardian": 30,
       "jn": 30,
       "lusa": 76,
       "nam": 30,
       "observador": 30,
+      "parlamento_debates": 72,
       "portugal_gov": 30,
       "presidencia": 30,
       "publico": 30,
       "renascenca": 25,
+      "reuters": 30,
       "rtp_noticias": 30,
       "sapo_24": 30,
       "sic_noticias": 30,
@@ -42,8 +45,8 @@
       },
       "international": {
         "sources": 5,
-        "articles": 120,
-        "articles_today": 120
+        "articles": 150,
+        "articles_today": 150
       },
       "mainstream": {
         "sources": 13,
@@ -57,8 +60,8 @@
       },
       "parliament": {
         "sources": 1,
-        "articles": 0,
-        "articles_today": 0
+        "articles": 72,
+        "articles_today": 72
       },
       "public_broadcaster": {
         "sources": 1,
@@ -67,8 +70,8 @@
       },
       "regulator": {
         "sources": 1,
-        "articles": 0,
-        "articles_today": 0
+        "articles": 2,
+        "articles_today": 2
       }
     }
   },
@@ -95,6 +98,11 @@
         "stories": 30,
         "lusa_derived": 0
       },
+      "erc_advertising": {
+        "pct": 0.0,
+        "stories": 2,
+        "lusa_derived": 0
+      },
       "expresso": {
         "pct": 0.0,
         "stories": 30,
@@ -113,6 +121,11 @@
       "observador": {
         "pct": 0.0,
         "stories": 30,
+        "lusa_derived": 0
+      },
+      "parlamento_debates": {
+        "pct": 0.0,
+        "stories": 72,
         "lusa_derived": 0
       },
       "portugal_gov": {
@@ -209,8 +222,8 @@
     ]
   },
   "silence": {
-    "today": 109,
-    "avg_7d": 15.6,
+    "today": 139,
+    "avg_7d": 19.9,
     "top_silenced": [
       {
         "title": "Sturgeon says she was deceived, betrayed and lied to over Murrell embezzlement",
@@ -312,7 +325,7 @@
       0.0,
       0.0,
       0.0,
-      0.5
+      0.6
     ],
     "divergence_avg_7d": [
       0.0,
@@ -330,7 +343,7 @@
       0,
       0,
       110,
-      561
+      665
     ],
     "silence_daily_7d": [
       0,
@@ -339,7 +352,7 @@
       0,
       0,
       0,
-      109
+      139
     ],
     "dates_7d": [
       "2026-05-22",
@@ -355,7 +368,7 @@
     "uptime_pct": 100.0,
     "sources_healthy": 26,
     "sources_failing": 0,
-    "last_scrape": "2026-05-28T17:06:31.890874",
+    "last_scrape": "2026-05-28T19:05:51.021523",
     "last_error": null
   },
   "personnel": {
@@ -377,7 +390,7 @@
       {
         "outlet_id": "rtp_noticias",
         "outlet_name": "RTP — Rádio e Televisão de Portugal",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 6686.65,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -387,7 +400,7 @@
       {
         "outlet_id": "sic_noticias",
         "outlet_name": "SIC / SIC Notícias",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 3248.06,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -397,7 +410,7 @@
       {
         "outlet_id": "cnn_portugal",
         "outlet_name": "CNN Portugal",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 3809.98,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -407,7 +420,7 @@
       {
         "outlet_id": "publico",
         "outlet_name": "Público",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 3051.93,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -417,7 +430,7 @@
       {
         "outlet_id": "expresso",
         "outlet_name": "Expresso",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 2697.76,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -427,7 +440,7 @@
       {
         "outlet_id": "cm_jornal",
         "outlet_name": "Correio da Manhã",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 2230.37,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -437,7 +450,7 @@
       {
         "outlet_id": "jn",
         "outlet_name": "Jornal de Notícias",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 6068.97,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -487,7 +500,7 @@
       {
         "outlet_id": "eco",
         "outlet_name": "ECO — Economia Online",
-        "estimated_ad_spend_eur": 0.0,
+        "estimated_ad_spend_eur": 3587.92,
         "articles_count": 0,
         "avg_sentiment": null,
         "gov_coverage_pct": 0.0,
@@ -497,7 +510,7 @@
     ],
     "r_spend_vs_articles": null,
     "r_spend_vs_gov_coverage": null,
-    "total_ad_spend_estimated": 0.0,
+    "total_ad_spend_estimated": 31381.64,
     "total_articles_analyzed": 0
   },
   "influence": {
