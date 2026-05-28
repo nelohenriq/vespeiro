@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-28T12:07:02.183154Z",
+  "generated_at": "2026-05-28T16:16:09.618293Z",
   "version": "1.0",
   "sources": {
     "total": 6,
@@ -176,5 +176,154 @@
     "sources_failing": 0,
     "last_scrape": "2026-05-28T11:57:55.556584",
     "last_error": null
+  },
+  "personnel": {
+    "nodes": [],
+    "edges": [],
+    "total_people": 0,
+    "total_appointments": 0
+  },
+  "parliament_gap": {
+    "overall_gap_score": 0.0,
+    "total_parliament_docs": 0,
+    "total_media_articles": 0,
+    "topics": [],
+    "most_discussed_only_parliament": [],
+    "most_covered_in_media": []
+  },
+  "ad_correlation": {
+    "outlets": [
+      {
+        "outlet_id": "rtp_noticias",
+        "outlet_name": "RTP — Rádio e Televisão de Portugal",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Setor Público Estatal",
+        "owner": "Estado Português"
+      },
+      {
+        "outlet_id": "sic_noticias",
+        "outlet_name": "SIC / SIC Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Impresa",
+        "owner": "Impresa"
+      },
+      {
+        "outlet_id": "cnn_portugal",
+        "outlet_name": "CNN Portugal",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Media Capital",
+        "owner": "Media Capital"
+      },
+      {
+        "outlet_id": "publico",
+        "outlet_name": "Público",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Sonae",
+        "owner": "Sonae"
+      },
+      {
+        "outlet_id": "expresso",
+        "outlet_name": "Expresso",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Impresa",
+        "owner": "Impresa"
+      },
+      {
+        "outlet_id": "cm_jornal",
+        "outlet_name": "Correio da Manhã",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Cofina",
+        "owner": "Cofina Media"
+      },
+      {
+        "outlet_id": "jn",
+        "outlet_name": "Jornal de Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "dn",
+        "outlet_name": "Diário de Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "tsf",
+        "outlet_name": "TSF — Rádio Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "observador",
+        "outlet_name": "Observador",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Observador",
+        "owner": "Observador ON AIR"
+      },
+      {
+        "outlet_id": "renascenca",
+        "outlet_name": "Rádio Renascença",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Igreja Católica em Portugal",
+        "owner": "Igreja Católica"
+      },
+      {
+        "outlet_id": "eco",
+        "outlet_name": "ECO — Economia Online",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Grupo Trust in News",
+        "owner": "Trust in News"
+      }
+    ],
+    "r_spend_vs_articles": null,
+    "r_spend_vs_gov_coverage": null,
+    "total_ad_spend_estimated": 0.0,
+    "total_articles_analyzed": 0
+  },
+  "influence": {
+    "capture_score": 0.0,
+    "personnel_density": 0.0,
+    "parliament_gap": 0.0,
+    "ad_correlation_strength": 0.0,
+    "summary": "Captura mínima: não foi detetada evidência significativa de captura do ecossistema mediático."
   }
 }
