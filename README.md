@@ -1,137 +1,232 @@
 # 🐝 Project Vespeiro
 
-[![Deploy Dashboard](https://github.com/USER/REPO/actions/workflows/deploy-dashboard.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/deploy-dashboard.yml)
-[![Scrape Sources](https://github.com/USER/REPO/actions/workflows/scrape.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/scrape.yml)
-[![Narrative Analysis](https://github.com/USER/REPO/actions/workflows/analyze.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/analyze.yml)
-[![Daily Stats](https://github.com/USER/REPO/actions/workflows/stats.yml/badge.svg)](https://github.com/USER/REPO/actions/workflows/stats.yml)
+[![Deploy Dashboard](https://github.com/nelohenriq/vespeiro/actions/workflows/deploy-dashboard.yml/badge.svg)](https://github.com/nelohenriq/vespeiro/actions/workflows/deploy-dashboard.yml)
+[![Scrape Sources](https://github.com/nelohenriq/vespeiro/actions/workflows/scrape.yml/badge.svg)](https://github.com/nelohenriq/vespeiro/actions/workflows/scrape.yml)
+[![Narrative Analysis](https://github.com/nelohenriq/vespeiro/actions/workflows/analyze.yml/badge.svg)](https://github.com/nelohenriq/vespeiro/actions/workflows/analyze.yml)
+[![Daily Stats](https://github.com/nelohenriq/vespeiro/actions/workflows/stats.yml/badge.svg)](https://github.com/nelohenriq/vespeiro/actions/workflows/stats.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-**Media Narrative Intelligence Platform**
+**Media Narrative Intelligence Platform — Open-source media monitoring for Portugal**
 
-Monitoriza, analisa e expõe o controlo narrativo nos media portugueses — com foco no papel da Lusa como gatekeeper da informação e na assimetria entre o que Portugal vê e o que o mundo vê.
+Monitors, analyzes, and exposes narrative control in Portuguese media — quantifying Lusa's gatekeeping role, detecting international coverage gaps, mapping the state-media personnel network, and measuring advertising-editorial correlation.
 
-> 📊 **[Live Dashboard →](https://USER.github.io/REPO/)** — deployed daily via GitHub Pages
+> 📊 **[Live Dashboard →](https://nelohenriq.github.io/vespeiro/)** · 📖 **[API Docs →](docs/api.md)** · 🔬 **[Methodology →](https://nelohenriq.github.io/vespeiro/)** (📖 Methodology tab) · 🏷️ **[Releases →](https://github.com/nelohenriq/vespeiro/tags)**
 
-## 🎯 Missão
+---
 
-> *"A propaganda mais poderosa não é a mentira que te contam — é a verdade que nunca vês."*
+## 🎯 Mission
 
-Construir um radar público de **assimetria informativa** que torna visível o que está a ser silenciado, distorcido ou filtrado nos media portugueses.
+> *"The most powerful propaganda isn't the lie you're told — it's the truth you never see."*
 
-## 🔧 Stack
+Vespeiro is a public **information asymmetry radar** that makes visible what is being silenced, distorted, or filtered in Portuguese media. We don't claim what's "true" — we show the **gap** between what Portugal sees and what the world sees.
 
-| Componente | Tecnologia | Custo |
-|------------|-----------|-------|
+---
+
+## 🏗️ Architecture
+
+```
+┌────────────────────────────────────────────────────────────────┐
+│                    DATA SOURCES ($0)                           │
+│  🇵🇹 15 PT outlets  │  🌍 10 international  │  🏛️ 6 state sites │
+└──────────────────────────┬─────────────────────────────────────┘
+                           │
+     ┌─────────────────────▼──────────────────────┐
+     │       GITHUB ACTIONS (scheduled cron)       │
+     │  scrape → embed → match → analyze → alert  │
+     └─────────────────────┬──────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │   SUPABASE (PostgreSQL)  │
+              │   articles · embeddings  │
+              │   clusters · metrics     │
+              └────────────┬────────────┘
+                           │
+     ┌─────────────────────┼──────────────────────┐
+     │                     │                      │
+     ▼                     ▼                      ▼
+┌─────────┐    ┌──────────────────┐    ┌─────────────────┐
+│ GH Pages│    │  Public REST API │    │  Telegram Bot   │
+│ React   │    │  (PostgREST)     │    │  daily briefing │
+│ D3.js   │    │  RLS policies    │    │  anomaly alerts │
+└─────────┘    └──────────────────┘    └─────────────────┘
+```
+
+**💰 Total cost: $0/month.** Everything runs on free tiers — GitHub Actions, Supabase, GitHub Pages, Telegram API. No servers, no paid APIs, no Docker in production.
+
+---
+
+## ✨ Features
+
+### Phase 1 — Lusa Dependency
+- **Lusa Dependency Score** per outlet — what % of articles trace back to Lusa?
+- **Topic Monopoly Analysis** — topics where Lusa has >80% market share
+- **Agenda-Setting Metrics** — time lag, gatekeeping ratio
+- **Framing Divergence** — how outlets reframe Lusa content
+
+### Phase 2 — The Broken Mirror
+- **Silence Detection** — international stories with zero Portuguese coverage
+- **Narrative Asymmetry** — sentiment divergence on key political figures
+- **Story Clustering** — cross-lingual matching (PT/EN/ES/FR)
+- **"Jornal do Contra"** — daily Telegram briefing with silenced stories
+
+### Phase 3 — State Ecosystem
+- **Personnel Network Graph** — D3.js force graph of state-media revolving door
+- **Parliament-Media Gap** — topics debated in Parliament that never reach the public
+- **Advertising-Editorial Correlation** — do outlets that receive more state ads cover government more favorably?
+- **Influence Map** — composite dashboard with Capture Score per outlet
+
+### Phase 4 — Public Exposure
+- **React Dashboard** — 6 tabs, 13 components, D3.js visualizations
+- **Public API** — Supabase PostgREST with Row Level Security
+- **Transparency & Methodology** — full disclosure of how every metric is calculated
+- **Telegram Alerts** — daily briefings + anomaly detection
+
+---
+
+## 🔧 Tech Stack
+
+| Component | Technology | Cost |
+|-----------|-----------|------|
 | Scraping | Python (httpx + feedparser + trafilatura + pdfplumber) | $0 |
 | Embeddings | sentence-transformers (multilingual-e5-large) | $0 (CPU) |
 | Sentiment | pysentimiento (PT/ES/EN) | $0 (CPU) |
+| Story Matching | cosine similarity + DBSCAN | $0 |
 | Database | SQLite (dev) / Supabase Free Tier (prod) | $0 |
-| Dashboard | React 19 + Vite 6 + TypeScript 5.8 (GitHub Pages) | $0 |
-| CI/CD | GitHub Actions (scrape, analyze, stats, deploy) | $0 |
-| Alertas | Telegram Bot (via GitHub Actions) | $0 |
+| API | Supabase PostgREST + Row Level Security | $0 |
+| Dashboard | React 19 + Vite 6 + TypeScript + D3.js | $0 |
+| Hosting | GitHub Pages | $0 |
+| CI/CD | GitHub Actions (5 workflows) | $0 |
+| Alerts | Telegram Bot | $0 |
 
-**💰 Total: $0/mês operacionais.**
+---
 
-## 📂 Estrutura
+## 📂 Project Structure
 
 ```
 vespeiro/
-├── .github/workflows/     # 5 workflows: scrape, analyze, stats, deploy, alerts
+├── .github/workflows/        # 5 CI/CD workflows
 ├── backend/
 │   ├── src/
-│   │   ├── config/         # Sources.yaml + Pydantic settings
-│   │   ├── db/             # SQLAlchemy models + async session
-│   │   ├── scrapers/       # 8 spiders → 27 sources (RSS, Google News, PDF)
-│   │   ├── pipeline/       # Embeddings, story matching, sentiment, monitor
-│   │   ├── analysis/       # Divergence, Lusa dependency, silence detection
-│   │   ├── alerts/         # Telegram bot (daily briefing + anomaly alerts)
-│   │   └── supabase/       # Supabase client
-│   ├── tests/              # 200+ tests (pytest)
-│   └── run_*.py           # CLI entrypoints (scrape, analysis, stats, alert)
-├── frontend/               # React 19 + Vite 6 + TypeScript dashboard
-│   ├── src/components/     # 10 dashboard components
-│   ├── public/             # stats.json, favicon, OG image, PWA manifest
-│   └── dist/               # Built output (deployed to GitHub Pages)
-├── docs/                   # Design docs + implementation plans
-└── data/                   # SQLite database (local dev + GHA cache)
+│   │   ├── config/           # sources.yaml + Pydantic settings
+│   │   ├── db/               # SQLAlchemy models (async, SQLite + Postgres)
+│   │   ├── scrapers/         # 7 spiders → 27+ sources
+│   │   ├── pipeline/         # embedder, matcher, sentiment, monitor
+│   │   ├── analysis/
+│   │   │   ├── dependency/   # Lusa dependency analyzer
+│   │   │   ├── silence/      # International coverage gap detector
+│   │   │   ├── divergence/   # Narrative divergence (extractor, comparator, reporter)
+│   │   │   ├── personnel/    # Personnel network graph builder
+│   │   │   ├── gap/          # Parliament-media topic gap analysis
+│   │   │   └── correlation/  # Advertising-editorial correlation
+│   │   ├── alerts/           # Telegram bot (daily briefings + anomaly alerts)
+│   │   ├── stats/            # StatsGenerator → stats.json
+│   │   └── supabase/         # Supabase client
+│   ├── alembic/              # DB migrations (including RLS policies)
+│   ├── tests/                # 258+ tests (pytest + pytest-asyncio)
+│   └── run_*.py              # CLI entrypoints
+├── frontend/                 # React 19 + Vite 6 + TypeScript
+│   ├── src/components/       # 13 dashboard components
+│   └── public/               # stats.json + static assets
+├── docs/                     # Design docs, implementation plans, API docs
+└── data/                     # SQLite database (dev)
 ```
 
-## 🏗️ Fases
+---
 
-| Fase | O quê | Estado |
-|------|-------|--------|
-| 0 | Fundação — 8 spiders, 27 sources, SQLite storage | ✅ Implementado |
-| 1 | Pipeline — embeddings, story matching, sentiment | ✅ Implementado |
-| 2 | Divergência — extractor, comparator, reporter | ✅ Implementado |
-| 3 | Ecossistema — DRE, Parlamento, ERC, dependência Lusa | ✅ Implementado |
-| 4 | Exposição — dashboard, Telegram bot, stats portal | ✅ Implementado |
+## 🚀 Quick Start
 
-## 🌐 Workflows
+### Prerequisites
+- Python ≥3.12
+- Node.js ≥20
 
-| Workflow | Schedule | Description |
-|----------|----------|-------------|
-| [Scrape Sources](.github/workflows/scrape.yml) | Every 30 min — 6h | Fetch articles from 27 sources across 5 cadence groups |
-| [Narrative Analysis](.github/workflows/analyze.yml) | Every 6h | Compare Lusa vs Portuguese outlets for divergence scoring |
-| [Daily Stats](.github/workflows/stats.yml) | Daily 09:00 UTC | Generate stats.json, commit to repo, send Telegram briefing |
-| [Deploy Dashboard](.github/workflows/deploy-dashboard.yml) | Daily 09:30 UTC | Build React app and deploy to GitHub Pages |
-
-## 🚀 Começar
+### Backend
 
 ```bash
-git clone https://github.com/USER/REPO.git
+git clone https://github.com/nelohenriq/vespeiro.git
 cd vespeiro
+
+# Python environment
 python -m venv .venv
 source .venv/bin/activate
 pip install -e backend/
 
-# Scrape a source
-cd backend && python run_pipeline.py lusa
+# Scrape a source (requires GOOGLE_API_KEY + GOOGLE_CUSTOM_SEARCH_CX for DRE)
+cd backend
+python run_pipeline.py lusa        # fetch + store Lusa articles
+python run_analysis.py             # run divergence analysis
+python run_stats.py                # generate stats.json
+python run_alert.py --test         # test Telegram alert (needs TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID)
 
-# Run analysis
-python run_analysis.py
-
-# Generate stats
-python run_stats.py
+# Run tests
+python -m pytest tests/ -v
 ```
 
-## 📊 Dashboard Preview
+### Frontend
 
-Run locally:
 ```bash
 cd frontend
 npm install
-npm run dev     # → http://localhost:3000
+npm run dev        # → http://localhost:5173
+npm run build      # production build → dist/
 ```
 
-## 🚀 GitHub Pages Deployment
-
-The dashboard is automatically built and deployed to GitHub Pages every day at 09:30 UTC via the [Deploy Dashboard](.github/workflows/deploy-dashboard.yml) workflow.
-
-### Prerequisites
-
-1. **Enable GitHub Pages** — Go to your repo **Settings → Pages → Source** and select **"GitHub Actions"**.
-2. **Approve the environment (if prompted)** — The first time the workflow runs, you may see a pending approval for the `github-pages` environment. Go to **Settings → Environments → github-pages** and approve it. To skip this step on future runs, set **Required reviewers** to _none_.
-3. **Update placeholder URLs** — Replace `USER/REPO` in the badges at the top of this README with your actual GitHub username and repository name (e.g., `myuser/vespeiro`).
-
-After these steps, the workflow triggers on:
-- **Push** to `main` that changes files in `frontend/`, workflow files, or `stats.json`
-- **Schedule** daily at 09:30 UTC (30 min after stats generation)
-- **Manual** via `Actions → Deploy Dashboard → Run workflow` (supports `build_only` mode)
-
-> The live dashboard will be available at `https://USER.github.io/REPO/` once deployed.
-
-## 📄 Documentação
-
-- [Design Doc](docs/superpowers/specs/2026-05-27-vespeiro-design.md)
-- [Plano de Implementação](docs/superpowers/plans/2026-05-27-vespeiro-implementation.md)
-- [TODO Tracker](docs/superpowers/plans/vespeiro-todo.md)
-- [Narrative Divergence Spec](docs/superpowers/specs/2026-05-27-narrative-divergence-design.md)
-- [Stats Portal Spec](docs/superpowers/specs/2026-05-27-stats-portal-design.md)
-
-## ⚠️ Nota
-
-Este projeto é open source e apartidário. Expõe controlo narrativo de QUALQUER direção — esquerda, direita ou centro. Os dados são verificáveis por qualquer pessoa.
+> The dashboard reads `stats.json` from `public/`. Generate it first with `python run_stats.py --output ../frontend/public/stats.json`.
 
 ---
 
-> 🔧 Substitui `USER/REPO` nos badges e links pelo teu repositório GitHub real.
+## 🌐 CI/CD Workflows
+
+| Workflow | Schedule | Description |
+|----------|----------|-------------|
+| [Scrape Sources](.github/workflows/scrape.yml) | Every 30 min – 6h | Fetch articles from 27+ sources |
+| [Narrative Analysis](.github/workflows/analyze.yml) | Every 6h | Story matching + divergence scoring |
+| [Daily Stats](.github/workflows/stats.yml) | Daily 09:00 UTC | Generate stats.json + send Telegram briefing |
+| [Deploy Dashboard](.github/workflows/deploy-dashboard.yml) | On push to `frontend/**` | Build + deploy to GitHub Pages |
+| [Backup](.github/workflows/backup.yml) | Weekly | Export metadata snapshots to repo |
+
+---
+
+## 📊 Public API
+
+Vespeiro exposes a free, open-access REST API via Supabase PostgREST. No API key required for read access on:
+
+- **`/sources`** — registered media sources with metadata
+- **`/articles`** — article metadata (title, URL, date, summary; full text excluded)
+- **`/people`** — public officials extracted from Diário da República
+- **`/appointments`** — DRE-extracted appointments to media/communication roles
+
+Full documentation with cURL, Python, and JavaScript examples: **[docs/api.md](docs/api.md)**
+
+---
+
+## 📖 Methodology
+
+Every metric in Vespeiro is transparently documented. See the live **Methodology page** (📖 tab on the dashboard) for:
+
+- **Story matching** — how cosine similarity + DBSCAN clusters articles cross-lingually
+- **Silence detection** — how we identify international stories missing from PT media
+- **Divergence scoring** — multi-dimensional comparison (quote fidelity, sentiment, headline)
+- **Threshold tables** — exact values used for each analysis
+- **Known limitations** — what the system can and cannot detect
+- **Data sources** — complete list with update frequencies and licenses
+
+---
+
+## 📄 Documentation
+
+- [Design Document](docs/superpowers/specs/2026-05-27-vespeiro-design.md) — full architecture and task specs
+- [Implementation Plan](docs/superpowers/plans/2026-05-27-vespeiro-implementation.md) — build order and milestones
+- [TODO Tracker](docs/superpowers/plans/vespeiro-todo.md) — 87/87 tasks complete ✅
+- [API Documentation](docs/api.md) — REST API reference with client examples
+- [Narrative Divergence Spec](docs/superpowers/specs/2026-05-27-narrative-divergence-design.md)
+- [Stats Portal Spec](docs/superpowers/specs/2026-05-27-stats-portal-design.md)
+
+---
+
+## ⚠️ Disclaimer
+
+This project is open source and non-partisan. It exposes narrative control from **any** direction — left, right, or center. All data is verifiable by anyone. The project's authority comes from transparency: methodology, code, and data are fully public.
+
+---
+
+*Vespeiro v0.3 — 87/87 tasks complete · [MIT License](LICENSE)*
