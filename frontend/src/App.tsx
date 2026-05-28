@@ -9,8 +9,9 @@ import DependencyCard from "./components/DependencyCard";
 import SilenceCard from "./components/SilenceCard";
 import SystemHealth from "./components/SystemHealth";
 import InfluenceMap from "./components/InfluenceMap";
+import TransparencyMethodology from "./components/TransparencyMethodology";
 
-type Tab = "overview" | "sources" | "narrative" | "influence" | "system";
+type Tab = "overview" | "sources" | "narrative" | "influence" | "system" | "transparency";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "📊" },
@@ -18,6 +19,7 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "narrative", label: "Narrative", icon: "🔄" },
   { id: "influence", label: "Influence", icon: "🕸️" },
   { id: "system", label: "System", icon: "⚙️" },
+  { id: "transparency", label: "Methodology", icon: "📖" },
 ];
 
 export default function App() {
@@ -107,6 +109,12 @@ export default function App() {
         {activeTab === "system" && (
           <div className="tab-content fade-in">
             <SystemHealth stats={stats} />
+          </div>
+        )}
+
+        {activeTab === "transparency" && (
+          <div className="tab-content fade-in">
+            <TransparencyMethodology stats={stats} />
           </div>
         )}
       </main>

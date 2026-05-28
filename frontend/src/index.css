@@ -1403,4 +1403,312 @@ body {
   color: var(--text-muted);
 }
 
-/* Trigger deploy */
+/* ── Transparency / Methodology page ─────────────────────────────────────── */
+
+.transparency-page {
+  max-width: 900px;
+}
+
+.transparency-hero {
+  margin-bottom: 32px;
+}
+
+.transparency-hero h1 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.transparency-subtitle {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ── Quick Stats ─────────────────────────────────────────────────────────── */
+.transparency-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.transparency-stat-card {
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+
+.transparency-stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent);
+  display: block;
+}
+
+.transparency-stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+.transparency-section {
+  margin-bottom: 36px;
+}
+
+.transparency-section h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--border);
+}
+
+.transparency-section h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.transparency-section p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.transparency-section ul {
+  margin: 6px 0 12px 20px;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.transparency-section ul li {
+  margin-bottom: 4px;
+}
+
+.transparency-section code {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent);
+}
+
+/* ── Philosophy Grid ─────────────────────────────────────────────────────── */
+.transparency-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.transparency-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+
+.transparency-card:hover {
+  border-color: var(--border-light);
+}
+
+.transparency-card h3 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.transparency-card p {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Methodology Items ───────────────────────────────────────────────────── */
+.methodology-item {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.methodology-item:last-child {
+  border-bottom: none;
+}
+
+.methodology-note {
+  font-size: 0.8rem;
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.08);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--warning);
+  margin-top: 8px;
+}
+
+/* ── Threshold Table ─────────────────────────────────────────────────────── */
+.threshold-table {
+  margin: 14px 0;
+}
+
+.threshold-table h4 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.threshold-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.threshold-table th,
+.threshold-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.threshold-table th {
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+}
+
+.threshold-table td {
+  color: var(--text-secondary);
+}
+
+/* ── Limitations Grid ────────────────────────────────────────────────────── */
+.limitations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.limitation-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+}
+
+.limitation-card h3 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--warning);
+  margin-bottom: 8px;
+}
+
+.limitation-card p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ── Sources Table ───────────────────────────────────────────────────────── */
+.sources-table-wrapper {
+  overflow-x: auto;
+  margin-top: 14px;
+}
+
+.sources-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.sources-table th,
+.sources-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.sources-table th {
+  font-weight: 600;
+  color: var(--text);
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.sources-table td {
+  color: var(--text-secondary);
+  vertical-align: top;
+}
+
+.sources-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── CTA Cards ───────────────────────────────────────────────────────────── */
+.cta-card {
+  border-left: 3px solid var(--accent);
+}
+
+.cta-link {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.cta-link:hover {
+  border-bottom-color: var(--accent);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.transparency-footer {
+  text-align: center;
+  padding: 24px 0 8px;
+  border-top: 1px solid var(--border);
+  margin-top: 36px;
+}
+
+.transparency-footer p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* ── Responsive (transparency) ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .transparency-hero h1 {
+    font-size: 1.4rem;
+  }
+
+  .transparency-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .transparency-grid,
+  .limitations-grid {
+    grid-template-columns: 1fr;
+  }
+}

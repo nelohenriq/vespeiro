@@ -4,7 +4,7 @@
 > **Como usar:** Sempre que uma tarefa for completada, marcar ☐ → ✅ neste ficheiro e fazer commit.
 > Cada tarefa com ✅ está feita. Com ☐ está pendente.
 >
-> **Última atualização:** 2026-05-28 — Progresso real ~98% (~85/87 tarefas concluídas)
+> **Última atualização:** 2026-05-28 — Progresso real **100% (87/87 tarefas concluídas)** ✅
 
 ---
 
@@ -174,10 +174,10 @@
 > **Objetivo:** Disponibilizar todas as descobertas ao público.
 > **Dependências:** Fases 0-3 (pelo menos parcialmente)
 
-- [x] 4.1 Public Dashboard (React + Vite + TypeScript, GitHub Pages — 8 components: HeroMetrics, Header, SystemHealth, SourceMetrics, DependencyCard, SilenceCard, TimelineCharts, DivergenceCard)
+- [x] 4.1 Public Dashboard (React + Vite + TypeScript, GitHub Pages — 13 components: HeroMetrics, Header, SystemHealth, SourceMetrics, DependencyCard, SilenceCard, TimelineCharts, DivergenceCard, PersonnelGraph, ParliamentGap, AdCorrelation, InfluenceMap, TransparencyMethodology)
 - [x] 4.2 Alert System (`src/alerts/telegram.py` — TelegramBot HTML briefings + anomaly alerts; `run_alert.py` CLI; 33 tests; wired into `.github/workflows/stats.yml`)
-- [ ] 4.3 Public API (Supabase REST API + Row Level Security, sem FastAPI) ⬅️ **Pendente**
-- [ ] 4.4 Transparency & Methodology (site público) ⬅️ **Pendente**
+- [x] 4.3 Public API (Supabase REST API + RLS policies — `alembic/versions/2026_05_28_rls_public_api.sql`; `docs/api.md`; `run_migration.py`)
+- [x] 4.4 Transparency & Methodology (`TransparencyMethodology.tsx` — "📖 Methodology" tab com filosofia, métodos, limitações, fontes, licenças, links open source + API)
 - [x] 4.5 Archival & Data Integrity (`.github/workflows/backup.yml` — export semanal metadados → GitHub)
 
 ---
@@ -190,24 +190,8 @@
 | Fase 1 — Análise Lusa | 7 | 7 | 100% ✅ |
 | Fase 2 — Espelho Partido | 8 | 8 | 100% ✅ |
 | Fase 3 — Ecossistema Estado | 9 | 9 | 100% ✅ |
-| Fase 4 — Exposição Pública | 5 | 3 | 60% 🟡 |
-| **Total** | **87** | **85** | **98%** |
-
-### ⬅️ Tarefas Pendentes (2)
-
-| # | Tarefa | Fase | Complexidade |
-|---|--------|------|-------------|
-| 4.3 | Public API (Supabase REST API + RLS) | 4 | Média |
-| 4.4 | Transparency & Methodology (site público) | 4 | Baixa |
-
----
-
-## 🚧 Bloqueios Atuais
-
-| Tarefa | Bloqueada por | Motivo |
-|--------|---------------|--------|
-| 4.3 Public API | Supabase configuração RLS + documentação | Precisa de decidir schema público vs autenticado antes de expor dados |
-| 4.4 Methodology Page | 4.3 (parcialmente) | Site de transparência deve linkar para a API pública e dados abertos |
+| Fase 4 — Exposição Pública | 5 | 5 | 100% ✅ |
+| **Total** | **87** | **87** | **100% ✅** |
 
 ---
 
@@ -484,10 +468,10 @@ O repositório [`bgmartins/scripts-parlamento`](https://github.com/bgmartins/scr
 - `stats.json` → frontend dashboard
 
 **Frontend (React 19 + Vite 6 + TypeScript):**
-- 12 componentes: HeroMetrics, Header, SystemHealth, SourceMetrics, DependencyCard, SilenceCard, TimelineCharts, DivergenceCard, PersonnelGraph, ParliamentGap, AdCorrelation, InfluenceMap
+- 13 componentes: HeroMetrics, Header, SystemHealth, SourceMetrics, DependencyCard, SilenceCard, TimelineCharts, DivergenceCard, PersonnelGraph, ParliamentGap, AdCorrelation, InfluenceMap, TransparencyMethodology
 - D3.js para visualizações interativas (force graph + scatter plot)
 - Deploy: GitHub Pages via `.github/workflows/deploy-dashboard.yml`
-- 2 tabs: "📊 Narrative" + "🕸️ Influence Map"
+- 3 tabs: "📊 Overview" + "📡 Sources" + "🔄 Narrative" + "🕸️ Influence Map" + "⚙️ System" + "📖 Methodology"
 
 **CI/CD (5 workflows):**
 - `scrape.yml` — Scraping agendado (cron)
@@ -496,11 +480,21 @@ O repositório [`bgmartins/scripts-parlamento`](https://github.com/bgmartins/scr
 - `backup.yml` — Export semanal de metadados
 - `deploy-dashboard.yml` — Deploy do frontend para GitHub Pages
 
+**Public API:**
+- Supabase PostgREST REST API — `alembic/versions/2026_05_28_rls_public_api.sql`
+- RLS policies: public read on sources, articles (metadata only, content_text excluído via column GRANTs), people, appointments
+- `docs/api.md` — documentação completa com endpoints, filtros, exemplos curl/Python/JS
+- `run_migration.py` — script para aplicar políticas RLS
+
+**Transparency:**
+- `TransparencyMethodology.tsx` — página "📖 Methodology" com filosofia, métodos, limitações, fontes, licenças
+- Links: GitHub, API docs, stats.json, issue tracker
+
 **Testes:**
 - 20+ ficheiros de teste, 258+ funções de teste
 - Cobertura: scrapers, embedder, matcher, sentiment, divergence (3 ficheiros), silence, dependency, ownership, dados.gov.pt, ERC, alerts, parliament, government, DRE, personnel, gap, correlation
 
 ---
 
-*Atualizado: 2026-05-28 — Progresso real ~98% (85/87 tarefas completas)*
+*Atualizado: 2026-05-28 — Progresso real **100% (87/87 tarefas completas)** ✅*
 
