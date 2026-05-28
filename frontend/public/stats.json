@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-28T16:29:57.280472Z",
+  "generated_at": "2026-05-28T16:46:01.578115Z",
   "version": "1.0",
   "sources": {
-    "total": 6,
-    "active": 6,
+    "total": 26,
+    "active": 26,
     "articles_total": 221,
     "articles_today": 111,
     "articles_per_source": {
@@ -25,15 +25,35 @@
         "articles": 60,
         "articles_today": 0
       },
+      "international": {
+        "sources": 5,
+        "articles": 0,
+        "articles_today": 0
+      },
       "mainstream": {
-        "sources": 2,
+        "sources": 13,
         "articles": 55,
         "articles_today": 55
+      },
+      "official_gazette": {
+        "sources": 2,
+        "articles": 0,
+        "articles_today": 0
+      },
+      "parliament": {
+        "sources": 1,
+        "articles": 0,
+        "articles_today": 0
       },
       "public_broadcaster": {
         "sources": 1,
         "articles": 30,
         "articles_today": 30
+      },
+      "regulator": {
+        "sources": 1,
+        "articles": 0,
+        "articles_today": 0
       }
     }
   },
@@ -172,7 +192,7 @@
   },
   "system": {
     "uptime_pct": 100.0,
-    "sources_healthy": 6,
+    "sources_healthy": 26,
     "sources_failing": 0,
     "last_scrape": "2026-05-28T11:57:55.556584",
     "last_error": null
