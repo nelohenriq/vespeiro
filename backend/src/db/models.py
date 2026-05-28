@@ -2,7 +2,7 @@
 
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, Boolean, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from src.db.session import Base
 
@@ -48,3 +48,46 @@ class Article(Base):
     language: Mapped[str | None] = mapped_column(String(5), nullable=True)
 
     source = relationship("Source", back_populates="articles")
+
+
+class Person(Base):
+    """A person extracted from DRE appointment documents."""
+
+    __tablename__ = "people"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    normalized_name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    source_article_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("articles.id"), nullable=True
+    )
+
+    appointments = relationship("Appointment", back_populates="person", lazy="dynamic")
+
+
+class Appointment(Base):
+    """An appointment extracted from a DRE document."""
+
+    __tablename__ = "appointments"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    person_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("people.id"), nullable=False
+    )
+    organization: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    role: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    appointing_body: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    appointment_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    article_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("articles.id"), nullable=True
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    extracted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+    confidence: Mapped[float] = mapped_column(Float, default=0.7)
+
+    person = relationship("Person", back_populates="appointments")

@@ -85,4 +85,83 @@ export interface StatsPayload {
   silence: SilenceMetrics;
   timelines: Timelines;
   system: SystemMetrics;
+  // Phase 3 — Influence Map
+  personnel: PersonnelNetworkMetrics;
+  parliament_gap: ParliamentGapMetrics;
+  ad_correlation: CorrelationMetrics;
+  influence: InfluenceMapMetrics;
+}
+
+// ── Phase 3: Personnel Network ───────────────────────────────────────────
+
+export interface PersonnelNode {
+  id: string;
+  label: string;
+  type: string;
+  group: string;
+}
+
+export interface PersonnelEdge {
+  source: string;
+  target: string;
+  label: string;
+  value: number;
+}
+
+export interface PersonnelNetworkMetrics {
+  nodes: PersonnelNode[];
+  edges: PersonnelEdge[];
+  total_people: number;
+  total_appointments: number;
+}
+
+// ── Phase 3: Parliament-Media Gap ────────────────────────────────────────
+
+export interface TopicGapItem {
+  topic: string;
+  parliament_mentions: number;
+  media_mentions: number;
+  media_outlets: number;
+  gap_score: number;
+  top_media_outlets: string[];
+}
+
+export interface ParliamentGapMetrics {
+  overall_gap_score: number;
+  total_parliament_docs: number;
+  total_media_articles: number;
+  topics: TopicGapItem[];
+  most_discussed_only_parliament: string[];
+  most_covered_in_media: string[];
+}
+
+// ── Phase 3: Ad-Editorial Correlation ────────────────────────────────────
+
+export interface OutletCorrelationItem {
+  outlet_id: string;
+  outlet_name: string;
+  estimated_ad_spend_eur: number;
+  articles_count: number;
+  avg_sentiment: number | null;
+  gov_coverage_pct: number;
+  owner_group: string;
+  owner: string;
+}
+
+export interface CorrelationMetrics {
+  outlets: OutletCorrelationItem[];
+  r_spend_vs_articles: number | null;
+  r_spend_vs_gov_coverage: number | null;
+  total_ad_spend_estimated: number;
+  total_articles_analyzed: number;
+}
+
+// ── Phase 3: Influence Map ───────────────────────────────────────────────
+
+export interface InfluenceMapMetrics {
+  capture_score: number;
+  personnel_density: number;
+  parliament_gap: number;
+  ad_correlation_strength: number;
+  summary: string;
 }

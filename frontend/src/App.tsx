@@ -8,13 +8,15 @@ import DivergenceCard from "./components/DivergenceCard";
 import DependencyCard from "./components/DependencyCard";
 import SilenceCard from "./components/SilenceCard";
 import SystemHealth from "./components/SystemHealth";
+import InfluenceMap from "./components/InfluenceMap";
 
-type Tab = "overview" | "sources" | "narrative" | "system";
+type Tab = "overview" | "sources" | "narrative" | "influence" | "system";
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: "overview", label: "Overview", icon: "📊" },
   { id: "sources", label: "Sources", icon: "📡" },
   { id: "narrative", label: "Narrative", icon: "🔄" },
+  { id: "influence", label: "Influence", icon: "🕸️" },
   { id: "system", label: "System", icon: "⚙️" },
 ];
 
@@ -93,6 +95,12 @@ export default function App() {
               <DependencyCard stats={stats} />
               <SilenceCard stats={stats} />
             </div>
+          </div>
+        )}
+
+        {activeTab === "influence" && (
+          <div className="tab-content fade-in">
+            <InfluenceMap stats={stats} />
           </div>
         )}
 

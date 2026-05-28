@@ -102,6 +102,83 @@ class SystemMetrics(BaseModel):
     last_error: str | None = None
 
 
+class PersonnelNode(BaseModel):
+    """A node in the personnel network graph."""
+    id: str = ""
+    label: str = ""
+    type: str = ""  # person, organization, government
+    group: str = ""  # media, state, regulator, other
+
+
+class PersonnelEdge(BaseModel):
+    """An edge in the personnel network graph."""
+    source: str = ""
+    target: str = ""
+    label: str = ""
+    value: int = 1
+
+
+class PersonnelNetworkMetrics(BaseModel):
+    """Personnel / revolving-door network graph metrics."""
+    nodes: list[PersonnelNode] = []
+    edges: list[PersonnelEdge] = []
+    total_people: int = 0
+    total_appointments: int = 0
+
+
+class TopicGapItem(BaseModel):
+    """A single topic's parliament-vs-media gap."""
+    topic: str = ""
+    parliament_mentions: int = 0
+    media_mentions: int = 0
+    media_outlets: int = 0
+    gap_score: float = 0.0
+    top_media_outlets: list[str] = []
+
+
+class ParliamentGapMetrics(BaseModel):
+    """Parliament-media coverage gap metrics."""
+    overall_gap_score: float = 0.0
+    total_parliament_docs: int = 0
+    total_media_articles: int = 0
+    topics: list[TopicGapItem] = []
+    most_discussed_only_parliament: list[str] = []
+    most_covered_in_media: list[str] = []
+
+
+class OutletCorrelationItem(BaseModel):
+    """Correlation data for a single outlet."""
+    outlet_id: str = ""
+    outlet_name: str = ""
+    estimated_ad_spend_eur: float = 0.0
+    articles_count: int = 0
+    avg_sentiment: float | None = None
+    gov_coverage_pct: float = 0.0
+    owner_group: str = ""
+    owner: str = ""
+
+
+class CorrelationMetrics(BaseModel):
+    """Ad-editorial correlation metrics."""
+    outlets: list[OutletCorrelationItem] = []
+    r_spend_vs_articles: float | None = None
+    r_spend_vs_gov_coverage: float | None = None
+    total_ad_spend_estimated: float = 0.0
+    total_articles_analyzed: int = 0
+
+
+class InfluenceMapMetrics(BaseModel):
+    """Composite Influence Map — a unified capture score."""
+    # Composite capture score (0-1, higher = more captured)
+    capture_score: float = 0.0
+    # Sub-scores
+    personnel_density: float = 0.0
+    parliament_gap: float = 0.0
+    ad_correlation_strength: float = 0.0
+    # Narrative
+    summary: str = ""
+
+
 class StatsPayload(BaseModel):
     """Top-level stats.json payload — the single source of truth for the dashboard."""
     generated_at: datetime
@@ -112,3 +189,8 @@ class StatsPayload(BaseModel):
     silence: SilenceMetrics = SilenceMetrics()
     timelines: Timelines = Timelines()
     system: SystemMetrics = SystemMetrics()
+    # Phase 3 — Influence Map
+    personnel: PersonnelNetworkMetrics = PersonnelNetworkMetrics()
+    parliament_gap: ParliamentGapMetrics = ParliamentGapMetrics()
+    ad_correlation: CorrelationMetrics = CorrelationMetrics()
+    influence: InfluenceMapMetrics = InfluenceMapMetrics()

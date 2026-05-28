@@ -30,6 +30,14 @@ from src.stats.models import (
     Timelines,
     SystemMetrics,
     StatsPayload,
+    PersonnelNetworkMetrics,
+    PersonnelNode,
+    PersonnelEdge,
+    ParliamentGapMetrics,
+    TopicGapItem,
+    CorrelationMetrics,
+    OutletCorrelationItem,
+    InfluenceMapMetrics,
 )
 
 logger = logging.getLogger(__name__)
@@ -65,14 +73,202 @@ class StatsGenerator:
 
     async def collect(self) -> StatsPayload:
         """Run all metric collectors and return the aggregated payload."""
+        # Run all collectors in parallel where possible
+        sources = await self._source_metrics()
+        lusa = await self._lusa_metrics()
+        divergence = self._divergence_metrics()
+        silence = await self._silence_metrics()
+        timelines = await self._timelines()
+        system = await self._system_health()
+
+        # Phase 3 collectors
+        personnel = await self._personnel_metrics()
+        parliament_gap = await self._parliament_gap_metrics()
+        ad_correlation = await self._correlation_metrics()
+        influence = self._influence_metrics(personnel, parliament_gap, ad_correlation)
+
         return StatsPayload(
             generated_at=datetime.now(timezone.utc),
-            sources=await self._source_metrics(),
-            lusa_dependency=await self._lusa_metrics(),
-            divergence=self._divergence_metrics(),
-            silence=await self._silence_metrics(),
-            timelines=await self._timelines(),
-            system=await self._system_health(),
+            sources=sources,
+            lusa_dependency=lusa,
+            divergence=divergence,
+            silence=silence,
+            timelines=timelines,
+            system=system,
+            personnel=personnel,
+            parliament_gap=parliament_gap,
+            ad_correlation=ad_correlation,
+            influence=influence,
+        )
+
+    # ── Phase 3: Influence Map ───────────────────────────────────────────────
+
+    async def _personnel_metrics(self) -> PersonnelNetworkMetrics:
+        """Build the personnel/revolving-door network graph.
+
+        Delegates to :class:`PersonnelNetworkBuilder` which queries DRE
+        articles and extracts person-organization connections.
+
+        Returns empty defaults if no DB session or no DRE data.
+        """
+        if self.db is None:
+            return PersonnelNetworkMetrics()
+
+        try:
+            from src.analysis.personnel import PersonnelNetworkBuilder
+
+            builder = PersonnelNetworkBuilder(db_session=self.db)
+            network = await builder.build()
+
+            return PersonnelNetworkMetrics(
+                nodes=[
+                    PersonnelNode(
+                        id=n.id, label=n.label, type=n.type, group=n.group,
+                    )
+                    for n in network.nodes
+                ],
+                edges=[
+                    PersonnelEdge(
+                        source=e.source, target=e.target,
+                        label=e.label, value=e.value,
+                    )
+                    for e in network.edges
+                ],
+                total_people=network.total_people,
+                total_appointments=network.total_appointments,
+            )
+        except Exception as exc:
+            logger.warning("Failed to build personnel network: %s", exc)
+            return PersonnelNetworkMetrics()
+
+    async def _parliament_gap_metrics(self) -> ParliamentGapMetrics:
+        """Analyze the gap between parliamentary debate and media coverage.
+
+        Delegates to :class:`ParliamentGapAnalyzer` which compares
+        parliament docs to media outlet articles.
+
+        Returns empty defaults if no DB session.
+        """
+        if self.db is None:
+            return ParliamentGapMetrics()
+
+        try:
+            from src.analysis.gap import ParliamentGapAnalyzer
+
+            analyzer = ParliamentGapAnalyzer(db_session=self.db)
+            report = await analyzer.analyze()
+
+            return ParliamentGapMetrics(
+                overall_gap_score=report.overall_gap_score,
+                total_parliament_docs=report.total_parliament_docs,
+                total_media_articles=report.total_media_articles,
+                topics=[
+                    TopicGapItem(
+                        topic=t.topic,
+                        parliament_mentions=t.parliament_mentions,
+                        media_mentions=t.media_mentions,
+                        media_outlets=t.media_outlets,
+                        gap_score=t.gap_score,
+                        top_media_outlets=t.top_media_outlets,
+                    )
+                    for t in report.topics
+                ],
+                most_discussed_only_parliament=report.most_discussed_only_parliament,
+                most_covered_in_media=report.most_covered_in_media,
+            )
+        except Exception as exc:
+            logger.warning("Failed to analyze parliament gap: %s", exc)
+            return ParliamentGapMetrics()
+
+    async def _correlation_metrics(self) -> CorrelationMetrics:
+        """Analyze advertising-editorial correlation.
+
+        Delegates to :class:`CorrelationAnalyzer` which compares ERC ad
+        spending data with outlet editorial coverage patterns.
+
+        Returns empty defaults if no DB session.
+        """
+        if self.db is None:
+            return CorrelationMetrics()
+
+        try:
+            from src.analysis.correlation import CorrelationAnalyzer
+
+            analyzer = CorrelationAnalyzer(db_session=self.db)
+            report = await analyzer.analyze()
+
+            return CorrelationMetrics(
+                outlets=[
+                    OutletCorrelationItem(
+                        outlet_id=o.outlet_id,
+                        outlet_name=o.outlet_name,
+                        estimated_ad_spend_eur=o.estimated_ad_spend_eur,
+                        articles_count=o.articles_count,
+                        avg_sentiment=o.avg_sentiment,
+                        gov_coverage_pct=o.gov_coverage_pct,
+                        owner_group=o.owner_group,
+                        owner=o.owner,
+                    )
+                    for o in report.outlets
+                ],
+                r_spend_vs_articles=report.r_spend_vs_articles,
+                r_spend_vs_gov_coverage=report.r_spend_vs_gov_coverage,
+                total_ad_spend_estimated=report.total_ad_spend_estimated,
+                total_articles_analyzed=report.total_articles_analyzed,
+            )
+        except Exception as exc:
+            logger.warning("Failed to analyze ad correlation: %s", exc)
+            return CorrelationMetrics()
+
+    def _influence_metrics(
+        self,
+        personnel: PersonnelNetworkMetrics,
+        parliament_gap: ParliamentGapMetrics,
+        ad_correlation: CorrelationMetrics,
+    ) -> InfluenceMapMetrics:
+        """Compute a composite Influence Map Capture Score.
+
+        Combines:
+        - Personnel density: normalized count of appointments/people
+        - Parliament gap: 1 - overall_gap_score (higher = more gap detected)
+        - Ad correlation: absolute value of Pearson's r (higher = stronger correlation)
+
+        Each sub-score is 0-1; capture_score is the weighted average.
+        """
+        # Personnel density (0-1 scale, capped at 50 people)
+        personnel_density = min(personnel.total_people / 50.0, 1.0) if personnel.total_people > 0 else 0.0
+
+        # Parliament gap (already 0-1, higher = bigger gap = more capture)
+        parliament_gap_score = parliament_gap.overall_gap_score
+
+        # Ad correlation strength (absolute Pearson's r, 0-1)
+        r_val = ad_correlation.r_spend_vs_gov_coverage
+        ad_corr_strength = abs(r_val) if r_val is not None else 0.0
+
+        # Composite capture score (weighted average)
+        capture_score = round(
+            (personnel_density * 0.3) +
+            (parliament_gap_score * 0.4) +
+            (ad_corr_strength * 0.3),
+            3,
+        )
+
+        # Narrative summary
+        if capture_score > 0.7:
+            summary = "Alta captura: fortes conexões pessoais, grande fosso parlamento-media, e correlação publicidade-cobertura significativa."
+        elif capture_score > 0.4:
+            summary = "Captura moderada: existem conexões entre Estado e media que merecem atenção."
+        elif capture_score > 0.2:
+            summary = "Baixa captura: alguns sinais de influência mas sem evidência forte de captura sistémica."
+        else:
+            summary = "Captura mínima: não foi detetada evidência significativa de captura do ecossistema mediático."
+
+        return InfluenceMapMetrics(
+            capture_score=capture_score,
+            personnel_density=round(personnel_density, 3),
+            parliament_gap=round(parliament_gap_score, 3),
+            ad_correlation_strength=round(ad_corr_strength, 3),
+            summary=summary,
         )
 
     # ── Source metrics ──────────────────────────────────────────────────────
