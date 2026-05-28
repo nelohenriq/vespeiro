@@ -10,7 +10,7 @@ in the project (publico, observador, expresso, etc.).
 import feedparser
 import httpx
 from src.scrapers.base import BaseSpider, ScrapedArticle
-from src.scrapers.extractors import parse_date
+from src.scrapers.extractors import parse_date, enrich_articles_with_full_text, extract_article_url
 
 
 _HEADERS = {
@@ -66,9 +66,10 @@ class GovernmentSpider(BaseSpider):
 
             for entry in feed.entries[:30]:
                 external_id = entry.get("id") or entry.get("link", "")
+                article_url, _original_url = extract_article_url(entry)
                 articles.append(ScrapedArticle(
                     external_id=external_id,
-                    url=entry.get("link", ""),
+                    url=article_url,
                     title=entry.get("title", ""),
                     summary=str(entry.get("summary", ""))[:500] or None,
                     author=author,
@@ -76,6 +77,10 @@ class GovernmentSpider(BaseSpider):
                     language="pt",
                     source_id=source_id,
                 ))
+
+            # Fetch full article text for Lusa dependency analysis
+            if articles:
+                await enrich_articles_with_full_text(articles, self.http_client)
         except Exception:
             # HTTP errors, timeouts, malformed RSS — return what we have (likely [])
             pass

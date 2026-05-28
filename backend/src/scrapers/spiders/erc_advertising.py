@@ -33,13 +33,14 @@ Extraction strategy
 -------------------
 1. Discover PDF URLs from the ERC listing page (preferred) or generate from
    the known URL pattern (fallback).
-2. Download each PDF.
+2. Download each PDF concurrently.
 3. Extract tables with pdfplumber's ``extract_tables()`` method.
 4. Also extract full text as context.
 5. Format as ScrapedArticle with structured JSON in ``content_text``.
 """
 from __future__ import annotations
 
+import asyncio
 import io
 import json
 import logging
@@ -83,11 +84,22 @@ _MONTH_NAMES: list[str] = [
 
 _YEARS = list(range(2016, 2027))  # 2016–2026 full years
 
+_CONCURRENT_REQUESTS = 10
+
+
+def _is_recent_pie(url: str) -> bool:
+    """Check if a PIE report URL is from the last 2 years."""
+    year = _parse_year_from_url(url)
+    if year is None:
+        return True  # Keep if we can't parse year
+    current_year = datetime.now(timezone.utc).year
+    return int(year) >= current_year - 2
+
 
 def _parse_month_from_url(url: str) -> str | None:
     """Extract the month from a report PDF filename.
 
-    Returns the 2-digit month string (\"01\", \"02\", …) or ``None``.
+    Returns the 2-digit month string ("01", "02", …) or ``None``.
     """
     filename = url.rsplit("/", 1)[-1].lower()
     for pt_name, num in _PT_MONTHS_LOWER.items():
@@ -114,10 +126,10 @@ def extract_tables_from_pdf(content: bytes) -> list[dict]:
 
         [
             {
-                \"page\": 1,
-                \"text\": \"...\",
-                \"tables\": [
-                    [[\"col1\", \"col2\"], [\"val1\", \"val2\"]],
+                "page": 1,
+                "text": "...",
+                "tables": [
+                    [["col1", "col2"], ["val1", "val2"]],
                     ...
                 ]
             },
@@ -245,8 +257,9 @@ class ERCAdvertisingSpider(BaseSpider):
     1. Scraping the ERC listing page for direct PDF links (preferred).
     2. Falling back to URL generation from the known pattern.
 
-    Downloads each PDF, extracts tables with pdfplumber, and returns
-    ``ScrapedArticle`` objects with structured table data in ``content_text``.
+    Downloads each PDF concurrently, extracts tables with pdfplumber, and
+    returns ``ScrapedArticle`` objects with structured table data in
+    ``content_text``.
 
     The ``url`` parameter is used as the ERC reports listing page URL;
     if empty, the default page is used.
@@ -257,9 +270,9 @@ class ERCAdvertisingSpider(BaseSpider):
             timeout=30.0, follow_redirects=True, headers=_HEADERS
         )
         self._seen_urls: set[str] = set()
+        self._semaphore = asyncio.Semaphore(_CONCURRENT_REQUESTS)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
-        articles: list[ScrapedArticle] = []
         self._seen_urls.clear()
 
         try:
@@ -275,19 +288,20 @@ class ERCAdvertisingSpider(BaseSpider):
                 logger.warning("ERC: no report PDFs found at all")
                 return []
 
-            # Phase 2: Download and process
-            for pdf_url in pdf_urls:
-                if pdf_url in self._seen_urls:
-                    continue
-                self._seen_urls.add(pdf_url)
+            logger.info("ERC: %d PDF URLs to download", len(pdf_urls))
 
-                try:
-                    article = await self._process_report(pdf_url, source_id)
-                    if article is not None:
-                        articles.append(article)
-                except Exception as exc:
-                    logger.debug("ERC: failed to process %s: %s", pdf_url, exc)
-                    continue
+            # Phase 2: Download and process concurrently
+            tasks = [
+                self._process_report(pdf_url, source_id)
+                for pdf_url in pdf_urls
+            ]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            articles: list[ScrapedArticle] = []
+            for result in results:
+                if isinstance(result, Exception):
+                    logger.debug("ERC: download failed: %s", result)
+                elif result is not None:
+                    articles.append(result)
 
         finally:
             await self.http_client.aclose()
@@ -307,7 +321,7 @@ class ERCAdvertisingSpider(BaseSpider):
 
             pdf_urls: list[str] = []
             for href in re.findall(r'href=[\"\']([^\"\']+\.pdf)[\"\']', html, re.IGNORECASE):
-                if "Relatorio" in href:
+                if "Relatorio" in href and "/PIE" in href:
                     full_url = href
                     if href.startswith("/"):
                         full_url = "https://www.erc.pt" + href
@@ -316,15 +330,16 @@ class ERCAdvertisingSpider(BaseSpider):
                     if full_url.startswith("https://www.erc.pt"):
                         pdf_urls.append(full_url)
 
-            # Deduplicate while preserving order
+            # Deduplicate, then limit to recent reports (last 2 years)
             seen: set[str] = set()
             unique: list[str] = []
             for u in pdf_urls:
                 if u not in seen:
                     seen.add(u)
                     unique.append(u)
-
-            return unique
+            recent_urls = [u for u in unique if _is_recent_pie(u)]
+            logger.info("ERC: %d total PIE PDFs, %d recent", len(unique), len(recent_urls))
+            return recent_urls
 
         except Exception as exc:
             logger.warning("ERC: failed to scrape listing page (%s)", exc)
@@ -365,8 +380,12 @@ class ERCAdvertisingSpider(BaseSpider):
 
         Returns a ``ScrapedArticle`` or ``None`` on failure.
         """
-        response = await self.http_client.get(pdf_url)
-        response.raise_for_status()
+        if pdf_url in self._seen_urls:
+            return None
+        self._seen_urls.add(pdf_url)
+
+        async with self._semaphore:
+            response = await self.http_client.get(pdf_url)
 
         content_type = response.headers.get("content-type", "")
         if "pdf" not in content_type.lower():

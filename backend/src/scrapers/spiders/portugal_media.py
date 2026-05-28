@@ -6,11 +6,14 @@ Handles both:
 - type: google_news_rss (all others — Google News RSS)
 
 Both emit standard RSS XML, parsed with feedparser.
+
+After fetching RSS entries, each article's URL is followed and full text is
+extracted via trafilatura so the Lusa dependency analyzer has enough signal.
 """
 import feedparser
 import httpx
 from src.scrapers.base import BaseSpider, ScrapedArticle
-from src.scrapers.extractors import parse_date
+from src.scrapers.extractors import parse_date, enrich_articles_with_full_text, extract_article_url
 
 
 _HEADERS = {
@@ -34,9 +37,10 @@ class PortugalMediaSpider(BaseSpider):
             feed = feedparser.parse(response.text)
 
             for entry in feed.entries[:30]:
+                article_url, _original_url = extract_article_url(entry)
                 articles.append(ScrapedArticle(
                     external_id=entry.get("id"),
-                    url=entry.get("link", ""),
+                    url=article_url,
                     title=entry.get("title", ""),
                     summary=str(entry.get("summary", ""))[:500] or None,
                     author=None,
@@ -44,6 +48,10 @@ class PortugalMediaSpider(BaseSpider):
                     language="pt",
                     source_id=source_id,
                 ))
+
+            # Fetch full article text for Lusa dependency analysis
+            if articles:
+                await enrich_articles_with_full_text(articles, self.http_client)
         finally:
             await self.http_client.aclose()
 

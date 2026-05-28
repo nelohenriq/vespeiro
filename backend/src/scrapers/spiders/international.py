@@ -10,7 +10,7 @@ All feeds are standard RSS parsed with feedparser.
 import feedparser
 import httpx
 from src.scrapers.base import BaseSpider, ScrapedArticle
-from src.scrapers.extractors import parse_date
+from src.scrapers.extractors import parse_date, enrich_articles_with_full_text, extract_article_url
 
 
 _HEADERS = {
@@ -19,7 +19,7 @@ _HEADERS = {
 
 # International sources with known-working RSS feeds
 INTERNATIONAL_FEEDS: dict[str, str] = {
-    "reuters": "https://www.reuters.com/arc/outboundfeeds/newsletter/",
+    "reuters": "https://news.google.com/rss/search?q=site:reuters.com&hl=en&ceid=US:en",
     "bbc": "https://feeds.bbci.co.uk/news/rss.xml",
     "guardian": "https://www.theguardian.com/world/rss",
     "ap": "https://feeds.feedburner.com/AssociatedPressNews",
@@ -89,9 +89,10 @@ class InternationalSpider(BaseSpider):
 
             for entry in feed.entries[:30]:
                 title = entry.get("title", "")
+                article_url, _original_url = extract_article_url(entry)
                 articles.append(ScrapedArticle(
                     external_id=entry.get("id"),
-                    url=entry.get("link", ""),
+                    url=article_url,
                     title=title,
                     summary=str(entry.get("summary", ""))[:500] or None,
                     author=None,
@@ -99,6 +100,10 @@ class InternationalSpider(BaseSpider):
                     language=_detect_language(title),
                     source_id=source_id,
                 ))
+
+            # Fetch full article text for Lusa dependency analysis
+            if articles:
+                await enrich_articles_with_full_text(articles, self.http_client)
         finally:
             await self.http_client.aclose()
 
