@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-28T20:14:50.157671Z",
+  "generated_at": "2026-05-28T21:01:59.979012Z",
   "version": "1.0",
   "sources": {
     "total": 26,
@@ -378,258 +378,10 @@
     "total_appointments": 0
   },
   "parliament_gap": {
-    "overall_gap_score": 1.0,
+    "overall_gap_score": 0.997,
     "total_parliament_docs": 72,
     "total_media_articles": 410,
     "topics": [
-      {
-        "topic": "reunião plenária",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de i série",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "presidente ex",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "sr presidente",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "o sr",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de redação",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de esquerda",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "é a",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "que todos",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "á r i",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "palavra o sr",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "e minutos",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "uma vez",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "jn"
-        ]
-      },
-      {
-        "topic": "não é",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "dn"
-        ]
-      },
-      {
-        "topic": "dia de",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "dn"
-        ]
-      },
-      {
-        "topic": "a primeira",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "observador"
-        ]
-      },
-      {
-        "topic": "do psd",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "partido socialista",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "sr deputado",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de forma",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "do ps",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 2,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "expresso",
-          "eco"
-        ]
-      },
-      {
-        "topic": "o país",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 2,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "renascenca",
-          "sic_noticias"
-        ]
-      },
-      {
-        "topic": "eram horas e",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "psd e",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "palavra o",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de hoje",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "aplausos do",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "r i",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "horas e",
-        "parliament_mentions": 72,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "publico"
-        ]
-      },
       {
         "topic": "iniciativa liberal",
         "parliament_mentions": 72,
@@ -639,21 +391,271 @@
         "top_media_outlets": [
           "renascenca"
         ]
+      },
+      {
+        "topic": "bloco de esquerda",
+        "parliament_mentions": 72,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "em portugal",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 4,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "lusa",
+          "renascenca",
+          "expresso",
+          "observador"
+        ]
+      },
+      {
+        "topic": "presenças e faltas",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "não pode",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do bloco de",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "faltas dos deputados",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do partido socialista",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "e faltas dos",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "nacional de",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "condições de",
+        "parliament_mentions": 71,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de sousa real",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "inês de sousa",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de saúde",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 2,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "publico",
+          "observador"
+        ]
+      },
+      {
+        "topic": "das pessoas",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "anos e",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 2,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "publico",
+          "observador"
+        ]
+      },
+      {
+        "topic": "social e",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "projetos de",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do chega",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "o direito",
+        "parliament_mentions": 70,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de portugal",
+        "parliament_mentions": 69,
+        "media_mentions": 7,
+        "media_outlets": 4,
+        "gap_score": 0.899,
+        "top_media_outlets": [
+          "renascenca",
+          "expresso",
+          "eco",
+          "tsf"
+        ]
+      },
+      {
+        "topic": "é verdade",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "os portugueses",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "tempo de",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "pessoas que",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "a criação",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de qualquer",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "necessidade de",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "a mesma",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "a verdade é",
+        "parliament_mentions": 69,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
       }
     ],
     "most_discussed_only_parliament": [
-      "reunião plenária",
-      "de i série",
-      "presidente ex",
-      "sr presidente",
-      "o sr",
-      "de redação",
-      "de esquerda",
-      "é a",
-      "que todos",
-      "á r i"
+      "iniciativa liberal",
+      "bloco de esquerda",
+      "em portugal",
+      "presenças e faltas",
+      "não pode",
+      "do bloco de",
+      "faltas dos deputados",
+      "do partido socialista",
+      "e faltas dos",
+      "nacional de"
     ],
-    "most_covered_in_media": []
+    "most_covered_in_media": [
+      "de portugal"
+    ]
   },
   "ad_correlation": {
     "outlets": [
@@ -784,9 +786,9 @@
     "total_articles_analyzed": 325
   },
   "influence": {
-    "capture_score": 0.609,
+    "capture_score": 0.608,
     "personnel_density": 0.0,
-    "parliament_gap": 1.0,
+    "parliament_gap": 0.997,
     "ad_correlation_strength": 0.698,
     "summary": "Captura moderada: existem conexões entre Estado e media que merecem atenção."
   }
