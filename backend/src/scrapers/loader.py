@@ -5,6 +5,7 @@ from src.scrapers.base import BaseSpider
 from src.scrapers.spiders.lusa import LusaSpider
 from src.scrapers.spiders.portugal_media import PortugalMediaSpider
 from src.scrapers.spiders.publico import PublicoSpider
+from src.scrapers.spiders.portugal_news_scrapy import PortugalNewsScrapySpider
 from src.scrapers.spiders.international import InternationalSpider
 from src.scrapers.spiders.government import GovernmentSpider
 from src.scrapers.spiders.dre import DRESpider
@@ -16,18 +17,18 @@ SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     "lusa": LusaSpider,
     "rtp_noticias": PortugalMediaSpider,
     "publico": PublicoSpider,
-    "observador": PortugalMediaSpider,
-    "expresso": PortugalMediaSpider,
-    "cm_jornal": PortugalMediaSpider,
-    "jn": PortugalMediaSpider,
-    "dn": PortugalMediaSpider,
-    "sic_noticias": PortugalMediaSpider,
-    "eco": PortugalMediaSpider,
-    "cnn_portugal": PortugalMediaSpider,
-    "tsf": PortugalMediaSpider,
-    "renascenca": PortugalMediaSpider,
-    "sapo_24": PortugalMediaSpider,
-    "nam": PortugalMediaSpider,
+    "observador": PortugalNewsScrapySpider,
+    "expresso": PortugalMediaSpider,  # Blocks automated access (HTTP 403) — keep RSS for now
+    "cm_jornal": PortugalNewsScrapySpider,
+    "jn": PortugalMediaSpider,        # JS-heavy — keep RSS for now
+    "dn": PortugalMediaSpider,        # JS-heavy — keep RSS for now
+    "sic_noticias": PortugalMediaSpider,  # Blocks automated access (HTTP 403)
+    "eco": PortugalNewsScrapySpider,
+    "cnn_portugal": PortugalMediaSpider,  # JS-heavy
+    "tsf": PortugalMediaSpider,  # Blocks automated access (HTTP 403) — keep RSS
+    "renascenca": PortugalMediaSpider,  # Already has RSS
+    "sapo_24": PortugalNewsScrapySpider,
+    "nam": PortugalNewsScrapySpider,
     # International sources
     "reuters": InternationalSpider,
     "bbc": InternationalSpider,

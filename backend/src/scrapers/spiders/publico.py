@@ -32,6 +32,17 @@ logger = logging.getLogger(__name__)
 _SCRAPY_PROJECT_DIR = Path(__file__).parent.parent.parent.parent / "scrapy_project"
 
 
+def _parse_date(date_str: str | None) -> datetime | None:
+    """Parse an ISO 8601 date string, returning None on failure."""
+    if not date_str:
+        return None
+    try:
+        from dateutil import parser
+        return parser.parse(date_str)
+    except Exception:
+        return None
+
+
 class PublicoSpider(BaseSpider):
     """Run the Scrapy Público spider and return results as ScrapedArticle list.
 
@@ -68,7 +79,7 @@ class PublicoSpider(BaseSpider):
                 content_text=item.get("content_text"),
                 summary=item.get("summary"),
                 author=item.get("author"),
-                published_at=self._parse_date(item.get("published_at")),
+                published_at=_parse_date(item.get("published_at")),
                 language="pt",
                 source_id=source_id,
             ))
@@ -157,14 +168,3 @@ class PublicoSpider(BaseSpider):
                 Path(tmp_path).unlink(missing_ok=True)
             except Exception:
                 pass
-
-    @staticmethod
-    def _parse_date(date_str: str | None) -> datetime | None:
-        """Parse an ISO 8601 date string, returning None on failure."""
-        if not date_str:
-            return None
-        try:
-            from dateutil import parser
-            return parser.parse(date_str)
-        except Exception:
-            return None

@@ -39,13 +39,13 @@ sources:
 
   - id: observador
     name: "Observador"
-    # Sem RSS oficial.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:observador.pt&hl=pt-PT&ceid=PT:pt"
+    # Sem RSS oficial. Scraping direto via Scrapy.
+    type: scrape
+    url: "https://observador.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: expresso
     name: "Expresso"
@@ -59,13 +59,13 @@ sources:
 
   - id: cm_jornal
     name: "Correio da Manhã"
-    # RSS oficial atrás de login.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:cmjornal.pt&hl=pt-PT&ceid=PT:pt"
+    # RSS oficial atrás de login. Scraping direto via Scrapy.
+    type: scrape
+    url: "https://www.cmjornal.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: jn
     name: "Jornal de Notícias"
@@ -99,13 +99,13 @@ sources:
 
   - id: eco
     name: "ECO — Economia Online"
-    # Sem RSS público.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:eco.sapo.pt&hl=pt-PT&ceid=PT:pt"
+    # Sem RSS público. Scraping direto via Scrapy.
+    type: scrape
+    url: "https://eco.sapo.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: cnn_portugal
     name: "CNN Portugal"
@@ -118,6 +118,7 @@ sources:
 
   - id: tsf
     name: "TSF — Rádio Notícias"
+    # Bloqueia scraping (HTTP 403). Google News RSS como fallback.
     type: google_news_rss
     url: "https://news.google.com/rss/search?q=site:tsf.pt&hl=pt-PT&ceid=PT:pt"
     language: pt
@@ -137,21 +138,23 @@ sources:
 
   - id: sapo_24
     name: "SAPO 24"
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:24noticias.sapo.pt&hl=pt-PT&ceid=PT:pt"
+    # Scraping direto via Scrapy.
+    type: scrape
+    url: "https://24noticias.sapo.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: nam
     name: "Notícias ao Minuto"
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:noticiasaominuto.com&hl=pt-PT&ceid=PT:pt"
+    # Scraping direto via Scrapy.
+    type: scrape
+    url: "https://www.noticiasaominuto.com"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   # ── International sources ────────────────────────────────────────────────
 
