@@ -27,6 +27,7 @@ class SourceCategory(str, Enum):
 class ExtractionStrategy(str, Enum):
     TRAFILATURA = "trafilatura"
     NEWSPAPER4K = "newspaper4k"
+    SCRAPY = "scrapy"
 
 
 class SourceConfig(BaseModel):

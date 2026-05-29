@@ -4,6 +4,7 @@ from src.config import SourceConfig
 from src.scrapers.base import BaseSpider
 from src.scrapers.spiders.lusa import LusaSpider
 from src.scrapers.spiders.portugal_media import PortugalMediaSpider
+from src.scrapers.spiders.publico import PublicoSpider
 from src.scrapers.spiders.international import InternationalSpider
 from src.scrapers.spiders.government import GovernmentSpider
 from src.scrapers.spiders.dre import DRESpider
@@ -14,7 +15,7 @@ from src.scrapers.spiders.erc_advertising import ERCAdvertisingSpider
 SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     "lusa": LusaSpider,
     "rtp_noticias": PortugalMediaSpider,
-    "publico": PortugalMediaSpider,
+    "publico": PublicoSpider,
     "observador": PortugalMediaSpider,
     "expresso": PortugalMediaSpider,
     "cm_jornal": PortugalMediaSpider,

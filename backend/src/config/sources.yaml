@@ -28,13 +28,14 @@ sources:
 
   - id: publico
     name: "Público"
-    # RSS oficial descontinuado ~2022. Google News RSS como alternativa.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:publico.pt&hl=pt-PT&ceid=PT:pt"
+    # RSS oficial descontinuado ~2022. Scraping direto via Scrapy.
+    # Spider: backend/src/scrapers/spiders/publico.py + backend/scrapy_project/
+    type: scrape
+    url: "https://www.publico.pt/"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: observador
     name: "Observador"

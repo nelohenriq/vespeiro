@@ -1,83 +1,92 @@
 {
-  "generated_at": "2026-05-29T00:31:45.388783Z",
-  "version": "1.0",
+  "generated_at": "2026-05-29T17:03:40.966108+00:00",
   "sources": {
     "total": 16,
     "active": 16,
     "articles_total": 487,
     "articles_today": 7,
-    "articles_per_source": {
-      "cm_jornal": 30,
-      "cnn_portugal": 30,
-      "dn": 30,
-      "dre_appointments": 7,
-      "eco": 30,
-      "expresso": 30,
-      "jn": 30,
-      "lusa": 60,
-      "nam": 30,
-      "observador": 30,
-      "publico": 30,
-      "renascenca": 30,
-      "rtp_noticias": 30,
-      "sapo_24": 30,
-      "sic_noticias": 30,
-      "tsf": 30
-    },
-    "per_category": {}
-  },
-  "lusa_dependency": {
-    "global_pct": null,
-    "per_outlet": {},
-    "per_topic": {}
-  },
-  "divergence": {
-    "global_avg": null,
-    "per_outlet": {},
-    "top_omitted_facts": []
-  },
-  "silence": {
-    "today": 0,
-    "avg_7d": 0.0,
-    "top_silenced": []
-  },
-  "timelines": {
-    "lusa_dependency_7d": [],
-    "divergence_avg_7d": [
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0
-    ],
-    "articles_daily_7d": [
-      0,
-      0,
-      0,
-      0,
-      480,
-      0,
-      7
-    ],
-    "silence_daily_7d": [],
-    "dates_7d": [
-      "2026-05-23",
-      "2026-05-24",
-      "2026-05-25",
-      "2026-05-26",
-      "2026-05-27",
-      "2026-05-28",
-      "2026-05-29"
-    ]
-  },
-  "system": {
-    "uptime_pct": 100.0,
-    "sources_healthy": 16,
-    "sources_failing": 0,
-    "last_scrape": "2026-05-29T00:21:35.293268",
-    "last_error": null
+    "per_source": {
+      "cm_jornal": {
+        "name": "Correio da Manhã",
+        "category": "mainstream",
+        "count": 30
+      },
+      "cnn_portugal": {
+        "name": "CNN Portugal",
+        "category": "mainstream",
+        "count": 30
+      },
+      "dn": {
+        "name": "Diário de Notícias",
+        "category": "mainstream",
+        "count": 30
+      },
+      "dre_appointments": {
+        "name": "Diário da República (Nomeações)",
+        "category": "government",
+        "count": 7
+      },
+      "eco": {
+        "name": "ECO — Economia Online",
+        "category": "mainstream",
+        "count": 30
+      },
+      "expresso": {
+        "name": "Expresso",
+        "category": "mainstream",
+        "count": 30
+      },
+      "jn": {
+        "name": "Jornal de Notícias",
+        "category": "mainstream",
+        "count": 30
+      },
+      "lusa": {
+        "name": "Lusa — Agência de Notícias",
+        "category": "agency",
+        "count": 60
+      },
+      "nam": {
+        "name": "Notícias ao Minuto",
+        "category": "mainstream",
+        "count": 30
+      },
+      "observador": {
+        "name": "Observador",
+        "category": "mainstream",
+        "count": 30
+      },
+      "publico": {
+        "name": "Público",
+        "category": "mainstream",
+        "count": 30
+      },
+      "renascenca": {
+        "name": "Rádio Renascença",
+        "category": "mainstream",
+        "count": 30
+      },
+      "rtp_noticias": {
+        "name": "RTP Notícias",
+        "category": "public_broadcaster",
+        "count": 30
+      },
+      "sapo_24": {
+        "name": "SAPO 24",
+        "category": "mainstream",
+        "count": 30
+      },
+      "sic_noticias": {
+        "name": "SIC Notícias",
+        "category": "mainstream",
+        "count": 30
+      },
+      "tsf": {
+        "name": "TSF — Rádio Notícias",
+        "category": "mainstream",
+        "count": 30
+      }
+    }
   },
   "personnel": {
     "nodes": [
@@ -421,28 +430,7 @@
       }
     ],
     "total_people": 0,
-    "total_appointments": 0
-  },
-  "parliament_gap": {
-    "overall_gap_score": 0.0,
-    "total_parliament_docs": 0,
-    "total_media_articles": 0,
-    "topics": [],
-    "most_discussed_only_parliament": [],
-    "most_covered_in_media": []
-  },
-  "ad_correlation": {
-    "outlets": [],
-    "r_spend_vs_articles": null,
-    "r_spend_vs_gov_coverage": null,
-    "total_ad_spend_estimated": 0.0,
-    "total_articles_analyzed": 0
-  },
-  "influence": {
-    "capture_score": 0.0,
-    "personnel_density": 0.0,
-    "parliament_gap": 0.0,
-    "ad_correlation_strength": 0.0,
-    "summary": ""
+    "total_appointments": 0,
+    "generated_at": "2026-05-29T17:03:40.965975+00:00"
   }
 }
