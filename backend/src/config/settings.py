@@ -9,10 +9,13 @@ class Settings(BaseSettings):
     embedding_model: str = "intfloat/multilingual-e5-large"
     scrape_interval_minutes: int = 15
 
-    # Google Custom Search API (DRE scraper)
-    # Free tier: 100 queries/day — sufficient for weekly DRE checks
-    google_api_key: str = ""  # From .env: GOOGLE_API_KEY
-    google_custom_search_cx: str = ""  # From .env: GOOGLE_CUSTOM_SEARCH_CX
+    # Exa Search API (DRE spider — appointment discovery, primary)
+    # Free tier: 1,000 requests/month
+    exa_api_key: str = ""  # From .env: EXA_API_KEY
+
+    # Tavily Search API (DRE spider — appointment discovery, fallback)
+    # Free tier: 1,000 credits/month
+    tavily_api_key: str = ""  # From .env: TAVILY_API_KEY
 
     # Telegram bot (Jornal do Contra alerts)
     telegram_bot_token: str = ""  # From .env: TELEGRAM_BOT_TOKEN

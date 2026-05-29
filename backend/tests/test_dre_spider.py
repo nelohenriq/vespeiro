@@ -1,15 +1,13 @@
 """Tests for DRESpider.
 
-Mocks httpx transport to simulate Google Custom Search API responses and
-PDF downloads.  No external network calls are made.
+Mocks the Exa client to simulate search API responses and httpx transport
+for PDF downloads.  No external network calls are made.
 """
 
 from __future__ import annotations
 
 import io
-import json
-from collections.abc import Callable
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import httpx
 import pytest
@@ -25,45 +23,30 @@ from src.scrapers.base import ScrapedArticle
 from src.config.settings import settings
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-def _make_search_response(items: list[dict]) -> str:
-    """Build a Google Custom Search JSON response body."""
-    return json.dumps({"items": items})
-
+# ── Test data ─────────────────────────────────────────────────────────────────
 
 SEARCH_RESULT_LUSA = {
-    "link": "https://files.dre.pt/2s/2026/05/12345.pdf",
+    "url": "https://files.dre.pt/2s/2026/05/12345.pdf",
     "title": "Despacho (extrato) n.º 5432/2026 — Nomeação de vogal do CA da Lusa",
-    "snippet": "Procede à nomeação de um vogal do conselho de administração da Lusa — Agência de Notícias de Portugal, S.A.",
-    "pagemap": {
-        "metatags": [{"publication_date": "2026-05-15"}],
-    },
+    "text": "Procede à nomeação de um vogal do conselho de administração da Lusa — Agência de Notícias de Portugal, S.A.",
 }
 
 SEARCH_RESULT_RTP = {
-    "link": "https://files.dre.pt/2s/2026/04/09876.pdf",
+    "url": "https://files.dre.pt/2s/2026/04/09876.pdf",
     "title": "Despacho n.º 4321/2026 — Designação de membro do CA da RTP",
-    "snippet": "Designa um membro do conselho de administração da Rádio e Televisão de Portugal, S.A.",
-    "pagemap": {
-        "metatags": [{"publication_date": "2026-04-20"}],
-    },
+    "text": "Designa um membro do conselho de administração da Rádio e Televisão de Portugal, S.A.",
 }
 
 SEARCH_RESULT_ERC = {
-    "link": "https://files.dre.pt/1s/2026/03/00500.pdf",
+    "url": "https://files.dre.pt/1s/2026/03/00500.pdf",
     "title": "Resolução da AR n.º 123/2026 — Nomeação de membro do Conselho Regulador da ERC",
-    "snippet": "Procede à nomeação de um membro do Conselho Regulador da ERC.",
-    "pagemap": {
-        "metatags": [],
-    },
+    "text": "Procede à nomeação de um membro do Conselho Regulador da ERC.",
 }
 
 SEARCH_RESULT_NON_DRE = {
-    "link": "https://www.portugal.gov.pt/noticia.html",
+    "url": "https://www.portugal.gov.pt/noticia.html",
     "title": "Comunicado do Governo",
-    "snippet": "Anúncio do Governo sobre políticas de comunicação social.",
-    "pagemap": {"metatags": []},
+    "text": "Anúncio do Governo sobre políticas de comunicação social.",
 }
 
 # Tiny valid PDF for testing extraction
@@ -78,41 +61,27 @@ TINY_PDF = (
     b"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n443\n%%EOF"
 )
 
-
-def _make_pdf_handler(search_results: list[dict]) -> Callable[..., httpx.Response]:
-    """Create an httpx mock transport handler.
-
-    The handler inspects the request URL:
-    - If it contains ``customsearch`` → returns the search JSON results
-    - If it contains ``files.dre.pt`` → returns a dummy PDF
-    - Otherwise → returns a 404
-    """
-
-    def _handler(request: httpx.Request) -> httpx.Response:
-        url = str(request.url)
-        if "customsearch" in url:
-            return httpx.Response(
-                200,
-                headers={"content-type": "application/json"},
-                text=_make_search_response(search_results),
-            )
-        if "files.dre.pt" in url:
-            return httpx.Response(
-                200,
-                headers={"content-type": "application/pdf"},
-                content=TINY_PDF,
-            )
-        return httpx.Response(404, text="Not Found")
-
-    return _handler
+# ── Helper: build a fake Exa response ─────────────────────────────────────────
 
 
-async def _make_spider(handler: callable) -> DRESpider:
-    """Create a DRESpider with a mocked HTTP client."""
-    spider = DRESpider()
-    await spider.http_client.aclose()
-    spider.http_client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    return spider
+class _FakeExaResult:
+    """Mimics an Exa search result item (has .url, .title, .text attrs)."""
+
+    def __init__(self, data: dict) -> None:
+        self.url = data.get("url", "")
+        self.title = data.get("title", "")
+        self.text = data.get("text", "")
+
+
+class _FakeExaResponse:
+    """Mimics an Exa search response (has .results list)."""
+
+    def __init__(self, items: list[dict]) -> None:
+        self.results = [_FakeExaResult(d) for d in items]
+
+
+def _make_exa_response(items: list[dict]) -> _FakeExaResponse:
+    return _FakeExaResponse(items)
 
 
 # ── _extract_pdf_url tests ────────────────────────────────────────────────────
@@ -129,6 +98,9 @@ class TestExtractPdfUrl:
 
     def test_non_dre_url_returns_none(self) -> None:
         assert _extract_pdf_url("https://example.com/doc.pdf") is None
+
+    def test_gratuitos_url_returns_none(self) -> None:
+        assert _extract_pdf_url("https://files.dre.pt/gratuitos/2s/2018/08/2S151A0000S00.pdf") is None
 
     def test_empty_link_returns_none(self) -> None:
         assert _extract_pdf_url("") is None
@@ -178,45 +150,72 @@ class TestExtractTextFromPdf:
 # ── DRESpider fetch tests ────────────────────────────────────────────────────
 
 
+def _make_pdf_handler() -> object:
+    """Create an httpx mock transport handler for PDF downloads."""
+
+    def _handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if "files.dre.pt" in url:
+            return httpx.Response(
+                200,
+                headers={"content-type": "application/pdf"},
+                content=TINY_PDF,
+            )
+        return httpx.Response(404, text="Not Found")
+
+    return _handler
+
+
+async def _make_spider() -> DRESpider:
+    """Create a DRESpider with a mocked HTTP client for PDFs."""
+    spider = DRESpider()
+    await spider.http_client.aclose()
+    spider.http_client = httpx.AsyncClient(
+        transport=httpx.MockTransport(_make_pdf_handler())
+    )
+    return spider
+
+
 class TestDRESpider:
     @pytest.mark.asyncio
     async def test_fetch_with_valid_query(self) -> None:
-        """Should return articles from search results containing DRE PDFs."""
-        handler = _make_pdf_handler([SEARCH_RESULT_LUSA, SEARCH_RESULT_RTP, SEARCH_RESULT_ERC])
-        spider = await _make_spider(handler)
+        """Should return articles from Exa results containing DRE PDFs."""
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response(
+            [SEARCH_RESULT_LUSA, SEARCH_RESULT_RTP, SEARCH_RESULT_ERC]
+        )
 
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
         assert len(articles) == 3
 
-        # Lusa article
         a0 = articles[0]
         assert a0.source_id == "dre_appointments"
         assert a0.url == "https://files.dre.pt/2s/2026/05/12345.pdf"
         assert "Lusa" in a0.title
-        assert a0.published_at is not None
-        assert a0.published_at.year == 2026
 
-        # RTP article
         a1 = articles[1]
         assert a1.url == "https://files.dre.pt/2s/2026/04/09876.pdf"
         assert "RTP" in a1.title
 
-        # ERC article (no publication_date in metatags)
         a2 = articles[2]
         assert a2.url == "https://files.dre.pt/1s/2026/03/00500.pdf"
-        assert a2.published_at is None  # No date in metatags
+        assert "ERC" in a2.title
 
     @pytest.mark.asyncio
     async def test_fetch_filters_non_dre_urls(self) -> None:
         """Should exclude search results that don't point to files.dre.pt."""
-        handler = _make_pdf_handler([SEARCH_RESULT_LUSA, SEARCH_RESULT_NON_DRE])
-        spider = await _make_spider(handler)
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response(
+            [SEARCH_RESULT_LUSA, SEARCH_RESULT_NON_DRE]
+        )
 
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
         assert len(articles) == 1
@@ -225,86 +224,52 @@ class TestDRESpider:
     @pytest.mark.asyncio
     async def test_fetch_deduplicates_urls(self) -> None:
         """Should not create duplicate articles for the same PDF URL."""
-        # Two identical results
-        handler = _make_pdf_handler([SEARCH_RESULT_LUSA, SEARCH_RESULT_LUSA])
-        spider = await _make_spider(handler)
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response(
+            [SEARCH_RESULT_LUSA, SEARCH_RESULT_LUSA]
+        )
 
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
         assert len(articles) == 1
 
     @pytest.mark.asyncio
-    async def test_fetch_missing_api_key_returns_empty(self) -> None:
-        """Should return empty list when Google API key is not set."""
-        spider = DRESpider()
-        await spider.http_client.aclose()
-
-        with patch.object(settings, "google_api_key", ""), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
-            articles = await spider.fetch("dre_appointments")
-
-        assert articles == []
-
-    @pytest.mark.asyncio
-    async def test_fetch_missing_cx_returns_empty(self) -> None:
-        """Should return empty list when search engine ID is not set."""
-        spider = DRESpider()
-        await spider.http_client.aclose()
-
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", ""):
-            articles = await spider.fetch("dre_appointments")
-
-        assert articles == []
-
-    @pytest.mark.asyncio
-    async def test_fetch_http_error_on_search(self) -> None:
-        """Should handle HTTP errors from Google API gracefully."""
-
-        def _error_handler(request: httpx.Request) -> httpx.Response:
-            if "customsearch" in str(request.url):
-                return httpx.Response(403, text="Forbidden")
-            return httpx.Response(404, text="Not Found")
-
-        spider = await _make_spider(_error_handler)
-
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
-            articles = await spider.fetch("dre_appointments")
-
-        assert articles == []
-
-    @pytest.mark.asyncio
     async def test_fetch_empty_search_results(self) -> None:
-        """Should return empty list when Google returns no results."""
+        """Should return empty list when Exa returns no results."""
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response([])
 
-        def _empty_handler(request: httpx.Request) -> httpx.Response:
-            if "customsearch" in str(request.url):
-                return httpx.Response(
-                    200,
-                    headers={"content-type": "application/json"},
-                    text='{"items": []}',
-                )
-            return httpx.Response(404, text="Not Found")
-
-        spider = await _make_spider(_empty_handler)
-
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
+
+        assert articles == []
+
+    @pytest.mark.asyncio
+    async def test_fetch_missing_api_key_returns_empty(self) -> None:
+        """Should return empty list when no API keys are set."""
+        spider = await _make_spider()
+        with patch.object(settings, "exa_api_key", ""):
+            with patch.object(settings, "tavily_api_key", ""):
+                articles = await spider.fetch("dre_appointments")
 
         assert articles == []
 
     @pytest.mark.asyncio
     async def test_each_article_has_required_fields(self) -> None:
         """Every returned article should have core fields populated."""
-        handler = _make_pdf_handler([SEARCH_RESULT_LUSA, SEARCH_RESULT_RTP])
-        spider = await _make_spider(handler)
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response(
+            [SEARCH_RESULT_LUSA, SEARCH_RESULT_RTP]
+        )
 
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
         for a in articles:
@@ -319,11 +284,14 @@ class TestDRESpider:
     @pytest.mark.asyncio
     async def test_content_text_extracted_from_pdf(self) -> None:
         """Should extract text content from downloaded PDFs."""
-        handler = _make_pdf_handler([SEARCH_RESULT_LUSA])
-        spider = await _make_spider(handler)
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response(
+            [SEARCH_RESULT_LUSA]
+        )
 
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
         assert len(articles) == 1
@@ -331,36 +299,45 @@ class TestDRESpider:
         assert "Test content for DRE" in articles[0].content_text
 
     @pytest.mark.asyncio
+    async def test_fallback_to_tavily_when_exa_fails(self) -> None:
+        """Should fall back to Tavily when Exa returns no results."""
+        mock_exa = MagicMock()
+        mock_exa.search.return_value = _make_exa_response([])  # Exa returns empty
+
+        mock_tavily = MagicMock()
+        mock_tavily.search.return_value = {
+            "results": [
+                {
+                    "url": "https://files.dre.pt/2s/2026/05/12345.pdf",
+                    "title": "Nomeação Lusa via Tavily fallback",
+                    "content": "Test fallback",
+                }
+            ]
+        }
+
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        spider._tavily = mock_tavily
+        with patch.object(settings, "exa_api_key", "fake-key"):
+            with patch.object(settings, "tavily_api_key", "fake-key-tavily"):
+                articles = await spider.fetch("dre_appointments")
+
+        assert len(articles) >= 1
+        assert "Tavily" in articles[0].title
+
+    @pytest.mark.asyncio
     async def test_search_query_failure_continues(self) -> None:
         """Should continue processing remaining queries if one fails."""
+        mock_exa = MagicMock()
+        # First call raises error, second works
+        mock_exa.search.side_effect = [
+            Exception("API error"),
+            _make_exa_response([SEARCH_RESULT_LUSA]),
+        ]
 
-        # Simulate a scenario where the first search fails but queries continue
-        call_count = 0
-
-        def _interleaved_handler(request: httpx.Request) -> httpx.Response:
-            nonlocal call_count
-            url = str(request.url)
-            if "customsearch" in url:
-                call_count += 1
-                if call_count <= 2:
-                    return httpx.Response(500, text="Error")
-                return httpx.Response(
-                    200,
-                    headers={"content-type": "application/json"},
-                    text=_make_search_response([SEARCH_RESULT_LUSA]),
-                )
-            if "files.dre.pt" in url:
-                return httpx.Response(
-                    200,
-                    headers={"content-type": "application/pdf"},
-                    content=TINY_PDF,
-                )
-            return httpx.Response(404, text="Not Found")
-
-        spider = await _make_spider(_interleaved_handler)
-
-        with patch.object(settings, "google_api_key", "fake-key"), \
-             patch.object(settings, "google_custom_search_cx", "fake-cx"):
+        spider = await _make_spider()
+        spider._exa = mock_exa
+        with patch.object(settings, "exa_api_key", "fake-key"):
             articles = await spider.fetch("dre_appointments")
 
-        assert len(articles) >= 1  # At least one from the successful third query
+        assert len(articles) >= 1

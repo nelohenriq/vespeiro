@@ -3,13 +3,17 @@
 Strategy
 --------
 For each Portuguese outlet, fetch all articles published in the last N days and
-compare them against Lusa articles from the same period using TF-IDF cosine
-similarity on (title + content heading). If the best Lusa match exceeds the
-``PARAPHRASE`` threshold (0.70), that article is classified as **Lusa-derived**.
+compare them against Lusa articles from the same period using multilingual
+sentence embeddings (``intfloat/multilingual-e5-large``) + cosine similarity.
+The embedding model captures semantic similarity across short RSS summary texts
+(200-500 chars) where TF-IDF sparse vectors produce near-zero overlap.
 
-This is a fast, embedder-free first pass. In a future iteration, once article
-embeddings are persisted in the DB, the :class:`StoryMatcher` can be used
-directly for more accurate cross-lingual matching.
+If the best Lusa match exceeds ``match_threshold`` (default 0.50, calibrated
+for embedding cosine similarity on short texts), that article is classified as
+**Lusa-derived**.
+
+Falls back gracefully to zero matches if the sentence-transformers model
+cannot be loaded (e.g. first-run download not yet complete).
 """
 
 from __future__ import annotations
@@ -37,17 +41,18 @@ class LusaDependencyAnalyzer:
     window_days:
         How many days back (from now) to look for articles. Default 7.
     match_threshold:
-        Minimum TF-IDF cosine similarity to consider an outlet article
-        as Lusa-derived. Default 0.35 — calibrated for short RSS summary
-        texts (200-500 chars).  Full-text articles would use 0.70 but all
-        mainstream outlets currently operate on summary-only matching.
+        Minimum embedding cosine similarity to consider an outlet article
+        as Lusa-derived. Default 0.50 — calibrated for multilingual
+        sentence embeddings (1024-dim, L2-normalised). Higher than the
+        old TF-IDF threshold (0.35) because embeddings produce richer
+        semantic representations even for short 200-500 char summaries.
     """
 
     def __init__(
         self,
         db_session: object,
         window_days: int = 7,
-        match_threshold: float = 0.35,
+        match_threshold: float = 0.50,
     ):
         self.db = db_session
         self.window_days = window_days
@@ -60,6 +65,11 @@ class LusaDependencyAnalyzer:
 
         Returns safe defaults (``global_pct=None``, empty ``per_outlet``) if
         the DB session is unavailable, there are no articles, or an error occurs.
+
+        Performance note: Lusa embeddings are computed once and reused across
+        all outlets (50 Lusa + N×30 outlet = ~530 total embeddings, ~3 min on
+        CPU). Without this batching, each outlet would re-embed Lusa texts,
+        totalling ~1280 embeddings.
         """
         if self.db is None:
             logger.debug("No DB session — returning defaults")
@@ -78,6 +88,11 @@ class LusaDependencyAnalyzer:
             # ── Identify Portuguese-language outlets (exclude Lusa itself) ──
             outlets = await self._fetch_portuguese_outlets()
 
+            # ── Pre-compute Lusa embeddings once ──
+            lusa_vecs = self._embed_articles(lusa_articles)
+            if lusa_vecs is None:
+                return LusaDependencyMetrics(global_pct=0.0)
+
             # ── Analyze per outlet ──
             per_outlet: dict[str, OutletDependency] = {}
             total_outlet_articles = 0
@@ -88,7 +103,11 @@ class LusaDependencyAnalyzer:
                 if not outlet_articles:
                     continue
 
-                derived = self._count_derived(lusa_articles, outlet_articles)
+                outlet_vecs = self._embed_articles(outlet_articles)
+                if outlet_vecs is None:
+                    continue
+
+                derived = self._count_derived_from_vecs(lusa_vecs, outlet_vecs)
                 total_outlet_articles += len(outlet_articles)
                 total_derived += derived
 
@@ -121,6 +140,9 @@ class LusaDependencyAnalyzer:
 
         Returns a list of floats (percentages), one per day, most recent last.
         Falls back to an empty list on error.
+
+        Performance note: Lusa embeddings are pre-computed once and reused
+        across all 7 days.
         """
         if self.db is None:
             return []
@@ -131,6 +153,10 @@ class LusaDependencyAnalyzer:
                 "lusa", now - timedelta(days=days), now
             )
             if not lusa_articles:
+                return [0.0] * days
+
+            lusa_vecs = self._embed_articles(lusa_articles)
+            if lusa_vecs is None:
                 return [0.0] * days
 
             outlets = await self._fetch_portuguese_outlets()
@@ -151,7 +177,12 @@ class LusaDependencyAnalyzer:
                     daily.append(0.0)
                     continue
 
-                derived = self._count_derived(lusa_articles, day_outlet_articles)
+                day_vecs = self._embed_articles(day_outlet_articles)
+                if day_vecs is None:
+                    daily.append(0.0)
+                    continue
+
+                derived = self._count_derived_from_vecs(lusa_vecs, day_vecs)
                 daily.append(round(derived / len(day_outlet_articles) * 100, 1))
 
             return daily
@@ -162,60 +193,78 @@ class LusaDependencyAnalyzer:
 
     # ── Matching logic ─────────────────────────────────────────────────────
 
+    @staticmethod
+    def _embed_articles(articles: list[Article]) -> "np.ndarray | None":  # type: ignore[valid-type]
+        """Embed a list of articles into a (N, 1024) numpy array.
+
+        Returns ``None`` if the embedding model is unavailable.
+        """
+        from src.pipeline.embedder import EmbeddingService, _get_model
+
+        import numpy as np
+
+        texts = [_article_text(a) for a in articles]
+        if not texts:
+            return None
+
+        if _get_model() is None:
+            logger.warning(
+                "Embedding model not available. "
+                "Install sentence-transformers to enable embedding-based matching."
+            )
+            return None
+
+        embedder = EmbeddingService()
+        embeddings = embedder.embed_batch(texts)
+        return np.array(embeddings, dtype=np.float64)
+
+    def _count_derived_from_vecs(
+        self,
+        lusa_vecs: "np.ndarray",  # type: ignore[valid-type]
+        outlet_vecs: "np.ndarray",  # type: ignore[valid-type]
+    ) -> int:
+        """Count derived articles from pre-computed embedding matrices.
+
+        Args:
+            lusa_vecs: (N_lusa, 1024) L2-normalised Lusa embeddings.
+            outlet_vecs: (N_outlet, 1024) L2-normalised outlet embeddings.
+
+        Returns:
+            Number of outlet articles whose best Lusa similarity ≥ threshold.
+        """
+        import numpy as np
+
+        if lusa_vecs.size == 0 or outlet_vecs.size == 0:
+            return 0
+
+        # Cosine similarity via dot product (embeddings are L2-normalised)
+        # Shape: (n_outlet, n_lusa)
+        sim_matrix: np.ndarray = outlet_vecs @ lusa_vecs.T
+
+        derived = 0
+        for row in sim_matrix:
+            if float(row.max()) >= self.match_threshold:
+                derived += 1
+
+        return derived
+
     def _count_derived(
         self, lusa_articles: list[Article], outlet_articles: list[Article]
     ) -> int:
         """Count how many *outlet_articles* are derived from *lusa_articles*.
 
-        Uses TF-IDF vectorisation on ``title + first 500 chars of content``,
-        then cosine similarity. Fast and doesn't require pre-computed embeddings.
+        Convenience wrapper that embeds both article sets then delegates to
+        :meth:`_count_derived_from_vecs`. Prefer calling :meth:`_embed_articles`
+        followed by :meth:`_count_derived_from_vecs` directly when Lusa
+        embeddings can be reused across multiple outlets (the common case).
         """
-        from sklearn.feature_extraction.text import TfidfVectorizer
-        from sklearn.metrics.pairwise import cosine_similarity
-
-        # Build text corpus: Lusa texts first, then outlet texts
-        lusa_texts = [_article_text(a) for a in lusa_articles]
-        outlet_texts = [_article_text(a) for a in outlet_articles]
-
-        if not lusa_texts or not outlet_texts:
+        lusa_vecs = self._embed_articles(lusa_articles)
+        if lusa_vecs is None:
             return 0
-
-        try:
-            # Fit TF-IDF on all texts, transform separately
-            # Adaptive max_df: only filter high-frequency terms when we have
-            # enough documents to reliably identify them (20+ docs). For small
-            # batches (tests, low-volume periods), keep all terms.
-            n_docs = len(lusa_texts) + len(outlet_texts)
-            vectorizer = TfidfVectorizer(
-                max_features=5000,
-                analyzer="word",
-                token_pattern=r"(?u)\b\w+\b",
-                stop_words=None,  # Keep all words — Portuguese stop words
-                # may filter important context
-                ngram_range=(1, 2),
-                max_df=0.85 if n_docs >= 20 else 1.0,
-                min_df=1,
-            )
-            vectorizer.fit(lusa_texts + outlet_texts)
-
-            lusa_vectors = vectorizer.transform(lusa_texts)
-            outlet_vectors = vectorizer.transform(outlet_texts)
-
-            # Compute similarity matrix: outlet x Lusa
-            sim_matrix = cosine_similarity(outlet_vectors, lusa_vectors)
-
-            # For each outlet article, find best Lusa match
-            derived = 0
-            for row in sim_matrix:
-                best = row.max()
-                if best >= self.match_threshold:
-                    derived += 1
-
-            return derived
-
-        except Exception as exc:
-            logger.warning("TF-IDF matching failed: %s", exc)
+        outlet_vecs = self._embed_articles(outlet_articles)
+        if outlet_vecs is None:
             return 0
+        return self._count_derived_from_vecs(lusa_vecs, outlet_vecs)
 
     # ── DB helpers ──────────────────────────────────────────────────────────
 
@@ -249,7 +298,7 @@ _TITLE_SUFFIX_RE = re.compile(r"\s[-|]\s([A-ZÀ-Ú][\wÀ-ú. ]+|[A-ZÀ-Ú]{2,})$
 
 # Google News RSS sometimes generates placeholder titles when it can't extract
 # the real article title (e.g. "www.lusa.pt - LUSA", "Fotogalerias - LUSA").
-# These pollute TF-IDF matching, so we detect them and skip the title entirely.
+# These pollute matching, so we detect them and skip the title entirely.
 # We match known garbage patterns rather than broad heuristics to avoid false
 # positives on legitimate article titles.
 _AUTO_TITLE_RE = re.compile(
@@ -276,7 +325,7 @@ def _article_text(article: Article) -> str:
 
     When a Google News RSS article has an auto-generated placeholder title
     (e.g. "www.lusa.pt - LUSA"), the title is discarded entirely so it doesn't
-    pollute TF-IDF matching.
+    pollute embedding-based matching.
     """
     raw_title = (article.title or "").strip()
 

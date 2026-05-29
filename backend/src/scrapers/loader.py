@@ -36,7 +36,7 @@ SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     # Government sources
     "portugal_gov": GovernmentSpider,
     "presidencia": GovernmentSpider,
-    # Diário da República (Google Custom Search)
+    # Diário da República (Exa + Tavily — appointment discovery)
     "dre_appointments": DRESpider,
     "dre_general_appointments": DRESpider,
     # Parliamentary debates
