@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-06-01T19:15:21.288300Z",
+  "generated_at": "2026-06-02T12:59:35.315108Z",
   "version": "1.0",
   "sources": {
     "total": 32,
     "active": 32,
     "articles_total": 2167,
-    "articles_today": 731,
+    "articles_today": 0,
     "articles_per_source": {
       "afp": 38,
       "ap": 70,
@@ -43,22 +43,22 @@
       "agency": {
         "sources": 1,
         "articles": 167,
-        "articles_today": 46
+        "articles_today": 0
       },
       "government": {
         "sources": 2,
         "articles": 140,
-        "articles_today": 57
+        "articles_today": 0
       },
       "international": {
         "sources": 9,
         "articles": 550,
-        "articles_today": 241
+        "articles_today": 0
       },
       "mainstream": {
         "sources": 15,
         "articles": 1034,
-        "articles_today": 355
+        "articles_today": 0
       },
       "official_gazette": {
         "sources": 2,
@@ -73,7 +73,7 @@
       "public_broadcaster": {
         "sources": 1,
         "articles": 130,
-        "articles_today": 32
+        "articles_today": 0
       },
       "regulator": {
         "sources": 1,
@@ -83,9 +83,129 @@
     }
   },
   "lusa_dependency": {
-    "global_pct": null,
-    "per_outlet": {},
-    "per_topic": {}
+    "global_pct": 100.0,
+    "per_outlet": {
+      "cm_jornal": {
+        "pct": 100.0,
+        "stories": 65,
+        "lusa_derived": 65
+      },
+      "cnn_portugal": {
+        "pct": 100.0,
+        "stories": 50,
+        "lusa_derived": 50
+      },
+      "dn": {
+        "pct": 100.0,
+        "stories": 60,
+        "lusa_derived": 60
+      },
+      "dre_appointments": {
+        "pct": 100.0,
+        "stories": 7,
+        "lusa_derived": 7
+      },
+      "eco": {
+        "pct": 100.0,
+        "stories": 44,
+        "lusa_derived": 44
+      },
+      "erc_advertising": {
+        "pct": 100.0,
+        "stories": 2,
+        "lusa_derived": 2
+      },
+      "expresso": {
+        "pct": 100.0,
+        "stories": 167,
+        "lusa_derived": 167
+      },
+      "jn": {
+        "pct": 100.0,
+        "stories": 60,
+        "lusa_derived": 60
+      },
+      "jornal_negocios": {
+        "pct": 100.0,
+        "stories": 30,
+        "lusa_derived": 30
+      },
+      "nam": {
+        "pct": 100.0,
+        "stories": 33,
+        "lusa_derived": 33
+      },
+      "observador": {
+        "pct": 100.0,
+        "stories": 80,
+        "lusa_derived": 80
+      },
+      "parlamento_debates": {
+        "pct": 100.0,
+        "stories": 137,
+        "lusa_derived": 137
+      },
+      "portugal_gov": {
+        "pct": 100.0,
+        "stories": 81,
+        "lusa_derived": 81
+      },
+      "presidencia": {
+        "pct": 100.0,
+        "stories": 59,
+        "lusa_derived": 59
+      },
+      "publico": {
+        "pct": 100.0,
+        "stories": 126,
+        "lusa_derived": 126
+      },
+      "renascenca": {
+        "pct": 100.0,
+        "stories": 103,
+        "lusa_derived": 103
+      },
+      "rtp_noticias": {
+        "pct": 100.0,
+        "stories": 130,
+        "lusa_derived": 130
+      },
+      "sapo_24": {
+        "pct": 100.0,
+        "stories": 55,
+        "lusa_derived": 55
+      },
+      "sic_noticias": {
+        "pct": 100.0,
+        "stories": 76,
+        "lusa_derived": 76
+      },
+      "tsf": {
+        "pct": 100.0,
+        "stories": 55,
+        "lusa_derived": 55
+      },
+      "tvi_noticias": {
+        "pct": 100.0,
+        "stories": 30,
+        "lusa_derived": 30
+      }
+    },
+    "per_topic": {
+      "política": 100.0,
+      "cultura": 100.0,
+      "internacional": 100.0,
+      "ciência": 100.0,
+      "desporto": 100.0,
+      "sociedade": 100.0,
+      "outros": 100.0,
+      "educação": 100.0,
+      "justiça": 100.0,
+      "crime": 100.0,
+      "economia": 100.0,
+      "saúde": 100.0,
+      "ambiente": 100.0
+    }
   },
   "divergence": {
     "global_avg": 0.4593145366004863,
@@ -138,7 +258,7 @@
     ]
   },
   "silence": {
-    "today": 202,
+    "today": 0,
     "avg_7d": 65.4,
     "top_silenced": [
       {
@@ -236,16 +356,16 @@
   "timelines": {
     "lusa_dependency_7d": [
       0.0,
+      100.0,
+      100.0,
+      100.0,
       0.0,
-      0.0,
-      0.0,
-      0.0,
-      0.0,
+      100.0,
       0.0
     ],
     "divergence_avg_7d": [
       0.0,
-      0.0,
+      0.4593145366004863,
       0.0,
       0.0,
       0.0,
@@ -254,30 +374,30 @@
     ],
     "articles_daily_7d": [
       0,
-      0,
       569,
       800,
       67,
       0,
-      731
+      731,
+      0
     ],
     "silence_daily_7d": [
-      0,
       0,
       121,
       135,
       0,
       0,
-      202
+      202,
+      0
     ],
     "dates_7d": [
-      "2026-05-26",
       "2026-05-27",
       "2026-05-28",
       "2026-05-29",
       "2026-05-30",
       "2026-05-31",
-      "2026-06-01"
+      "2026-06-01",
+      "2026-06-02"
     ]
   },
   "system": {
@@ -679,14 +799,6 @@
     "total_media_articles": 396,
     "topics": [
       {
-        "topic": "bloco de esquerda",
-        "parliament_mentions": 99,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
         "topic": "em portugal",
         "parliament_mentions": 99,
         "media_mentions": 0,
@@ -699,22 +811,12 @@
         ]
       },
       {
-        "topic": "não pode",
+        "topic": "bloco de esquerda",
         "parliament_mentions": 99,
         "media_mentions": 0,
         "media_outlets": 0,
         "gap_score": 1.0,
         "top_media_outlets": []
-      },
-      {
-        "topic": "iniciativa liberal",
-        "parliament_mentions": 99,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "renascenca"
-        ]
       },
       {
         "topic": "condições de",
@@ -727,12 +829,32 @@
         ]
       },
       {
-        "topic": "do partido socialista",
-        "parliament_mentions": 98,
+        "topic": "iniciativa liberal",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "não pode",
+        "parliament_mentions": 99,
         "media_mentions": 0,
         "media_outlets": 0,
         "gap_score": 1.0,
         "top_media_outlets": []
+      },
+      {
+        "topic": "nacional de",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
       },
       {
         "topic": "faltas dos deputados",
@@ -751,14 +873,6 @@
         "top_media_outlets": []
       },
       {
-        "topic": "presenças e faltas",
-        "parliament_mentions": 98,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
         "topic": "e faltas dos",
         "parliament_mentions": 98,
         "media_mentions": 0,
@@ -767,7 +881,7 @@
         "top_media_outlets": []
       },
       {
-        "topic": "do bloco de",
+        "topic": "das pessoas",
         "parliament_mentions": 98,
         "media_mentions": 0,
         "media_outlets": 0,
@@ -775,17 +889,23 @@
         "top_media_outlets": []
       },
       {
-        "topic": "nacional de",
+        "topic": "do partido socialista",
         "parliament_mentions": 98,
         "media_mentions": 0,
-        "media_outlets": 1,
+        "media_outlets": 0,
         "gap_score": 1.0,
-        "top_media_outlets": [
-          "renascenca"
-        ]
+        "top_media_outlets": []
       },
       {
-        "topic": "das pessoas",
+        "topic": "presenças e faltas",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do bloco de",
         "parliament_mentions": 98,
         "media_mentions": 0,
         "media_outlets": 0,
@@ -813,6 +933,16 @@
         ]
       },
       {
+        "topic": "os portugueses",
+        "parliament_mentions": 97,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
         "topic": "em nome",
         "parliament_mentions": 97,
         "media_mentions": 0,
@@ -821,8 +951,34 @@
         "top_media_outlets": []
       },
       {
-        "topic": "os portugueses",
-        "parliament_mentions": 97,
+        "topic": "de sousa real",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "a mesma",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "antes de",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "elpais"
+        ]
+      },
+      {
+        "topic": "de facto",
+        "parliament_mentions": 96,
         "media_mentions": 0,
         "media_outlets": 1,
         "gap_score": 1.0,
@@ -842,14 +998,12 @@
         ]
       },
       {
-        "topic": "de facto",
+        "topic": "inês de sousa",
         "parliament_mentions": 96,
         "media_mentions": 0,
-        "media_outlets": 1,
+        "media_outlets": 0,
         "gap_score": 1.0,
-        "top_media_outlets": [
-          "renascenca"
-        ]
+        "top_media_outlets": []
       },
       {
         "topic": "social e",
@@ -860,41 +1014,7 @@
         "top_media_outlets": []
       },
       {
-        "topic": "antes de",
-        "parliament_mentions": 96,
-        "media_mentions": 0,
-        "media_outlets": 1,
-        "gap_score": 1.0,
-        "top_media_outlets": [
-          "elpais"
-        ]
-      },
-      {
-        "topic": "a mesma",
-        "parliament_mentions": 96,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "de sousa real",
-        "parliament_mentions": 96,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "inês de sousa",
-        "parliament_mentions": 96,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "protestos do",
+        "topic": "por exemplo",
         "parliament_mentions": 95,
         "media_mentions": 0,
         "media_outlets": 0,
@@ -902,15 +1022,7 @@
         "top_media_outlets": []
       },
       {
-        "topic": "o tempo",
-        "parliament_mentions": 95,
-        "media_mentions": 0,
-        "media_outlets": 0,
-        "gap_score": 1.0,
-        "top_media_outlets": []
-      },
-      {
-        "topic": "que aqui",
+        "topic": "tempo de",
         "parliament_mentions": 95,
         "media_mentions": 0,
         "media_outlets": 0,
@@ -926,7 +1038,7 @@
         "top_media_outlets": []
       },
       {
-        "topic": "deve ser",
+        "topic": "protestos do",
         "parliament_mentions": 95,
         "media_mentions": 0,
         "media_outlets": 0,
@@ -934,29 +1046,33 @@
         "top_media_outlets": []
       },
       {
-        "topic": "de saúde",
+        "topic": "projetos de",
         "parliament_mentions": 95,
         "media_mentions": 0,
-        "media_outlets": 3,
+        "media_outlets": 0,
         "gap_score": 1.0,
-        "top_media_outlets": [
-          "renascenca",
-          "publico",
-          "observador"
-        ]
+        "top_media_outlets": []
+      },
+      {
+        "topic": "a verdade",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
       }
     ],
     "most_discussed_only_parliament": [
-      "bloco de esquerda",
       "em portugal",
-      "não pode",
-      "iniciativa liberal",
+      "bloco de esquerda",
       "condições de",
-      "do partido socialista",
+      "iniciativa liberal",
+      "não pode",
+      "nacional de",
       "faltas dos deputados",
       "do chega",
-      "presenças e faltas",
-      "e faltas dos"
+      "e faltas dos",
+      "das pessoas"
     ],
     "most_covered_in_media": []
   },
@@ -1090,7 +1206,7 @@
   },
   "influence": {
     "capture_score": 0.576,
-    "personnel_density": 0.68,
+    "personnel_density": 0.0,
     "parliament_gap": 1.0,
     "ad_correlation_strength": 0.587,
     "summary": "Captura moderada: existem conexões entre Estado e media que merecem atenção."
