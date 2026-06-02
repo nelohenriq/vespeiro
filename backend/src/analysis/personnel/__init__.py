@@ -152,76 +152,76 @@ class PersonnelNetworkBuilder:
         appointments_found = 0
         people_found: set[str] = set()
 
+        # ── Ownership connections from static config ─────────────────────
+        # These are always added, regardless of DRE articles, because the
+        # ownership.yaml dataset is a static reference that defines the base
+        # state-media network graph.  It runs BEFORE the DRE article extraction
+        # so that DRE-derived edges can augment the ownership backbone.
+        self._add_ownership_edges(nodes, edges)
+
         articles = await self._get_dre_articles()
         if not articles:
-            logger.info("Personnel: no DRE articles found")
-            return PersonnelNetwork(
-                nodes=[], edges=[],
-                generated_at=datetime.now(timezone.utc),
-            )
+            logger.info("Personnel: no DRE articles found (using ownership-only graph)")
+        else:
+            for article in articles:
+                text = article.get("content_text") or ""
+                if not text:
+                    continue
 
-        for article in articles:
-            text = article.get("content_text") or ""
-            if not text:
-                continue
+                # Extract person + role pairs
+                pairs = self._extract_person_role_pairs(text)
+                for person_name, role_desc in pairs:
+                    people_found.add(person_name)
 
-            # Extract person + role pairs
-            pairs = self._extract_person_role_pairs(text)
-            for person_name, role_desc in pairs:
-                people_found.add(person_name)
+                    # Identify organizations in the role description
+                    media_org = _find_media_org(role_desc)
+                    gov_org = _find_gov_org(role_desc)
 
-                # Identify organizations in the role description
-                media_org = _find_media_org(role_desc)
-                gov_org = _find_gov_org(role_desc)
-
-                # Add person node
-                person_id = _slugify(person_name)
-                if person_id not in nodes:
-                    nodes[person_id] = PersonnelNode(
-                        id=person_id,
-                        label=person_name,
-                        type="person",
-                        group="media" if media_org else "other",
-                    )
-
-                # Add organization node + edge
-                if media_org:
-                    org_id = _slugify(media_org)
-                    if org_id not in nodes:
-                        nodes[org_id] = PersonnelNode(
-                            id=org_id,
-                            label=media_org,
-                            type="organization",
-                            group="media",
+                    # Add person node
+                    person_id = _slugify(person_name)
+                    if person_id not in nodes:
+                        nodes[person_id] = PersonnelNode(
+                            id=person_id,
+                            label=person_name,
+                            type="person",
+                            group="media" if media_org else "other",
                         )
-                    edges.append(PersonnelEdge(
-                        source=person_id,
-                        target=org_id,
-                        label=role_desc[:80],
-                        value=1,
-                    ))
-                    appointments_found += 1
 
-                # Add government node + edge
-                if gov_org:
-                    gov_id = _slugify(gov_org)
-                    if gov_id not in nodes:
-                        nodes[gov_id] = PersonnelNode(
-                            id=gov_id,
-                            label=gov_org,
-                            type="government",
-                            group="state",
-                        )
-                    edges.append(PersonnelEdge(
-                        source=person_id,
-                        target=gov_id,
-                        label="nomeado por",
-                        value=1,
-                    ))
-                    appointments_found += 1
+                    # Add organization node + edge
+                    if media_org:
+                        org_id = _slugify(media_org)
+                        if org_id not in nodes:
+                            nodes[org_id] = PersonnelNode(
+                                id=org_id,
+                                label=media_org,
+                                type="organization",
+                                group="media",
+                            )
+                        edges.append(PersonnelEdge(
+                            source=person_id,
+                            target=org_id,
+                            label=role_desc[:80],
+                            value=1,
+                        ))
+                        appointments_found += 1
 
-        # Also add ownership connections from config
-        self._add_ownership_edges(nodes, edges)
+                    # Add government node + edge
+                    if gov_org:
+                        gov_id = _slugify(gov_org)
+                        if gov_id not in nodes:
+                            nodes[gov_id] = PersonnelNode(
+                                id=gov_id,
+                                label=gov_org,
+                                type="government",
+                                group="state",
+                            )
+                        edges.append(PersonnelEdge(
+                            source=person_id,
+                            target=gov_id,
+                            label="nomeado por",
+                            value=1,
+                        ))
+                        appointments_found += 1
 
         # Deduplicate edges (merge same source→target into single edge with incremented value)
         merged_edges: dict[tuple[str, str], PersonnelEdge] = {}
@@ -276,34 +276,24 @@ class PersonnelNetworkBuilder:
 
             config = load_ownership()
             for outlet in config.outlets:
-                # Add owner as a node if it's a person/family
-                if outlet.ultimate_owner and outlet.ultimate_owner not in ("null", "", None):
-                    owner_id = _slugify(outlet.ultimate_owner)
-                    if owner_id not in nodes:
-                        nodes[owner_id] = PersonnelNode(
-                            id=owner_id,
-                            label=outlet.ultimate_owner,
-                            type="person",
-                            group="media",
-                        )
+                outlet_id = _slugify(outlet.id)
 
-                    outlet_id = _slugify(outlet.id)
-                    if outlet_id not in nodes:
-                        nodes[outlet_id] = PersonnelNode(
-                            id=outlet_id,
-                            label=outlet.name,
-                            type="organization",
-                            group="media",
-                        )
+                # ── Ensure the outlet node always exists ────────────────────
+                # This must be outside any conditional block because edges below
+                # (owner_group, ultimate_owner) always reference outlet_id as a
+                # target.  Without this guard, outlets with null ultimate_owner
+                # (e.g. state-owned rtp_noticias) would generate dangling edge
+                # references → D3 force graph crash ("node not found").
+                if outlet_id not in nodes:
+                    nodes[outlet_id] = PersonnelNode(
+                        id=outlet_id,
+                        label=outlet.name,
+                        type="organization",
+                        group="media",
+                    )
 
-                    edges.append(PersonnelEdge(
-                        source=owner_id,
-                        target=outlet_id,
-                        label="proprietário",
-                        value=1,
-                    ))
-
-                # Add owner group as node
+                # ── Owner group edge ────────────────────────────────────────
+                # e.g. "Setor Público Estatal" → rtp_noticias
                 if outlet.owner_group:
                     group_id = _slugify(outlet.owner_group)
                     if group_id not in nodes:
@@ -315,8 +305,27 @@ class PersonnelNetworkBuilder:
                         )
                     edges.append(PersonnelEdge(
                         source=group_id,
-                        target=_slugify(outlet.id),
+                        target=outlet_id,
                         label="detém",
+                        value=1,
+                    ))
+
+                # ── Ultimate owner node + edge ──────────────────────────────
+                # Only for outlets with a known ultimate owner
+                if outlet.ultimate_owner and outlet.ultimate_owner not in ("null", "", None):
+                    owner_id = _slugify(outlet.ultimate_owner)
+                    if owner_id not in nodes:
+                        nodes[owner_id] = PersonnelNode(
+                            id=owner_id,
+                            label=outlet.ultimate_owner,
+                            type="person",
+                            group="media",
+                        )
+
+                    edges.append(PersonnelEdge(
+                        source=owner_id,
+                        target=outlet_id,
+                        label="proprietário",
                         value=1,
                     ))
         except Exception as exc:

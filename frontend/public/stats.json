@@ -290,15 +290,15 @@
   "personnel": {
     "nodes": [
       {
-        "id": "setor-publico-estatal",
-        "label": "Setor Público Estatal",
+        "id": "rtp-noticias",
+        "label": "RTP — Rádio e Televisão de Portugal",
         "type": "organization",
         "group": "media"
       },
       {
-        "id": "paulo-junqueiro-bpi",
-        "label": "Paulo Junqueiro / BPI",
-        "type": "person",
+        "id": "setor-publico-estatal",
+        "label": "Setor Público Estatal",
+        "type": "organization",
         "group": "media"
       },
       {
@@ -314,8 +314,8 @@
         "group": "media"
       },
       {
-        "id": "pluralis-ex-grupo-ongoing-mario-ferreira",
-        "label": "Pluralis (ex-Grupo Ongoing / Mário Ferreira)",
+        "id": "paulo-junqueiro-bpi",
+        "label": "Paulo Junqueiro / BPI",
         "type": "person",
         "group": "media"
       },
@@ -332,8 +332,8 @@
         "group": "media"
       },
       {
-        "id": "familia-azevedo",
-        "label": "Família Azevedo",
+        "id": "pluralis-ex-grupo-ongoing-mario-ferreira",
+        "label": "Pluralis (ex-Grupo Ongoing / Mário Ferreira)",
         "type": "person",
         "group": "media"
       },
@@ -350,8 +350,8 @@
         "group": "media"
       },
       {
-        "id": "varios-acionistas-capital-aberto-em-crowdfunding",
-        "label": "Vários acionistas (capital aberto em crowdfunding)",
+        "id": "familia-azevedo",
+        "label": "Família Azevedo",
         "type": "person",
         "group": "media"
       },
@@ -368,15 +368,15 @@
         "group": "media"
       },
       {
-        "id": "expresso",
-        "label": "Expresso",
-        "type": "organization",
+        "id": "varios-acionistas-capital-aberto-em-crowdfunding",
+        "label": "Vários acionistas (capital aberto em crowdfunding)",
+        "type": "person",
         "group": "media"
       },
       {
-        "id": "familia-fino-paulo-fernandes",
-        "label": "Família Fino (Paulo Fernandes)",
-        "type": "person",
+        "id": "expresso",
+        "label": "Expresso",
+        "type": "organization",
         "group": "media"
       },
       {
@@ -392,8 +392,8 @@
         "group": "media"
       },
       {
-        "id": "marco-galinha-noticias-do-mundo",
-        "label": "Marco Galinha / Notícias do Mundo",
+        "id": "familia-fino-paulo-fernandes",
+        "label": "Família Fino (Paulo Fernandes)",
         "type": "person",
         "group": "media"
       },
@@ -407,6 +407,12 @@
         "id": "global-media-group",
         "label": "Global Media Group",
         "type": "organization",
+        "group": "media"
+      },
+      {
+        "id": "marco-galinha-noticias-do-mundo",
+        "label": "Marco Galinha / Notícias do Mundo",
+        "type": "person",
         "group": "media"
       },
       {
@@ -428,12 +434,6 @@
         "group": "media"
       },
       {
-        "id": "luis-santos",
-        "label": "Luís Santos",
-        "type": "person",
-        "group": "media"
-      },
-      {
         "id": "jornal-negocios",
         "label": "Jornal de Negócios",
         "type": "organization",
@@ -446,15 +446,15 @@
         "group": "media"
       },
       {
-        "id": "eco",
-        "label": "ECO — Economia Online",
-        "type": "organization",
+        "id": "luis-santos",
+        "label": "Luís Santos",
+        "type": "person",
         "group": "media"
       },
       {
-        "id": "conferencia-episcopal-portuguesa",
-        "label": "Conferência Episcopal Portuguesa",
-        "type": "person",
+        "id": "eco",
+        "label": "ECO — Economia Online",
+        "type": "organization",
         "group": "media"
       },
       {
@@ -470,8 +470,8 @@
         "group": "media"
       },
       {
-        "id": "estado-50-associados-50-global-media-impresa-cofina-publico-media-capital",
-        "label": "Estado (50%) + Associados (50%: Global Media, Impresa, Cofina, Público, Media Capital)",
+        "id": "conferencia-episcopal-portuguesa",
+        "label": "Conferência Episcopal Portuguesa",
         "type": "person",
         "group": "media"
       },
@@ -486,6 +486,12 @@
         "label": "Setor Público Estatal + Privado",
         "type": "organization",
         "group": "media"
+      },
+      {
+        "id": "estado-50-associados-50-global-media-impresa-cofina-publico-media-capital",
+        "label": "Estado (50%) + Associados (50%: Global Media, Impresa, Cofina, Público, Media Capital)",
+        "type": "person",
+        "group": "media"
       }
     ],
     "edges": [
@@ -496,20 +502,14 @@
         "value": 1
       },
       {
-        "source": "paulo-junqueiro-bpi",
-        "target": "sic-noticias",
-        "label": "proprietário",
-        "value": 1
-      },
-      {
         "source": "grupo-impresa",
         "target": "sic-noticias",
         "label": "detém",
         "value": 1
       },
       {
-        "source": "pluralis-ex-grupo-ongoing-mario-ferreira",
-        "target": "cnn-portugal",
+        "source": "paulo-junqueiro-bpi",
+        "target": "sic-noticias",
         "label": "proprietário",
         "value": 1
       },
@@ -520,8 +520,8 @@
         "value": 1
       },
       {
-        "source": "familia-azevedo",
-        "target": "publico",
+        "source": "pluralis-ex-grupo-ongoing-mario-ferreira",
+        "target": "cnn-portugal",
         "label": "proprietário",
         "value": 1
       },
@@ -532,8 +532,8 @@
         "value": 1
       },
       {
-        "source": "varios-acionistas-capital-aberto-em-crowdfunding",
-        "target": "observador",
+        "source": "familia-azevedo",
+        "target": "publico",
         "label": "proprietário",
         "value": 1
       },
@@ -544,8 +544,8 @@
         "value": 1
       },
       {
-        "source": "paulo-junqueiro-bpi",
-        "target": "expresso",
+        "source": "varios-acionistas-capital-aberto-em-crowdfunding",
+        "target": "observador",
         "label": "proprietário",
         "value": 1
       },
@@ -556,8 +556,8 @@
         "value": 1
       },
       {
-        "source": "familia-fino-paulo-fernandes",
-        "target": "cm-jornal",
+        "source": "paulo-junqueiro-bpi",
+        "target": "expresso",
         "label": "proprietário",
         "value": 1
       },
@@ -568,8 +568,8 @@
         "value": 1
       },
       {
-        "source": "marco-galinha-noticias-do-mundo",
-        "target": "jn",
+        "source": "familia-fino-paulo-fernandes",
+        "target": "cm-jornal",
         "label": "proprietário",
         "value": 1
       },
@@ -581,7 +581,7 @@
       },
       {
         "source": "marco-galinha-noticias-do-mundo",
-        "target": "dn",
+        "target": "jn",
         "label": "proprietário",
         "value": 1
       },
@@ -593,7 +593,7 @@
       },
       {
         "source": "marco-galinha-noticias-do-mundo",
-        "target": "tsf",
+        "target": "dn",
         "label": "proprietário",
         "value": 1
       },
@@ -604,8 +604,8 @@
         "value": 1
       },
       {
-        "source": "pluralis-ex-grupo-ongoing-mario-ferreira",
-        "target": "tvi-noticias",
+        "source": "marco-galinha-noticias-do-mundo",
+        "target": "tsf",
         "label": "proprietário",
         "value": 1
       },
@@ -616,8 +616,8 @@
         "value": 1
       },
       {
-        "source": "luis-santos",
-        "target": "jornal-negocios",
+        "source": "pluralis-ex-grupo-ongoing-mario-ferreira",
+        "target": "tvi-noticias",
         "label": "proprietário",
         "value": 1
       },
@@ -629,7 +629,7 @@
       },
       {
         "source": "luis-santos",
-        "target": "eco",
+        "target": "jornal-negocios",
         "label": "proprietário",
         "value": 1
       },
@@ -640,8 +640,8 @@
         "value": 1
       },
       {
-        "source": "conferencia-episcopal-portuguesa",
-        "target": "renascenca",
+        "source": "luis-santos",
+        "target": "eco",
         "label": "proprietário",
         "value": 1
       },
@@ -652,8 +652,8 @@
         "value": 1
       },
       {
-        "source": "estado-50-associados-50-global-media-impresa-cofina-publico-media-capital",
-        "target": "lusa",
+        "source": "conferencia-episcopal-portuguesa",
+        "target": "renascenca",
         "label": "proprietário",
         "value": 1
       },
@@ -661,6 +661,12 @@
         "source": "setor-publico-estatal-privado",
         "target": "lusa",
         "label": "detém",
+        "value": 1
+      },
+      {
+        "source": "estado-50-associados-50-global-media-impresa-cofina-publico-media-capital",
+        "target": "lusa",
+        "label": "proprietário",
         "value": 1
       }
     ],
@@ -1084,7 +1090,7 @@
   },
   "influence": {
     "capture_score": 0.576,
-    "personnel_density": 0.0,
+    "personnel_density": 0.68,
     "parliament_gap": 1.0,
     "ad_correlation_strength": 0.587,
     "summary": "Captura moderada: existem conexões entre Estado e media que merecem atenção."
