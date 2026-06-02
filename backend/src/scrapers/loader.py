@@ -6,11 +6,15 @@ from src.scrapers.spiders.lusa import LusaSpider
 from src.scrapers.spiders.portugal_media import PortugalMediaSpider
 from src.scrapers.spiders.publico import PublicoSpider
 from src.scrapers.spiders.portugal_news_scrapy import PortugalNewsScrapySpider
+from src.scrapers.spiders.expresso_scrapy import ExpressoSpider as ExpressoScrapySpider
 from src.scrapers.spiders.international import InternationalSpider
 from src.scrapers.spiders.government import GovernmentSpider
 from src.scrapers.spiders.dre import DRESpider
 from src.scrapers.spiders.parliament import ParliamentSpider
 from src.scrapers.spiders.erc_advertising import ERCAdvertisingSpider
+from src.scrapers.spiders.tsf import TSFSpider
+from src.scrapers.spiders.dn import DNSpider
+from src.scrapers.spiders.jn import JNSpider
 
 
 SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
@@ -18,23 +22,29 @@ SPIDER_REGISTRY: dict[str, type[BaseSpider]] = {
     "rtp_noticias": PortugalMediaSpider,
     "publico": PublicoSpider,
     "observador": PortugalNewsScrapySpider,
-    "expresso": PortugalMediaSpider,  # Blocks automated access (HTTP 403) — keep RSS for now
+    "expresso": ExpressoScrapySpider,  # Uses sitemap + Google News RSS (DataDome blocks direct access)
     "cm_jornal": PortugalNewsScrapySpider,
-    "jn": PortugalMediaSpider,        # JS-heavy — keep RSS for now
-    "dn": PortugalMediaSpider,        # JS-heavy — keep RSS for now
+    "jn": JNSpider,  # News sitemap + httpx article fetching (Scrapy blocked, homepage JS-heavy)
+    "dn": DNSpider,  # Sitemap-based httpx spider (homepage is JS-heavy, article pages are SSR)
     "sic_noticias": PortugalMediaSpider,  # Blocks automated access (HTTP 403)
     "eco": PortugalNewsScrapySpider,
-    "cnn_portugal": PortugalMediaSpider,  # JS-heavy
-    "tsf": PortugalMediaSpider,  # Blocks automated access (HTTP 403) — keep RSS
+    "cnn_portugal": PortugalNewsScrapySpider,  # SSR homepage — Scrapy works
+    "tsf": TSFSpider,  # httpx-based homepage scraping (Scrapy blocked)
     "renascenca": PortugalMediaSpider,  # Already has RSS
     "sapo_24": PortugalNewsScrapySpider,
     "nam": PortugalNewsScrapySpider,
+    "tvi_noticias": PortugalMediaSpider,  # Google News RSS (no public RSS)
+    "jornal_negocios": PortugalMediaSpider,  # Google News RSS (no public RSS)
     # International sources
     "reuters": InternationalSpider,
     "bbc": InternationalSpider,
     "guardian": InternationalSpider,
     "ap": InternationalSpider,
     "elpais": InternationalSpider,
+    "afp": InternationalSpider,
+    "lemonde": InternationalSpider,
+    "dw": InternationalSpider,
+    "france24": InternationalSpider,
     # Government sources
     "portugal_gov": GovernmentSpider,
     "presidencia": GovernmentSpider,

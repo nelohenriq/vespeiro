@@ -1,92 +1,291 @@
 {
-  "generated_at": "2026-05-29T17:03:40.966108+00:00",
+  "generated_at": "2026-06-01T19:15:21.288300Z",
+  "version": "1.0",
   "sources": {
-    "total": 16,
-    "active": 16,
-    "articles_total": 487,
-    "articles_today": 7,
-    "per_source": {
-      "cm_jornal": {
-        "name": "Correio da Manhã",
-        "category": "mainstream",
-        "count": 30
+    "total": 32,
+    "active": 32,
+    "articles_total": 2167,
+    "articles_today": 731,
+    "articles_per_source": {
+      "afp": 38,
+      "ap": 70,
+      "bbc": 93,
+      "cm_jornal": 65,
+      "cnn_portugal": 50,
+      "dn": 60,
+      "dre_appointments": 7,
+      "dw": 30,
+      "eco": 44,
+      "elpais": 94,
+      "erc_advertising": 2,
+      "expresso": 167,
+      "france24": 24,
+      "guardian": 80,
+      "jn": 60,
+      "jornal_negocios": 30,
+      "lemonde": 16,
+      "lusa": 167,
+      "nam": 33,
+      "observador": 80,
+      "parlamento_debates": 137,
+      "portugal_gov": 81,
+      "presidencia": 59,
+      "publico": 126,
+      "renascenca": 103,
+      "reuters": 105,
+      "rtp_noticias": 130,
+      "sapo_24": 55,
+      "sic_noticias": 76,
+      "tsf": 55,
+      "tvi_noticias": 30
+    },
+    "per_category": {
+      "agency": {
+        "sources": 1,
+        "articles": 167,
+        "articles_today": 46
       },
-      "cnn_portugal": {
-        "name": "CNN Portugal",
-        "category": "mainstream",
-        "count": 30
+      "government": {
+        "sources": 2,
+        "articles": 140,
+        "articles_today": 57
       },
-      "dn": {
-        "name": "Diário de Notícias",
-        "category": "mainstream",
-        "count": 30
+      "international": {
+        "sources": 9,
+        "articles": 550,
+        "articles_today": 241
       },
-      "dre_appointments": {
-        "name": "Diário da República (Nomeações)",
-        "category": "government",
-        "count": 7
+      "mainstream": {
+        "sources": 15,
+        "articles": 1034,
+        "articles_today": 355
       },
-      "eco": {
-        "name": "ECO — Economia Online",
-        "category": "mainstream",
-        "count": 30
+      "official_gazette": {
+        "sources": 2,
+        "articles": 7,
+        "articles_today": 0
       },
-      "expresso": {
-        "name": "Expresso",
-        "category": "mainstream",
-        "count": 30
+      "parliament": {
+        "sources": 1,
+        "articles": 137,
+        "articles_today": 0
       },
-      "jn": {
-        "name": "Jornal de Notícias",
-        "category": "mainstream",
-        "count": 30
+      "public_broadcaster": {
+        "sources": 1,
+        "articles": 130,
+        "articles_today": 32
       },
-      "lusa": {
-        "name": "Lusa — Agência de Notícias",
-        "category": "agency",
-        "count": 60
-      },
-      "nam": {
-        "name": "Notícias ao Minuto",
-        "category": "mainstream",
-        "count": 30
-      },
-      "observador": {
-        "name": "Observador",
-        "category": "mainstream",
-        "count": 30
-      },
-      "publico": {
-        "name": "Público",
-        "category": "mainstream",
-        "count": 30
-      },
-      "renascenca": {
-        "name": "Rádio Renascença",
-        "category": "mainstream",
-        "count": 30
-      },
-      "rtp_noticias": {
-        "name": "RTP Notícias",
-        "category": "public_broadcaster",
-        "count": 30
-      },
-      "sapo_24": {
-        "name": "SAPO 24",
-        "category": "mainstream",
-        "count": 30
-      },
-      "sic_noticias": {
-        "name": "SIC Notícias",
-        "category": "mainstream",
-        "count": 30
-      },
-      "tsf": {
-        "name": "TSF — Rádio Notícias",
-        "category": "mainstream",
-        "count": 30
+      "regulator": {
+        "sources": 1,
+        "articles": 2,
+        "articles_today": 0
       }
     }
+  },
+  "lusa_dependency": {
+    "global_pct": null,
+    "per_outlet": {},
+    "per_topic": {}
+  },
+  "divergence": {
+    "global_avg": 0.4593145366004863,
+    "per_outlet": {
+      "publico": {
+        "avg": 0.4593145366004863,
+        "stories": 1,
+        "avg_omission": 0.7,
+        "avg_sentiment_shift": 0.0,
+        "avg_quote_fidelity": 0.0,
+        "avg_headline_divergence": 0.0715726830024318
+      }
+    },
+    "top_omitted_facts": [
+      {
+        "text": "2.3 milhões de euros",
+        "count": 1,
+        "category": "money"
+      },
+      {
+        "text": "milhões",
+        "count": 1,
+        "category": "number"
+      },
+      {
+        "text": "três",
+        "count": 1,
+        "category": "number"
+      },
+      {
+        "text": "Lisboa",
+        "count": 1,
+        "category": "location"
+      },
+      {
+        "text": "Organização Mundial de Saúde",
+        "count": 1,
+        "category": "org"
+      },
+      {
+        "text": "Pedro Costa",
+        "count": 1,
+        "category": "person"
+      },
+      {
+        "text": "30%",
+        "count": 1,
+        "category": "pct"
+      }
+    ]
+  },
+  "silence": {
+    "today": 202,
+    "avg_7d": 65.4,
+    "top_silenced": [
+      {
+        "title": "Sturgeon says she was deceived, betrayed and lied to over Murrell embezzlement",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Opportunities shrinking for too many young people, says major report on 'lost generation'",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "'I've applied for more than 400 roles' - how young people are facing the job shortage",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Prostate cancer screening only for 'a few thousand' high risk men",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Two more boys die in latest heatwave water deaths",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Iran says it targeted American base after fresh US strikes",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Are US and Iran close to peace or sliding back to war?",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Starmer defends policy decisions as he hits back at Blair",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Learning from Ukraine, Hezbollah is now using fibre-optic drones to hit Israel",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      },
+      {
+        "title": "Man killed by train after escaping vehicle on way to court",
+        "international_sources": 1,
+        "pt_coverage": 0,
+        "gap_pct": 100.0,
+        "sources": [
+          "BBC News"
+        ]
+      }
+    ]
+  },
+  "timelines": {
+    "lusa_dependency_7d": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "divergence_avg_7d": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "articles_daily_7d": [
+      0,
+      0,
+      569,
+      800,
+      67,
+      0,
+      731
+    ],
+    "silence_daily_7d": [
+      0,
+      0,
+      121,
+      135,
+      0,
+      0,
+      202
+    ],
+    "dates_7d": [
+      "2026-05-26",
+      "2026-05-27",
+      "2026-05-28",
+      "2026-05-29",
+      "2026-05-30",
+      "2026-05-31",
+      "2026-06-01"
+    ]
+  },
+  "system": {
+    "uptime_pct": 100.0,
+    "sources_healthy": 32,
+    "sources_failing": 0,
+    "last_scrape": "2026-06-01T18:28:12.131874",
+    "last_error": null
   },
   "personnel": {
     "nodes": [
@@ -223,20 +422,32 @@
         "group": "media"
       },
       {
+        "id": "tvi-noticias",
+        "label": "TVI Notícias",
+        "type": "organization",
+        "group": "media"
+      },
+      {
         "id": "luis-santos",
         "label": "Luís Santos",
         "type": "person",
         "group": "media"
       },
       {
-        "id": "eco",
-        "label": "ECO — Economia Online",
+        "id": "jornal-negocios",
+        "label": "Jornal de Negócios",
         "type": "organization",
         "group": "media"
       },
       {
         "id": "grupo-trust-in-news",
         "label": "Grupo Trust in News",
+        "type": "organization",
+        "group": "media"
+      },
+      {
+        "id": "eco",
+        "label": "ECO — Economia Online",
         "type": "organization",
         "group": "media"
       },
@@ -393,6 +604,30 @@
         "value": 1
       },
       {
+        "source": "pluralis-ex-grupo-ongoing-mario-ferreira",
+        "target": "tvi-noticias",
+        "label": "proprietário",
+        "value": 1
+      },
+      {
+        "source": "grupo-media-capital",
+        "target": "tvi-noticias",
+        "label": "detém",
+        "value": 1
+      },
+      {
+        "source": "luis-santos",
+        "target": "jornal-negocios",
+        "label": "proprietário",
+        "value": 1
+      },
+      {
+        "source": "grupo-trust-in-news",
+        "target": "jornal-negocios",
+        "label": "detém",
+        "value": 1
+      },
+      {
         "source": "luis-santos",
         "target": "eco",
         "label": "proprietário",
@@ -430,7 +665,428 @@
       }
     ],
     "total_people": 0,
-    "total_appointments": 0,
-    "generated_at": "2026-05-29T17:03:40.965975+00:00"
+    "total_appointments": 0
+  },
+  "parliament_gap": {
+    "overall_gap_score": 1.0,
+    "total_parliament_docs": 100,
+    "total_media_articles": 396,
+    "topics": [
+      {
+        "topic": "bloco de esquerda",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "em portugal",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 3,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca",
+          "expresso",
+          "observador"
+        ]
+      },
+      {
+        "topic": "não pode",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "iniciativa liberal",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "condições de",
+        "parliament_mentions": 99,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "do partido socialista",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "faltas dos deputados",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do chega",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "presenças e faltas",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "e faltas dos",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "do bloco de",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "nacional de",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "das pessoas",
+        "parliament_mentions": 98,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "o direito",
+        "parliament_mentions": 97,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de portugal",
+        "parliament_mentions": 97,
+        "media_mentions": 0,
+        "media_outlets": 3,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca",
+          "expresso",
+          "eco"
+        ]
+      },
+      {
+        "topic": "em nome",
+        "parliament_mentions": 97,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "os portugueses",
+        "parliament_mentions": 97,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "em causa",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 2,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca",
+          "eco"
+        ]
+      },
+      {
+        "topic": "de facto",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca"
+        ]
+      },
+      {
+        "topic": "social e",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "antes de",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 1,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "elpais"
+        ]
+      },
+      {
+        "topic": "a mesma",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de sousa real",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "inês de sousa",
+        "parliament_mentions": 96,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "protestos do",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "o tempo",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "que aqui",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "o regime",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "deve ser",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 0,
+        "gap_score": 1.0,
+        "top_media_outlets": []
+      },
+      {
+        "topic": "de saúde",
+        "parliament_mentions": 95,
+        "media_mentions": 0,
+        "media_outlets": 3,
+        "gap_score": 1.0,
+        "top_media_outlets": [
+          "renascenca",
+          "publico",
+          "observador"
+        ]
+      }
+    ],
+    "most_discussed_only_parliament": [
+      "bloco de esquerda",
+      "em portugal",
+      "não pode",
+      "iniciativa liberal",
+      "condições de",
+      "do partido socialista",
+      "faltas dos deputados",
+      "do chega",
+      "presenças e faltas",
+      "e faltas dos"
+    ],
+    "most_covered_in_media": []
+  },
+  "ad_correlation": {
+    "outlets": [
+      {
+        "outlet_id": "rtp_noticias",
+        "outlet_name": "RTP — Rádio e Televisão de Portugal",
+        "estimated_ad_spend_eur": 6686.65,
+        "articles_count": 0,
+        "avg_sentiment": null,
+        "gov_coverage_pct": 0.0,
+        "owner_group": "Setor Público Estatal",
+        "owner": "Estado Português"
+      },
+      {
+        "outlet_id": "sic_noticias",
+        "outlet_name": "SIC / SIC Notícias",
+        "estimated_ad_spend_eur": 3248.06,
+        "articles_count": 76,
+        "avg_sentiment": 0.0,
+        "gov_coverage_pct": 0.026,
+        "owner_group": "Grupo Impresa",
+        "owner": "Impresa"
+      },
+      {
+        "outlet_id": "cnn_portugal",
+        "outlet_name": "CNN Portugal",
+        "estimated_ad_spend_eur": 3809.98,
+        "articles_count": 47,
+        "avg_sentiment": -0.0422,
+        "gov_coverage_pct": 0.532,
+        "owner_group": "Grupo Media Capital",
+        "owner": "Media Capital"
+      },
+      {
+        "outlet_id": "publico",
+        "outlet_name": "Público",
+        "estimated_ad_spend_eur": 3051.93,
+        "articles_count": 126,
+        "avg_sentiment": 0.0727,
+        "gov_coverage_pct": 0.294,
+        "owner_group": "Grupo Sonae",
+        "owner": "Sonae"
+      },
+      {
+        "outlet_id": "expresso",
+        "outlet_name": "Expresso",
+        "estimated_ad_spend_eur": 2697.76,
+        "articles_count": 30,
+        "avg_sentiment": -0.0884,
+        "gov_coverage_pct": 0.033,
+        "owner_group": "Grupo Impresa",
+        "owner": "Impresa"
+      },
+      {
+        "outlet_id": "cm_jornal",
+        "outlet_name": "Correio da Manhã",
+        "estimated_ad_spend_eur": 2230.37,
+        "articles_count": 65,
+        "avg_sentiment": 0.0,
+        "gov_coverage_pct": 0.246,
+        "owner_group": "Grupo Cofina",
+        "owner": "Cofina Media"
+      },
+      {
+        "outlet_id": "jn",
+        "outlet_name": "Jornal de Notícias",
+        "estimated_ad_spend_eur": 6068.97,
+        "articles_count": 60,
+        "avg_sentiment": -0.0176,
+        "gov_coverage_pct": 0.3,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "dn",
+        "outlet_name": "Diário de Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 60,
+        "avg_sentiment": 0.0247,
+        "gov_coverage_pct": 0.533,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "tsf",
+        "outlet_name": "TSF — Rádio Notícias",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 55,
+        "avg_sentiment": -0.0027,
+        "gov_coverage_pct": 0.455,
+        "owner_group": "Global Media Group",
+        "owner": "Global Media Group"
+      },
+      {
+        "outlet_id": "observador",
+        "outlet_name": "Observador",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 80,
+        "avg_sentiment": -0.0046,
+        "gov_coverage_pct": 0.4,
+        "owner_group": "Grupo Observador",
+        "owner": "Observador ON AIR"
+      },
+      {
+        "outlet_id": "renascenca",
+        "outlet_name": "Rádio Renascença",
+        "estimated_ad_spend_eur": 0.0,
+        "articles_count": 103,
+        "avg_sentiment": 0.0087,
+        "gov_coverage_pct": 0.456,
+        "owner_group": "Igreja Católica em Portugal",
+        "owner": "Igreja Católica"
+      },
+      {
+        "outlet_id": "eco",
+        "outlet_name": "ECO — Economia Online",
+        "estimated_ad_spend_eur": 3587.92,
+        "articles_count": 44,
+        "avg_sentiment": 0.0,
+        "gov_coverage_pct": 0.205,
+        "owner_group": "Grupo Trust in News",
+        "owner": "Trust in News"
+      }
+    ],
+    "r_spend_vs_articles": -0.4709,
+    "r_spend_vs_gov_coverage": -0.5868,
+    "total_ad_spend_estimated": 31381.64,
+    "total_articles_analyzed": 746
+  },
+  "influence": {
+    "capture_score": 0.576,
+    "personnel_density": 0.0,
+    "parliament_gap": 1.0,
+    "ad_correlation_strength": 0.587,
+    "summary": "Captura moderada: existem conexões entre Estado e media que merecem atenção."
   }
 }

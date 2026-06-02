@@ -1,7 +1,12 @@
 """Tests for the LusaDependencyAnalyzer — matching logic, helper, and graceful degradation."""
 
 import uuid
+
+from unittest.mock import patch
+
+import numpy as np
 import pytest
+
 from src.analysis.dependency.analyzer import LusaDependencyAnalyzer, _article_text
 from src.db.models import Article
 from src.stats.models import LusaDependencyMetrics
@@ -121,19 +126,24 @@ class TestCountDerived:
 
     def test_no_match_different_topics(self):
         """Completely different topics should NOT be counted as derived."""
-        analyzer = LusaDependencyAnalyzer(db_session=None)
-        lusa = [_make_article(
-            "Governo investe 2.3 milhões em saúde",
-            "O governo português anunciou investimento de 2.3 milhões de euros "
-            "no setor da saúde para contratar enfermeiros.",
-        )]
-        outlet = [_make_article(
-            "Benfica vence clássico por 3-1",
-            "O Benfica venceu o FC Porto por 3-1 no Estádio da Luz num jogo "
-            "emocionante com casa cheia.",
-            source_id="publico",
-        )]
-        assert analyzer._count_derived(lusa, outlet) == 0
+        analyzer = LusaDependencyAnalyzer(db_session=None, match_threshold=0.70)
+        # Mock embeddings to return deterministic vectors
+        with patch.object(analyzer, "_embed_articles", side_effect=[
+            np.array([[0.9, 0.1, 0.0]], dtype=np.float64),  # Lusa: health
+            np.array([[0.0, 0.1, 0.9]], dtype=np.float64),  # Outlet: sports
+        ]):
+            lusa = [_make_article(
+                "Governo investe 2.3 milhões em saúde",
+                "O governo português anunciou investimento de 2.3 milhões de euros "
+                "no setor da saúde para contratar enfermeiros.",
+            )]
+            outlet = [_make_article(
+                "Benfica vence clássico por 3-1",
+                "O Benfica venceu o FC Porto por 3-1 no Estádio da Luz num jogo "
+                "emocionante com casa cheia.",
+                source_id="publico",
+            )]
+            assert analyzer._count_derived(lusa, outlet) == 0
 
     def test_empty_lusa_articles(self):
         """No Lusa articles → count is 0 (nothing to match against)."""
@@ -149,34 +159,38 @@ class TestCountDerived:
 
     def test_mixed_results(self):
         """With multiple outlet articles, only those above threshold are counted."""
-        analyzer = LusaDependencyAnalyzer(db_session=None)
-        lusa = [_make_article(
-            "Governo investe 2.3 milhões em saúde",
-            "O governo português anunciou um investimento de 2.3 milhões de "
-            "euros no setor da saúde. O primeiro-ministro António Costa "
-            "confirmou a decisão após uma reunião em Lisboa com a União "
-            "Europeia. Serão contratados 500 enfermeiros e adquiridos novos "
-            "equipamentos para o Serviço Nacional de Saúde.",
-        )]
-        outlets = [
-            # Should match — close paraphrase of the same story
-            _make_article(
-                "Governo investe 2.3 milhões na área da saúde",
-                "O governo português anunciou um investimento de 2.3 milhões de euros "
-                "na área da saúde. O primeiro-ministro António Costa confirmou a "
-                "decisão após uma reunião em Lisboa. Serão contratados 500 enfermeiros "
-                "e adquiridos novos equipamentos para o Serviço Nacional de Saúde.",
-                source_id="publico",
-            ),
-            # Should NOT match — different story entirely
-            _make_article(
-                "Tragédia na estrada: 5 mortos",
-                "Um grave acidente na A1 provocou cinco mortos e vários feridos. "
-                "A estrada esteve cortada durante várias horas.",
-                source_id="expresso",
-            ),
-        ]
-        assert analyzer._count_derived(lusa, outlets) == 1
+        analyzer = LusaDependencyAnalyzer(db_session=None, match_threshold=0.70)
+        # Mock embeddings: Lusa=[health], outlet1=[health-like], outlet2=[sports]
+        with patch.object(analyzer, "_embed_articles", side_effect=[
+            np.array([[0.9, 0.1, 0.0]], dtype=np.float64),    # Lusa: health
+            np.array([[0.85, 0.15, 0.0]], dtype=np.float64),   # publico: health -> matches
+            np.array([[0.0, 0.1, 0.9]], dtype=np.float64),     # expresso: sports -> no match
+        ]):
+            lusa = [_make_article(
+                "Governo investe 2.3 milhões em saúde",
+                "O governo português anunciou um investimento de 2.3 milhões de "
+                "euros no setor da saúde. O primeiro-ministro António Costa "
+                "confirmou a decisão após uma reunião em Lisboa com a União "
+                "Europeia. Serão contratados 500 enfermeiros e adquiridos novos "
+                "equipamentos para o Serviço Nacional de Saúde.",
+            )]
+            outlets = [
+                _make_article(
+                    "Governo investe 2.3 milhões na área da saúde",
+                    "O governo português anunciou um investimento de 2.3 milhões de euros "
+                    "na área da saúde. O primeiro-ministro António Costa confirmou a "
+                    "decisão após uma reunião em Lisboa. Serão contratados 500 enfermeiros "
+                    "e adquiridos novos equipamentos para o Serviço Nacional de Saúde.",
+                    source_id="publico",
+                ),
+                _make_article(
+                    "Tragédia na estrada: 5 mortos",
+                    "Um grave acidente na A1 provocou cinco mortos e vários feridos. "
+                    "A estrada esteve cortada durante várias horas.",
+                    source_id="expresso",
+                ),
+            ]
+            assert analyzer._count_derived(lusa, outlets) == 1
 
     def test_same_topic_different_angles(self):
         """Same broad topic but different angles → may or may not match.
@@ -288,7 +302,7 @@ def test_constructor_defaults():
     """Default window_days and match_threshold should be sensible."""
     analyzer = LusaDependencyAnalyzer(db_session=object())
     assert analyzer.window_days == 7
-    assert analyzer.match_threshold == 0.70
+    assert analyzer.match_threshold == 0.50
 
 
 def test_constructor_custom_values():
@@ -300,3 +314,165 @@ def test_constructor_custom_values():
     )
     assert analyzer.window_days == 14
     assert analyzer.match_threshold == 0.80
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  Topic classification — _classify_topic
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestClassifyTopic:
+    """Keyword-based topic classification (no model needed)."""
+
+    def test_politics_topic(self):
+        """Text about government/parliament → política."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O governo aprovou o orçamento do estado no parlamento com os votos do PS"
+        )
+        assert topic == "política"
+
+    def test_economy_topic(self):
+        """Text about economy/finance → economia."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O PIB cresceu 2.5% este trimestre e a inflação desceu para 1.8%"
+        )
+        assert topic == "economia"
+
+    def test_health_topic(self):
+        """Text about healthcare → saúde."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O SNS contratou 500 enfermeiros para os hospitais do país"
+        )
+        assert topic == "saúde"
+
+    def test_sports_topic(self):
+        """Text about sports → desporto."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O Benfica venceu o clássico contra o Porto no Estádio da Luz"
+        )
+        assert topic == "desporto"
+
+    def test_international_topic(self):
+        """Text about international affairs → internacional."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "A União Europeia anunciou novas sanções contra a Rússia"
+        )
+        assert topic == "internacional"
+
+    def test_environment_topic(self):
+        """Text about environment → ambiente."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "As alterações climáticas aumentam o risco de incêndios florestais"
+        )
+        assert topic == "ambiente"
+
+    def test_justice_topic(self):
+        """Text about justice/crime investigation → justiça."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O tribunal condenou o arguido por corrupção e fraude"
+        )
+        assert topic == "justiça"
+
+    def test_science_topic(self):
+        """Text about science/tech → ciência."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "A inteligência artificial promete revolucionar a investigação científica"
+        )
+        assert topic == "ciência"
+
+    def test_education_topic(self):
+        """Text about education → educação."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "Os professores aprovaram a nova avaliação nas escolas"
+        )
+        assert topic == "educação"
+
+    def test_culture_topic(self):
+        """Text about culture/arts → cultura."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O novo filme do cinema português ganhou o festival internacional"
+        )
+        assert topic == "cultura"
+
+    def test_society_topic(self):
+        """Text about social issues → sociedade."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "A habitação é o principal problema das famílias portuguesas"
+        )
+        assert topic == "sociedade"
+
+    def test_crime_topic(self):
+        """Text about crime → crime."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "A PJ investiga um homicídio violento na zona de Lisboa"
+        )
+        assert topic == "crime"
+
+    def test_fallback_outros(self):
+        """Text with no matching keywords → outros."""
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O gato subiu à árvore e comeu uma banana muito doce"
+        )
+        assert topic == "outros"
+
+    def test_empty_text_fallback(self):
+        """Empty text → outros."""
+        topic = LusaDependencyAnalyzer._classify_topic("")
+        assert topic == "outros"
+
+    def test_whitespace_only_fallback(self):
+        """Whitespace-only text → outros."""
+        topic = LusaDependencyAnalyzer._classify_topic("   ")
+        assert topic == "outros"
+
+    def test_politics_vs_economy_score_tiebreak(self):
+        """When scores are tied, the first topic in dict wins (política).
+
+        Text with one political and one economic keyword → tied at 1 each.
+        política appears first in the dict so it wins.
+        """
+        topic = LusaDependencyAnalyzer._classify_topic(
+            "O governo anunciou medidas para controlar a inflação"
+        )
+        # "governo" → política (1 match)
+        # "inflação" → economia (1 match)
+        # Tied at 1 → política wins (first in dict)
+        assert topic == "política"
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  _derived_mask_from_vecs — per-article derivation mask
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class TestDerivedMask:
+    """``_derived_mask_from_vecs`` returns per-article booleans."""
+
+    def test_all_derived(self):
+        """All outlet articles match → all True."""
+        analyzer = LusaDependencyAnalyzer(db_session=None, match_threshold=0.50)
+        lusa = np.array([[0.8, 0.2], [0.1, 0.9]], dtype=np.float64)
+        outlet = np.array([[0.75, 0.25], [0.15, 0.85]], dtype=np.float64)
+        assert analyzer._derived_mask_from_vecs(lusa, outlet) == [True, True]
+
+    def test_partial_derived(self):
+        """Some outlet articles match, some don't."""
+        analyzer = LusaDependencyAnalyzer(db_session=None, match_threshold=0.50)
+        lusa = np.array([[0.8, 0.2]], dtype=np.float64)
+        outlet = np.array([[0.75, 0.25], [0.25, 0.75]], dtype=np.float64)
+        assert analyzer._derived_mask_from_vecs(lusa, outlet) == [True, False]
+
+    def test_empty_lusa_vectors(self):
+        """Empty Lusa vectors → all False."""
+        analyzer = LusaDependencyAnalyzer(db_session=None)
+        empty_lusa = np.array([[]]).reshape(0, 3)
+        outlet = np.array([[0.5, 0.5]], dtype=np.float64)
+        mask = analyzer._derived_mask_from_vecs(empty_lusa, outlet)
+        assert mask == [False]
+
+    def test_no_outlet_articles(self):
+        """No outlet articles → empty list."""
+        analyzer = LusaDependencyAnalyzer(db_session=None)
+        lusa = np.array([[0.8, 0.2]], dtype=np.float64)
+        empty = np.array([[]]).reshape(0, 2)
+        assert analyzer._derived_mask_from_vecs(lusa, empty) == []

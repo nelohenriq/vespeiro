@@ -59,7 +59,14 @@ class SourceMetrics(BaseModel):
 
 
 class LusaDependencyMetrics(BaseModel):
-    """Lusa dependency metrics — placeholder until Phase 1 is built."""
+    """Lusa dependency metrics — per-outlet and per-topic breakdown.
+
+    ``global_pct`` is the overall percentage of Portuguese news articles that
+    are derived from Lusa. ``per_outlet`` breaks this down per source.
+    ``per_topic`` breaks it down by topic category (e.g. política, economia,
+    saúde), using keyword-based topic classification in
+    :class:`src.analysis.dependency.analyzer.LusaDependencyAnalyzer`.
+    """
     global_pct: float | None = None
     per_outlet: dict[str, OutletDependency] = {}
     per_topic: dict[str, float] = {}

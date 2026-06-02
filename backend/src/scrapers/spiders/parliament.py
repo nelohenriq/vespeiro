@@ -38,6 +38,7 @@ Volume estimate: ~480 documents total, ~20–50 media-relevant per year.
 from __future__ import annotations
 
 import asyncio
+import concurrent.futures
 import io
 import logging
 import re
@@ -55,13 +56,12 @@ _HEADERS = {
 # ── Discovery ranges ──────────────────────────────────────────────────────────
 # (legislature, session, max_number)  —  probed and confirmed on 2026-05-27
 
+# Regular-run ranges: only the current active legislature (XVI, 2024–2026).
+# Older sessions (XIV–XV) are already fully ingested (130 articles in DB)
+# and don't produce new documents. A full historical sweep can be triggered
+# manually by adding the older ranges back.
 _DISCOVERY_RANGES: list[tuple[str, str, int]] = [
-    ("16", "01", 100),   # XVI Legislatura (2024–2026)
-    ("15", "01", 150),   # XV  Legislatura (2022–2024) sessão 1
-    ("15", "02",  40),   # XV  Legislatura (2022–2024) sessão 2
-    ("14", "01",  70),   # XIV Legislatura (2019–2022) sessão 1
-    ("14", "02",  90),   # XIV Legislatura (2019–2022) sessão 2
-    ("14", "03",  30),   # XIV Legislatura (2019–2022) sessão 3
+    ("16", "01", 100),   # XVI Legislatura (2024–2026) — current, may have new docs
 ]
 
 _LEGIS_TO_YEAR: dict[str, int] = {
@@ -149,12 +149,14 @@ def extract_text_from_pdf(content: bytes, max_pages: int | None = None) -> str |
 def build_export_url(serie: str, legis: str, sessao: str, numero: int) -> str:
     """Build the export endpoint URL for a given DAR document.
 
+    Uses HTTPS directly to avoid an HTTP→HTTPS 302 redirect on every request.
+
     Example::
         >>> build_export_url("01", "16", "01", 1)
-        'http://debates.parlamento.pt/pagina/export?exportType=pdf&exportControl=documentoCompleto&periodo=r3&publicacao=dar&serie=01&legis=16&sessao=01&numero=001'
+        'https://debates.parlamento.pt/pagina/export?exportType=pdf&exportControl=documentoCompleto&periodo=r3&publicacao=dar&serie=01&legis=16&sessao=01&numero=001'
     """
     return (
-        f"http://debates.parlamento.pt/pagina/export"
+        f"https://debates.parlamento.pt/pagina/export"
         f"?exportType=pdf"
         f"&exportControl=documentoCompleto"
         f"&periodo=r3"
@@ -205,7 +207,7 @@ def guess_published_date(legis: str, session: str, number: int) -> datetime | No
         return None
 
 
-_CONCURRENT_REQUESTS = 20
+_CONCURRENT_REQUESTS = 3
 _RELEVANCE_SCAN_PAGES = 5  # Only scan first N pages for media relevance (perf)
 
 
@@ -223,17 +225,35 @@ class ParliamentSpider(BaseSpider):
 
     The ``url`` parameter passed to :meth:`fetch` is ignored; discovery ranges
     are built from ``_DISCOVERY_RANGES``.
+
+    PDF text extraction (pdfplumber) is CPU-intensive and runs in a thread pool
+    to avoid blocking the asyncio event loop during HTTP requests.
     """
 
     def __init__(self) -> None:
         self._semaphore = asyncio.Semaphore(_CONCURRENT_REQUESTS)
+        self._thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=2)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
         # Build all candidate URLs
-        candidates: list[tuple[str, str, str, int]] = []
+        all_candidates: list[tuple[str, str, str, int]] = []
         for legis, sessao, max_num in _DISCOVERY_RANGES:
             for num in range(1, max_num + 1):
-                candidates.append(("01", legis, sessao, num))
+                all_candidates.append(("01", legis, sessao, num))
+
+        # Skip candidates whose URLs are already stored in the DB.
+        # This avoids re-downloading and re-extracting large PDFs on every run.
+        existing_urls = _load_existing_urls(source_id)
+        candidates = [
+            c for c in all_candidates
+            if build_export_url(*c) not in existing_urls
+        ]
+        skipped = len(all_candidates) - len(candidates)
+        if skipped:
+            logger.info(
+                "Parliament spider: %d/%d candidates already in DB, skipping",
+                skipped, len(all_candidates),
+            )
 
         logger.info(
             "Parliament spider: probing %d candidate URLs (%d concurrent)…",
@@ -243,7 +263,7 @@ class ParliamentSpider(BaseSpider):
         # Single-phase: GET every candidate URL concurrently.
         # Non-existent docs return 404 quickly; real PDFs get downloaded.
         http_client = httpx.AsyncClient(
-            timeout=30.0,
+            timeout=15.0,
             follow_redirects=True,
             headers=_HEADERS,
             limits=httpx.Limits(max_keepalive_connections=0),
@@ -276,8 +296,20 @@ class ParliamentSpider(BaseSpider):
             )
         finally:
             await http_client.aclose()
+            self._thread_pool.shutdown(wait=False)
 
         return articles
+
+    async def _extract_pdf_text(
+        self, content: bytes, max_pages: int | None = None
+    ) -> str | None:
+        """Run pdfplumber extraction in a thread to avoid blocking the event loop."""
+        return await asyncio.get_event_loop().run_in_executor(
+            self._thread_pool,
+            extract_text_from_pdf,
+            content,
+            max_pages,
+        )
 
     async def _fetch_one(
         self,
@@ -288,26 +320,30 @@ class ParliamentSpider(BaseSpider):
         numero: int,
         source_id: str,
     ) -> ScrapedArticle | str | None:
-        """GET a single candidate URL; return article, "skip", or None."""
+        """GET a single candidate URL; return article, "skip", or None.
+
+        Uses streaming to avoid downloading the response body for 404s
+        and non-PDF responses — only the full PDF body is downloaded.
+        """
         url = build_export_url(serie, legis, sessao, numero)
 
         async with self._semaphore:
             try:
-                resp = await client.get(url)
+                async with client.stream("GET", url) as resp:
+                    if resp.status_code != 200:
+                        return None
+                    content_type = resp.headers.get("content-type", "")
+                    if "pdf" not in content_type.lower():
+                        logger.debug("Non-PDF response at %s: %s", url, content_type)
+                        return None
+                    # Only download the body for real PDFs
+                    content = await resp.aread()
             except Exception as exc:
                 logger.debug("GET failed for %s: %s", url, exc)
                 return None
 
-        if resp.status_code != 200:
-            return None
-
-        content_type = resp.headers.get("content-type", "")
-        if "pdf" not in content_type.lower():
-            logger.debug("Non-PDF response at %s: %s", url, content_type)
-            return None
-
-        # Extract text from first N pages for relevance check (fast path)
-        scan_text = extract_text_from_pdf(resp.content, max_pages=_RELEVANCE_SCAN_PAGES)
+        # Extract text from first N pages for relevance check (threaded — avoids blocking event loop)
+        scan_text = await self._extract_pdf_text(content, max_pages=_RELEVANCE_SCAN_PAGES)
         if not scan_text:
             return None
 
@@ -315,8 +351,8 @@ class ParliamentSpider(BaseSpider):
         if not _is_media_relevant(scan_text):
             return "skip"
 
-        # Media-relevant! Extract full text for storage
-        full_text = extract_text_from_pdf(resp.content)
+        # Media-relevant! Extract full text for storage (threaded)
+        full_text = await self._extract_pdf_text(content)
         if not full_text:
             return None
 
@@ -340,6 +376,43 @@ class ParliamentSpider(BaseSpider):
             language="pt",
             source_id=source_id,
         )
+
+
+def _load_existing_urls(source_id: str) -> set[str]:
+    """Load URLs already stored in the DB for this source.
+
+    Queries SQLite directly (not through SQLAlchemy) to avoid coupling
+    the spider to the ORM.  This is called once per :meth:`fetch` so
+    the overhead of opening a connection is negligible (~5 ms).
+    """
+    from pathlib import Path
+    import sqlite3
+
+    db_path = (
+        Path(__file__).resolve().parent.parent.parent.parent
+        / "data" / "vespeiro.db"
+    )
+    if not db_path.exists():
+        return set()
+    try:
+        conn = sqlite3.connect(str(db_path))
+        rows = conn.execute(
+            "SELECT url FROM articles WHERE source_id = ?", (source_id,)
+        ).fetchall()
+        conn.close()
+        existing = {row[0] for row in rows}
+        # Old records use http:// but the spider now generates https://.
+        # Add both versions so the dedup works regardless of stored scheme.
+        https_additions = {
+            u.replace("http://", "https://", 1)
+            for u in existing
+            if u.startswith("http://")
+        }
+        existing.update(https_additions)
+        return existing
+    except Exception as exc:
+        logger.debug("Failed to load existing URLs from DB: %s", exc)
+        return set()
 
 
 _LEGIS_ROMAN: dict[str, str] = {

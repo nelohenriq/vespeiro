@@ -193,7 +193,18 @@ class CorrelationAnalyzer:
             return {}
 
     async def _get_editorial_metrics(self) -> dict[str, dict]:
-        """Get editorial metrics per outlet from the database."""
+        """Get editorial metrics per outlet from the database.
+
+        For each Portuguese media outlet, fetches:
+        - Total article count
+        - Government coverage percentage
+        - Average sentiment score (using :class:`SentimentAnalyzer`)
+
+        Sentiment analysis is computed on the last 100 articles per outlet
+        (title + first 500 chars of content/summary) to balance accuracy
+        and performance. Falls back gracefully to ``None`` if the sentiment
+        model is unavailable.
+        """
         if self.db is None:
             return {}
 
@@ -228,6 +239,10 @@ class CorrelationAnalyzer:
                 .group_by(Article.source_id)
             )
 
+            # Pre-initialize SentimentAnalyzer (lazy-loaded, no cost until first call)
+            from src.pipeline.sentiment import SentimentAnalyzer
+            sentiment = SentimentAnalyzer()
+
             # Filter to only media outlet sources
             metrics: dict[str, dict] = {}
             for row in result.all():
@@ -239,18 +254,91 @@ class CorrelationAnalyzer:
                 # Check for government coverage
                 gov_count = await self._count_gov_articles(source_id)
 
+                # ── Sentiment analysis (last 100 articles per outlet) ──
+                avg_sentiment = await self._compute_avg_sentiment(
+                    source_id, sentiment
+                )
+
                 metrics[source_id] = {
                     "articles": count,
                     "gov_coverage_pct": (
                         gov_count / count if count > 0 else 0.0
                     ),
-                    "avg_sentiment": None,  # Requires sentiment pipeline
+                    "avg_sentiment": avg_sentiment,
                 }
 
             return metrics
         except Exception as exc:
             logger.warning("Failed to get editorial metrics: %s", exc)
             return {}
+
+    @staticmethod
+    def _build_sentiment_text(article) -> str:
+        """Build a text string suitable for sentiment analysis from an article.
+
+        Uses the title plus the first 500 characters of content (or summary as
+        fallback).  HTML tags are stripped from summaries.  This matches the
+        pattern used by the Lusa dependency analyzer.
+        """
+        from html import unescape
+
+        title = (article.title or "").strip()
+
+        content = (article.content_text or "").strip()
+        if not content:
+            summary = (article.summary or "").strip()
+            summary = re.sub(r"<[^>]+>", " ", summary)
+            summary = unescape(summary)
+            content = summary.strip()
+
+        lead = content[:500]
+        return f"{title} {lead}".strip()
+
+    async def _compute_avg_sentiment(
+        self,
+        source_id: str,
+        sentiment: "SentimentAnalyzer",
+    ) -> float | None:
+        """Compute average sentiment score for articles from a source.
+
+        Fetches the last 100 articles from the given source, runs sentiment
+        analysis on each (title + lead), and returns the mean score in
+        ``[-1.0, +1.0]``. Returns ``None`` if no articles or model unavailable.
+        """
+        if self.db is None:
+            return None
+
+        try:
+            from sqlalchemy import select, desc
+            from src.db.models import Article
+
+            result = await self.db.execute(
+                select(Article)
+                .where(Article.source_id == source_id)
+                .where(
+                    Article.content_text.isnot(None)
+                    | Article.summary.isnot(None)
+                )
+                .order_by(desc(Article.collected_at))
+                .limit(100)
+            )
+            articles = list(result.scalars().all())
+            if not articles:
+                return None
+
+            texts = [self._build_sentiment_text(a) for a in articles]
+            results = sentiment.analyze_batch(texts, lang="pt")
+
+            scores = [
+                s for s in (sentiment.score(r) for r in results)
+                if s is not None
+            ]
+            if not scores:
+                return None
+            return round(sum(scores) / len(scores), 4)
+        except Exception as exc:
+            logger.debug("Sentiment computation failed for %s: %s", source_id, exc)
+            return None
 
     async def _count_gov_articles(self, source_id: str) -> int:
         """Count articles mentioning government-related terms."""

@@ -14,6 +14,14 @@ for embedding cosine similarity on short texts), that article is classified as
 
 Falls back gracefully to zero matches if the sentence-transformers model
 cannot be loaded (e.g. first-run download not yet complete).
+
+Topic Classification
+--------------------
+After computing per-outlet dependency, the analyzer classifies each outlet
+article into a topic category using a keyword-based approach (TF-IDF-like
+term matching against curated keyword sets for 12 Portuguese news topics).
+Per-topic dependency percentages are computed and returned in
+``LusaDependencyMetrics.per_topic``.
 """
 
 from __future__ import annotations
@@ -29,6 +37,124 @@ from src.db.models import Source, Article
 from src.stats.models import LusaDependencyMetrics, OutletDependency
 
 logger = logging.getLogger(__name__)
+
+
+# ── Topic classification keywords ───────────────────────────────────────────
+# Each topic maps to a set of Portuguese-language keywords.  Classification
+# is done by counting keyword matches in the article text (title + lead).
+# The topic with the most matches wins; ``"outros"`` is the fallback.
+# These sets are curated for Portuguese news coverage and can be extended.
+
+_CLASSIFY_TOPIC_KEYWORDS: dict[str, set[str]] = {
+    "política": {
+        "governo", "primeiro-ministro", "presidente da república", "parlamento",
+        "assembleia da república", "partido", "ps", "psd", "chega",
+        "bloco de esquerda", "pcp", "livre", "pan", "deputado",
+        "ministro", "ministra", "eleições", "votação", "orçamento do estado",
+        "coligação", "maioria absoluta", "moção", "censura", "demissão",
+        "crise política", "liderança", "campanha eleitoral", "sondagem",
+        "poder político", "primeiro ministro", "presidente da republica",
+        "assembleia da republica", "autarquias", "municipio", "câmara municipal",
+        "presidencia", "cds", "il", "iniciativa liberal",
+    },
+    "economia": {
+        "economia", "pib", "inflação", "taxa de juro", "banco de portugal",
+        "banco central", "orçamento", "finanças", "fiscal", "irs", "irc", "iva",
+        "imposto", "receita fiscal", "despesa pública", "dívida pública",
+        "défice", "excedente", "crescimento económico", "recessão",
+        "mercado", "bolsa", "psix", "empresa", "negócios", "startup",
+        "investimento", "exportação", "importação", "turismo",
+        "desemprego", "emprego", "salário", "pensão", "segurança social",
+        "prr", "plano de recuperação", "fundos europeus", "bancos",
+        "finanças públicas", "contenção orçamental", "poupança",
+        "crise económica", "recuperação económica", "pacote",
+    },
+    "saúde": {
+        "saúde", "sns", "serviço nacional de saúde", "hospital", "centro de saúde",
+        "médico", "enfermeiro", "urgência", "consulta", "vacina", "medicamento",
+        "doença", "pandemia", "epidemia", "covid", "internamento",
+        "ministério da saúde", "direção geral da saúde", "dgs",
+        "ordem dos médicos", "cuidados intensivos", "cirurgia",
+        "transplante", "saúde mental", "doente", "utente",
+    },
+    "educação": {
+        "educação", "escola", "universidade", "faculdade", "politécnico",
+        "professor", "aluno", "estudante", "ensino", "curso", "licenciatura",
+        "mestrado", "doutoramento", "bolsa de estudo", "ação social escolar",
+        "ministério da educação", "provas de aferição", "exames nacionais",
+        "manuais escolares", "abandono escolar", "sucesso escolar",
+        "greve", "sindicato", "avaliação de professores",
+    },
+    "justiça": {
+        "justiça", "tribunal", "juiz", "procurador", "advogado", "magistrado",
+        "ministério público", "supremo tribunal", "conselho superior",
+        "crime", "processo crime", "investigação criminal",
+        "julgamento", "sentença", "condenação", "absolvição",
+        "recurso", "prisão", "estabelecimento prisional",
+        "corrupção", "fraude", "branqueamento", "suborno",
+        "operação", "busca", "apreensão", "arguido",
+    },
+    "desporto": {
+        "desporto", "futebol", "benfica", "porto", "sporting", "braga",
+        "seleção nacional", "liga", "campeonato", "taça",
+        "jogador", "treinador", "golo", "vitória", "derrota", "estádio",
+        "olimpíadas", "jogos olímpicos", "atletismo", "natação", "ténis",
+        "ciclismo", "modalidade", "federação", "clube",
+    },
+    "cultura": {
+        "cultura", "cinema", "teatro", "música", "dança", "literatura",
+        "livro", "autor", "escritor", "poesia", "romance", "ensaio",
+        "exposição", "museu", "galeria", "arte", "artista", "pintura",
+        "escultura", "arquitetura", "património", "unesco", "fado",
+        "festival", "espetáculo", "concerto", "série", "documentário",
+        "netflix", "streaming", "cinema português",
+    },
+    "ambiente": {
+        "ambiente", "clima", "alterações climáticas", "aquecimento global",
+        "sustentabilidade", "carbono", "pegada ecológica", "energia renovável",
+        "energia solar", "energia eólica", "transição energética",
+        "poluição", "qualidade do ar", "emissões", "co2", "lixo", "resíduos",
+        "reciclagem", "economia circular", "biodiversidade", "espécie",
+        "floresta", "incêndio florestal", "água", "seca", "oceanos",
+        "sustentável", "carbono neutro",
+    },
+    "internacional": {
+        "internacional", "europa", "união europeia", "ue", "otan", "nato",
+        "estados unidos", "eua", "china", "rússia", "ucrânia", "guerra",
+        "conflito internacional", "sanções", "diplomacia", "embaixador",
+        "nações unidas", "onu", "fmi", "banco mundial",
+        "comércio internacional", "migração", "refugiado", "fronteira",
+        "médio oriente", "israel", "palestina", "síria", "afeganistão",
+        "brasil", "palop", "cplp", "comunidade dos países de língua portuguesa",
+        "áfrica", "ásia", "américa latina", "g7", "g20",
+    },
+    "crime": {
+        "crime", "assalto", "roubo", "homicídio", "assassinato", "morte violenta",
+        "violência doméstica", "violação", "abuso", "tráfico", "droga",
+        "toxicodependência", "polícia", "psp", "gnr", "pj",
+        "polícia judiciária", "segurança pública", "violência",
+        "agressão", "sequestro", "incêndio criminoso", "arma",
+    },
+    "sociedade": {
+        "sociedade", "população", "demografia", "natalidade", "envelhecimento",
+        "família", "criança", "jovem", "idoso", "deficiência", "inclusão",
+        "igualdade de género", "discriminação", "racismo", "xenofobia",
+        "lgbt", "direitos humanos", "associativismo", "voluntariado",
+        "igreja", "religião", "católica", "fátima", "papa",
+        "consumo", "direitos do consumidor", "habitação", "renda", "casa",
+        "transportes", "mobilidade", "metro", "comboio", "cp", "carris",
+    },
+    "ciência": {
+        "ciência", "tecnologia", "investigação científica", "inovação",
+        "inteligência artificial", "ia", "digital", "transformação digital",
+        "internet", "dados", "software", "aplicação", "app",
+        "startup", "espaço", "satélite", "nasa", "esa",
+        "agência espacial", "biologia", "genética", "dna",
+        "investigador", "laboratório", "artigo científico", "estudo",
+        "centro de investigação", "física", "química", "matemática",
+        "engenharia", "computação", "algoritmo",
+    },
+}
 
 
 class LusaDependencyAnalyzer:
@@ -97,6 +223,7 @@ class LusaDependencyAnalyzer:
             per_outlet: dict[str, OutletDependency] = {}
             total_outlet_articles = 0
             total_derived = 0
+            per_topic_counts: dict[str, list[int]] = {}  # topic -> [total, derived]
 
             for outlet in outlets:
                 outlet_articles = await self._fetch_articles(outlet.id, start, now)
@@ -107,7 +234,8 @@ class LusaDependencyAnalyzer:
                 if outlet_vecs is None:
                     continue
 
-                derived = self._count_derived_from_vecs(lusa_vecs, outlet_vecs)
+                derived_mask = self._derived_mask_from_vecs(lusa_vecs, outlet_vecs)
+                derived = sum(derived_mask)
                 total_outlet_articles += len(outlet_articles)
                 total_derived += derived
 
@@ -117,16 +245,32 @@ class LusaDependencyAnalyzer:
                     lusa_derived=derived,
                 )
 
+                # Accumulate per-topic counts
+                for i, article in enumerate(outlet_articles):
+                    text = _article_text(article)
+                    topic = self._classify_topic(text)
+                    if topic not in per_topic_counts:
+                        per_topic_counts[topic] = [0, 0]
+                    per_topic_counts[topic][0] += 1
+                    if derived_mask[i]:
+                        per_topic_counts[topic][1] += 1
+
             global_pct = (
                 round(total_derived / total_outlet_articles * 100, 1)
                 if total_outlet_articles > 0
                 else None
             )
 
+            # Compute per-topic percentages
+            per_topic: dict[str, float] = {}
+            for topic, (total, derived_count) in per_topic_counts.items():
+                if total > 0:
+                    per_topic[topic] = round(derived_count / total * 100, 1)
+
             return LusaDependencyMetrics(
                 global_pct=global_pct,
                 per_outlet=per_outlet,
-                per_topic={},  # Placeholder until topic classification is built
+                per_topic=per_topic,
             )
 
         except Exception as exc:
@@ -193,6 +337,27 @@ class LusaDependencyAnalyzer:
 
     # ── Matching logic ─────────────────────────────────────────────────────
 
+    # ── Topic classification ────────────────────────────────────────────────
+
+    @staticmethod
+    def _classify_topic(text: str) -> str:
+        """Classify article text into a topic category using keyword matching.
+
+        Returns the best-matching topic key from ``_CLASSIFY_TOPIC_KEYWORDS``
+        or ``"outros"`` if no keywords match.
+        """
+        if not text:
+            return "outros"
+        text_lower = text.lower()
+        best_topic = "outros"
+        best_score = 0
+        for topic, keywords in _CLASSIFY_TOPIC_KEYWORDS.items():
+            score = sum(1 for kw in keywords if kw in text_lower)
+            if score > best_score:
+                best_score = score
+                best_topic = topic
+        return best_topic
+
     @staticmethod
     def _embed_articles(articles: list[Article]) -> "np.ndarray | None":  # type: ignore[valid-type]
         """Embed a list of articles into a (N, 1024) numpy array.
@@ -247,6 +412,24 @@ class LusaDependencyAnalyzer:
                 derived += 1
 
         return derived
+
+    def _derived_mask_from_vecs(
+        self,
+        lusa_vecs: "np.ndarray",  # type: ignore[valid-type]
+        outlet_vecs: "np.ndarray",  # type: ignore[valid-type]
+    ) -> list[bool]:
+        """Return a boolean mask indicating which outlet articles are Lusa-derived.
+
+        Like :meth:`_count_derived_from_vecs` but returns per-article booleans
+        instead of a count, enabling per-article analysis (e.g. topic breakdown).
+        """
+        import numpy as np
+
+        if lusa_vecs.size == 0 or outlet_vecs.size == 0:
+            return [False] * outlet_vecs.shape[0]
+
+        sim_matrix: np.ndarray = outlet_vecs @ lusa_vecs.T
+        return [float(row.max()) >= self.match_threshold for row in sim_matrix]
 
     def _count_derived(
         self, lusa_articles: list[Article], outlet_articles: list[Article]
