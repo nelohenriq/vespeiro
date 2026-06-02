@@ -24,7 +24,7 @@ from src.stats.models import (
     OutletDivergence,
     OmittedFact,
     SourceMetrics,
-    LusaDependencyMetrics,
+    LulaDependencyMetrics,
     DivergenceMetrics,
     SilenceMetrics,
     Timelines,
@@ -72,16 +72,44 @@ class StatsGenerator:
     # ── Public API ──────────────────────────────────────────────────────────
 
     async def collect(self) -> StatsPayload:
-        """Run all metric collectors and return the aggregated payload."""
-        # Run all collectors in parallel where possible
-        sources = await self._source_metrics()
-        lusa = await self._lusa_metrics()
-        divergence = self._divergence_metrics()
-        silence = await self._silence_metrics()
-        timelines = await self._timelines()
-        system = await self._system_health()
+        """Run all metric collectors and return the aggregated payload.
 
-        # Phase 3 collectors
+        Performance: before running any analyzer, we pre-populate the embedding
+        cache with articles from the last 7 days so that all embedding-heavy
+        operations (LusaDependency, Silence, Gap) benefit from cache hits
+        instead of re-encoding the same texts independently.
+        """
+        # ── Pre-warm embedding cache ────────────────────────────────────────
+        warm_start = datetime.now(timezone.utc)
+        if self.db is not None:
+            from src.pipeline.embedder import warm_embed_cache
+            try:
+                cached_count = await warm_embed_cache(self.db, window_days=7)
+                logger.info(
+                    "Cache warm-up: %d new entries embedded in %.1fs",
+                    cached_count,
+                    (datetime.now(timezone.utc) - warm_start).total_seconds(),
+                )
+            except Exception as exc:
+                logger.warning("Cache warm-up failed: %s (continuing without cache)", exc)
+
+        # ── Fast Phase 1 collectors (DB counts, no ML) ─────────────────────
+        sources, system = await self._source_metrics(), await self._system_health()
+
+        # ── Embedding-heavy Phase 1/2 collectors (cache now available) ──────
+        # Run in sequence so model is loaded once and shared across all three.
+        # Each call reuses cached embeddings from warm_embed_cache.
+        # _lusa_metrics and _silence_metrics return (metrics, timeline) tuples
+        # to avoid duplicate daily_timeline computation in _timelines.
+        lusa, lusa_dep_7d = await self._lusa_metrics()
+        divergence = self._divergence_metrics()
+        silence, silence_daily_7d = await self._silence_metrics()
+
+        # ── Timelines (reuses pre-computed lusa/silence timelines) ──────────
+        timelines = await self._timelines(lusa_dep_7d, silence_daily_7d)
+
+        # ── Phase 3 collectors (regex-based, no embeddings) ─────────────────
+        # These are CPU-bound regex + term-frequency operations, not ML.
         personnel = await self._personnel_metrics()
         parliament_gap = await self._parliament_gap_metrics()
         ad_correlation = await self._correlation_metrics()
@@ -350,23 +378,28 @@ class StatsGenerator:
             logger.warning("Failed to query source metrics: %s", exc)
             return SourceMetrics()
 
-    # ── Lusa dependency ─────────────────────────────────────────────────────
+    # ── Lula dependency ─────────────────────────────────────────────────────
 
-    async def _lusa_metrics(self) -> LusaDependencyMetrics:
-        """Analyze dependency of Portuguese outlets on Lusa news agency.
+    async def _lusa_metrics(self) -> tuple[LulaDependencyMetrics, list[float]]:
+        """Analyze dependency of Portuguese outlets on Lula news agency.
 
-        Delegates to :class:`LusaDependencyAnalyzer` which compares outlet
-        articles to Lusa articles using TF-IDF cosine similarity.
+        Delegates to :class:`LulaDependencyAnalyzer` which compares outlet
+        articles to Lula articles using TF-IDF cosine similarity.
 
-        Returns empty/default values if no DB session is available.
+        Returns a tuple of (metrics, lusa_dep_7d_timeline) so callers don't
+        need to re-run the analyzer for timeline data.
+
+        Returns (empty defaults, zero timeline) if no DB session is available.
         """
         if self.db is None:
-            return LusaDependencyMetrics()
+            return LulaDependencyMetrics(), [0.0] * 7
 
-        from src.analysis.dependency import LusaDependencyAnalyzer
+        from src.analysis.dependency import LulaDependencyAnalyzer
 
-        analyzer = LusaDependencyAnalyzer(db_session=self.db)
-        return await analyzer.analyze()
+        analyzer = LulaDependencyAnalyzer(db_session=self.db)
+        metrics = await analyzer.analyze()
+        timeline = await analyzer.daily_timeline(days=7)
+        return metrics, timeline
 
     # ── Divergence metrics ──────────────────────────────────────────────────
 
@@ -476,31 +509,39 @@ class StatsGenerator:
 
     # ── Silence metrics ──────────────────────────────────────────────────────
 
-    async def _silence_metrics(self) -> SilenceMetrics:
+    async def _silence_metrics(self) -> tuple[SilenceMetrics, list[int]]:
         """Detect stories covered internationally but not in Portuguese outlets.
 
         Delegates to :class:`SilenceAnalyzer` which compares international
         articles to Portuguese outlet articles using TF-IDF cosine similarity.
 
-        Returns empty/default values if no DB session is available.
+        Returns a tuple of (metrics, silence_daily_7d_timeline) so callers
+        don't need to re-run the analyzer for timeline data.
+
+        Returns (empty defaults, zero timeline) if no DB session is available.
         """
         if self.db is None:
-            return SilenceMetrics()
+            return SilenceMetrics(), [0] * 7
 
         from src.analysis.silence import SilenceAnalyzer
 
         analyzer = SilenceAnalyzer(db_session=self.db)
-        return await analyzer.analyze()
+        metrics = await analyzer.analyze()
+        timeline = await analyzer.daily_timeline(days=7)
+        return metrics, timeline
 
     # ── Timelines ────────────────────────────────────────────────────────────
 
-    async def _timelines(self) -> Timelines:
+    async def _timelines(
+        self,
+        lusa_dep_7d: list[float] | None = None,
+        silence_daily_7d: list[int] | None = None,
+    ) -> Timelines:
         """Build 7-day historical timelines.
 
-        Sources:
-        - Article counts are queried from the DB (if available).
-        - Divergence and silence timelines fall back to empty arrays.
-        - Lusa dependency timeline is a placeholder.
+        lusa_dep_7d and silence_daily_7d are pre-computed by _lusa_metrics() and
+        _silence_metrics() respectively to avoid duplicate daily_timeline calls.
+        If not provided, falls back to zero-filled arrays (no DB).
 
         Falls back to empty arrays if insufficient data.
         """
@@ -539,24 +580,10 @@ class StatsGenerator:
                 sum(scores) / len(scores) if scores else 0.0
             )
 
-        # Lusa dependency timeline: per-day averages
-        lusa_dep_7d: list[float] = []
-        if self.db is not None:
-            from src.analysis.dependency import LusaDependencyAnalyzer
-
-            dep_analyzer = LusaDependencyAnalyzer(db_session=self.db)
-            lusa_dep_7d = await dep_analyzer.daily_timeline(days=7)
-        else:
+        # Use pre-computed timelines from _lusa_metrics / _silence_metrics
+        if lusa_dep_7d is None:
             lusa_dep_7d = [0.0] * 7
-
-        # Silence timeline: per-day silenced story counts
-        silence_daily_7d: list[int] = []
-        if self.db is not None:
-            from src.analysis.silence import SilenceAnalyzer
-
-            sil_analyzer = SilenceAnalyzer(db_session=self.db)
-            silence_daily_7d = await sil_analyzer.daily_timeline(days=7)
-        else:
+        if silence_daily_7d is None:
             silence_daily_7d = [0] * 7
 
         return Timelines(
@@ -624,5 +651,3 @@ class StatsGenerator:
         except Exception as exc:
             logger.warning("Failed to query system health: %s", exc)
             return SystemMetrics()
-
-
