@@ -136,7 +136,7 @@ vespeiro/
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python ≥3.12
+- Python ≥3.11
 - Node.js ≥20
 
 ### Backend
