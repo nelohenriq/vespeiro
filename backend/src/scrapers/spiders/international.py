@@ -24,6 +24,10 @@ INTERNATIONAL_FEEDS: dict[str, str] = {
     "guardian": "https://www.theguardian.com/world/rss",
     "ap": "https://feeds.feedburner.com/AssociatedPressNews",
     "elpais": "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada",
+    "afp": "https://news.google.com/rss/search?q=site:afp.com&hl=en&ceid=US:en",
+    "lemonde": "https://www.lemonde.fr/rss/une.xml",
+    "dw": "https://rss.dw.com/rdf/rss-en-all",
+    "france24": "https://www.france24.com/en/rss",
 }
 
 

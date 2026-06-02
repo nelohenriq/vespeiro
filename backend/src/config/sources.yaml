@@ -49,13 +49,14 @@ sources:
 
   - id: expresso
     name: "Expresso"
-    # RSS oficial descontinuado.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:expresso.pt&hl=pt-PT&ceid=PT:pt"
+    # RSS oficial descontinuado. Sitemap + Google News RSS via Scrapy.
+    # Protegido por DataDome — artigos têm título + data mas sem texto completo.
+    type: scrape
+    url: "https://expresso.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: cm_jornal
     name: "Correio da Manhã"
@@ -69,9 +70,12 @@ sources:
 
   - id: jn
     name: "Jornal de Notícias"
-    # Sem RSS público.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:jn.pt&hl=pt-PT&ceid=PT:pt"
+    # Sem RSS público. Scrapy bloqueado (TLS fingerprinting). Homepage JS-heavy
+    # mas com links /artigo/ no HTML SSR. Spider usa news sitemap com news:news
+    # para URLs, títulos e datas, e httpx para conteúdo.
+    # Spider: backend/src/scrapers/spiders/jn.py
+    type: scrape
+    url: "https://www.jn.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -79,9 +83,11 @@ sources:
 
   - id: dn
     name: "Diário de Notícias"
-    # Sem RSS público.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:dn.pt&hl=pt-PT&ceid=PT:pt"
+    # Sem RSS público. Homepage JS-heavy — site usa sitemap diário com URLs
+    # de artigos. As páginas de artigos são SSR (acessíveis via httpx).
+    # Spider: backend/src/scrapers/spiders/dn.py
+    type: scrape
+    url: "https://www.dn.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -109,18 +115,23 @@ sources:
 
   - id: cnn_portugal
     name: "CNN Portugal"
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:cnnportugal.iol.pt&hl=pt-PT&ceid=PT:pt"
+    # SSR homepage with descriptive-slug article links. Scrapy with a broad
+    # a[href^='https://cnnportugal.iol.pt/'] selector catches all articles.
+    # Non-article pages (podcasts, videos) are filtered by the spider's nav-link
+    # detector. No JSON-LD on article pages — dates come from <time> tags.
+    type: scrape
+    url: "https://cnnportugal.iol.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
-    extraction_strategy: trafilatura
+    extraction_strategy: scrapy
 
   - id: tsf
     name: "TSF — Rádio Notícias"
-    # Bloqueia scraping (HTTP 403). Google News RSS como fallback.
-    type: google_news_rss
-    url: "https://news.google.com/rss/search?q=site:tsf.pt&hl=pt-PT&ceid=PT:pt"
+    # Scrapy bloqueado (TLS fingerprinting). Spider usa httpx para fazer scraping
+    # da homepage SSR (~250 links /artigo/) e extrai conteúdo via trafilatura.
+    type: scrape
+    url: "https://www.tsf.pt"
     language: pt
     category: mainstream
     schedule_interval_minutes: 30
@@ -155,6 +166,26 @@ sources:
     category: mainstream
     schedule_interval_minutes: 30
     extraction_strategy: scrapy
+
+  - id: tvi_noticias
+    name: "TVI Notícias"
+    # Sem RSS público. Google News RSS como fallback.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:tvi.iol.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
+
+  - id: jornal_negocios
+    name: "Jornal de Negócios"
+    # Sem RSS público. Google News RSS como fallback.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:jornaldenegocios.pt&hl=pt-PT&ceid=PT:pt"
+    language: pt
+    category: mainstream
+    schedule_interval_minutes: 30
+    extraction_strategy: trafilatura
 
   # ── International sources ────────────────────────────────────────────────
 
@@ -199,6 +230,46 @@ sources:
     type: rss
     url: "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"
     language: es
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: afp
+    name: "Agence France-Presse (AFP)"
+    # AFP não tem RSS público (serviço pago B2B). Google News RSS como fallback.
+    type: google_news_rss
+    url: "https://news.google.com/rss/search?q=site:afp.com&hl=en&ceid=US:en"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: lemonde
+    name: "Le Monde"
+    # RSS oficial público.
+    type: rss
+    url: "https://www.lemonde.fr/rss/une.xml"
+    language: fr
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: dw
+    name: "Deutsche Welle"
+    # RSS oficial público (inglês).
+    type: rss
+    url: "https://rss.dw.com/rdf/rss-en-all"
+    language: en
+    category: international
+    schedule_interval_minutes: 60
+    extraction_strategy: trafilatura
+
+  - id: france24
+    name: "France 24"
+    # RSS oficial público (inglês).
+    type: rss
+    url: "https://www.france24.com/en/rss"
+    language: en
     category: international
     schedule_interval_minutes: 60
     extraction_strategy: trafilatura

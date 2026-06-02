@@ -98,6 +98,24 @@ outlets:
     country: PT
     notes: "Estação de rádio noticiosa. Parte do Global Media Group com JN e DN."
 
+  - id: tvi_noticias
+    name: "TVI Notícias"
+    owner: "Media Capital"
+    owner_group: "Grupo Media Capital"
+    ultimate_owner: "Pluralis (ex-Grupo Ongoing / Mário Ferreira)"
+    type: commercial_tv
+    country: PT
+    notes: "Canal de notícias do grupo Media Capital (mesmo grupo da CNN Portugal). Substituiu a TVI24."
+
+  - id: jornal_negocios
+    name: "Jornal de Negócios"
+    owner: "Trust in News"
+    owner_group: "Grupo Trust in News"
+    ultimate_owner: "Luís Santos"
+    type: newspaper
+    country: PT
+    notes: "Jornal económico de referência. Propriedade do grupo Trust in News (mesmo grupo do ECO)."
+
   - id: eco
     name: "ECO — Economia Online"
     owner: "Trust in News"

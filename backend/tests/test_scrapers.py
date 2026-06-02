@@ -32,14 +32,15 @@ async def test_lusa_spider_fetches_articles():
 
 @pytest.mark.asyncio
 async def test_portugal_media_gnrss():
-    """Test Google News RSS for Público."""
+    """Test Google News RSS for a source still using google_news_rss type."""
     from src.scrapers.spiders.portugal_media import PortugalMediaSpider
 
     config = load_sources()
-    pub_cfg = next(s for s in config.sources if s.id == "publico")
+    # Use sic_noticias — still uses google_news_rss with PortugalMediaSpider
+    gnrss_cfg = next(s for s in config.sources if s.id == "sic_noticias")
 
     spider = PortugalMediaSpider()
-    articles = await spider.fetch("publico", pub_cfg.url)
+    articles = await spider.fetch("sic_noticias", gnrss_cfg.url)
 
     assert len(articles) > 0
     assert articles[0].title

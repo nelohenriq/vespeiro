@@ -3,7 +3,7 @@ name: Scrape Sources
 on:
   schedule:
     # ── High-frequency news: every 30 min ──────────────────────────────────
-    # 16 Portuguese sources (Lusa + 15 PT media outlets)
+    # 18 Portuguese sources (Lusa + 17 PT media outlets)
     - cron: '*/30 * * * *'
 
     # ── International: every 2 hours ───────────────────────────────────────
@@ -91,8 +91,8 @@ jobs:
           echo "🔍 Scrape group: $GROUP"
 
           # Source groups with their IDs
-          NEWS_SOURCES="lusa rtp_noticias publico observador expresso cm_jornal jn dn sic_noticias eco cnn_portugal tsf renascenca sapo_24 nam"
-          INTL_SOURCES="reuters bbc guardian ap elpais"
+          NEWS_SOURCES="lusa rtp_noticias publico observador expresso cm_jornal jn dn sic_noticias eco cnn_portugal tsf renascenca sapo_24 nam tvi_noticias jornal_negocios"
+          INTL_SOURCES="reuters bbc guardian ap elpais afp lemonde dw france24"
           GOV_SOURCES="portugal_gov presidencia"
           WEEKLY_SOURCES="dre_appointments dre_general_appointments parlamento_debates erc_advertising"
           ALL_SOURCES="$NEWS_SOURCES $INTL_SOURCES $GOV_SOURCES $WEEKLY_SOURCES"
@@ -138,6 +138,40 @@ jobs:
           echo "failed=$FAILED" >> "$GITHUB_OUTPUT"
           echo "articles=$TOTAL_ARTS" >> "$GITHUB_OUTPUT"
 
+      - name: Persist scrape metrics for baseline
+        if: always() && steps.scrape.outputs.status == 'ok'
+        run: |
+          mkdir -p data/scrape-metrics
+          TIMESTAMP=$(date -u +%s)
+          GROUP="${{ steps.groups.outputs.source }}"
+          cat > "data/scrape-metrics/${GROUP}-${TIMESTAMP}.json" <<EOF
+          {
+            "group": "$GROUP",
+            "timestamp": "$TIMESTAMP",
+            "success": ${{ steps.scrape.outputs.success }},
+            "failed": ${{ steps.scrape.outputs.failed }},
+            "articles": ${{ steps.scrape.outputs.articles }}
+          }
+          EOF
+          echo "📝 Persisted metrics for group=$GROUP (${{ steps.scrape.outputs.articles }} articles)"
+
+      - name: Commit scrape metrics
+        if: always() && steps.scrape.outputs.status == 'ok'
+        run: |
+          git config user.name "vespeiro-bot"
+          git config user.email "bot@vespeiro.pt"
+          # Pull first to avoid conflicts from concurrent scrape runs (news + international
+          # cron schedules overlap at :00 of even hours)
+          git pull --rebase --autostash 2>/dev/null || true
+          git add data/scrape-metrics/
+          if git diff --staged --quiet; then
+            echo "📄 No new metrics — skipping commit"
+          else
+            git commit -m "chore: add scrape metrics [skip ci]"
+            git push
+            echo "✅ Scrape metrics committed and pushed"
+          fi
+
       - name: Write GHA Summary
         if: always()
         run: |
@@ -152,8 +186,8 @@ jobs:
             echo "| New articles | ${{ steps.scrape.outputs.articles }} |"
             echo ''
             echo '### ⚡ Next scheduled'
-            echo '- News (16 PT sources): every 30 min'
-            echo '- International (5): every 2 hours'
+            echo '- News (17 PT sources): every 30 min'
+            echo '- International (9): every 2 hours'
             echo '- Government (2): every 6 hours'
             echo '- Weekly (DRE, Parliament, ERC): Monday 06:00 UTC'
           } >> "$GITHUB_STEP_SUMMARY"
