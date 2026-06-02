@@ -14,14 +14,17 @@ No external dependencies beyond httpx (already in the project).
 """
 from __future__ import annotations
 
+import math
 from datetime import datetime, timezone
 from typing import Any
 
 import httpx
 
-# ── Default thresholds (can be overridden per-call) ─────────────────────────
+from src.alerts.baseline import BaselineThresholds
+
+# ── Preserved backward-compatible constant ───────────────────────────────────
+# Re-exported for tests and external callers that may reference it.
 DEFAULT_DIVERGENCE_THRESHOLD = 0.35
-DEFAULT_SILENCE_STD_DEV_MULTIPLIER = 2.0
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -33,6 +36,13 @@ class TelegramBot:
 
     All methods return ``True`` on success, ``False`` on failure.  Errors are
     logged to stderr so they don't crash the calling pipeline.
+
+    Parameters
+    ----------
+    baseline:
+        Optional :class:`BaselineThresholds` instance for data-driven
+        anomaly thresholds.  Falls back to hardcoded defaults if not
+        provided or no ``baseline.json`` is available.
     """
 
     BASE_URL = "https://api.telegram.org/bot{token}/sendMessage"
@@ -43,10 +53,12 @@ class TelegramBot:
         chat_id: str,
         *,
         http_client: httpx.AsyncClient | None = None,
+        baseline: BaselineThresholds | None = None,
     ) -> None:
         self._token = bot_token
         self._chat_id = chat_id
         self._client = http_client  # optional injection for testing
+        self._baseline = baseline or BaselineThresholds()
 
     # ── Public API ──────────────────────────────────────────────────────────
 
@@ -69,7 +81,7 @@ class TelegramBot:
         anomaly_type: str,
         details: dict[str, Any],
         *,
-        divergence_threshold: float = DEFAULT_DIVERGENCE_THRESHOLD,
+        divergence_threshold: float | None = None,
     ) -> bool:
         """Send an anomaly alert.
 
@@ -77,11 +89,14 @@ class TelegramBot:
             anomaly_type: One of ``"divergence"``, ``"silence"``, ``"system"``.
             details: Key-value pairs describing the anomaly (e.g. outlet name,
                      score, threshold, etc.).
-            divergence_threshold: Threshold used (for display only).
+            divergence_threshold: Override threshold (defaults to baseline
+                value if available, else hardcoded fallback).
 
         Returns:
             ``True`` if sent successfully.
         """
+        if divergence_threshold is None:
+            divergence_threshold = self._get_divergence_threshold()
         lines = self._build_anomaly_alert(anomaly_type, details, divergence_threshold)
         message = "\n".join(lines)
         return await self._send(message)
@@ -98,8 +113,36 @@ class TelegramBot:
 
     # ── Message construction ────────────────────────────────────────────────
 
-    @staticmethod
-    def _build_daily_report(stats: Any) -> list[str]:
+    def _get_divergence_threshold(self) -> float:
+        """Get the divergence anomaly threshold (data-driven or fallback)."""
+        return self._baseline.get_divergence_threshold()
+
+    def _get_silence_threshold(self, avg_7d: float) -> float:
+        """Get the silence anomaly threshold (data-driven or fallback).
+
+        Delegates to :meth:`BaselineThresholds.get_silence_anomaly_threshold`
+        which uses historical stats.json data when available.
+        """
+        return self._baseline.get_silence_anomaly_threshold(current_avg_7d=avg_7d)
+
+    def _get_lusa_threshold(self, outlet_id: str | None = None) -> float:
+        """Get the Lusa dependency anomaly threshold (data-driven or fallback).
+
+        Delegates to :meth:`BaselineThresholds.get_lusa_dependency_threshold`.
+        """
+        return self._baseline.get_lusa_dependency_threshold(outlet_id=outlet_id)
+
+    def _get_daily_articles_threshold(self) -> dict[str, float | None]:
+        """Get the GHA baseline daily articles volume threshold.
+
+        Returns a dict with ``expected_mean``, ``expected_std``, and
+        ``threshold`` (all ``None`` when no baseline.json is loaded).
+
+        Delegates to :meth:`BaselineThresholds.get_daily_articles_threshold`.
+        """
+        return self._baseline.get_daily_articles_threshold()
+
+    def _build_daily_report(self, stats: Any) -> list[str]:
         """Build the HTML-formatted daily briefing lines from a stats object."""
         now = datetime.now(timezone.utc)
         date_label = now.strftime("%d de %B de %Y")
@@ -141,7 +184,8 @@ class TelegramBot:
             for outlet_id, od in sorted(div.per_outlet.items(), key=lambda x: x[1].avg, reverse=True):
                 label = outlet_id.replace("_", " ").title()
                 opct = od.avg * 100
-                icon = "⚠️" if od.avg >= DEFAULT_DIVERGENCE_THRESHOLD else "✓"
+                div_threshold = self._get_divergence_threshold()
+                icon = "⚠️" if od.avg >= div_threshold else "✓"
                 lines.append(f"• {label}: {opct:.0f}% {icon}")
             lines.append("")
 
@@ -154,24 +198,61 @@ class TelegramBot:
                 lines.append(f"• <i>{story.title}</i> (gap: {gap:.0f}%)")
             lines.append("")
 
+        # ── Timelines (used by anomaly checks below) ────────────────────────
+        tl = stats.timelines
+
         # ── Divergence anomalies ────────────────────────────────────────────
         anomalies: list[str] = []
+        div_threshold = self._get_divergence_threshold()
         if div.global_avg is not None:
             for outlet_id, od in sorted(div.per_outlet.items(), key=lambda x: x[1].avg, reverse=True):
-                if od.avg >= DEFAULT_DIVERGENCE_THRESHOLD:
+                if od.avg >= div_threshold:
                     label = outlet_id.replace("_", " ").title()
                     opct = od.avg * 100
                     anomalies.append(
                         f"⚠️ Divergência {label} acima do limiar "
-                        f"({opct:.0f}% > {DEFAULT_DIVERGENCE_THRESHOLD * 100:.0f}%)"
+                        f"({opct:.0f}% > {div_threshold * 100:.0f}%)"
                     )
 
         if sil.today > 0 and sil.avg_7d > 0:
-            threshold = sil.avg_7d + DEFAULT_SILENCE_STD_DEV_MULTIPLIER * (
-                max(sil.avg_7d, 1.0)
-            )
+            threshold = self._get_silence_threshold(sil.avg_7d)
             if sil.today > threshold:
                 anomalies.append(f"⚠️ Silêncio elevado: {sil.today} > {threshold:.1f} (média 7d: {sil.avg_7d:.1f})")
+
+        # ── Lusa dependency anomalies ───────────────────────────────────────
+        if dep.global_pct is not None:
+            for outlet_id, od in sorted(dep.per_outlet.items(), key=lambda x: x[1].pct, reverse=True):
+                lusa_threshold = self._get_lusa_threshold(outlet_id)
+                if lusa_threshold < 100.0 and od.pct > lusa_threshold:
+                    label = outlet_id.replace("_", " ").title()
+                    anomalies.append(
+                        f"⚠️ Dependência alta da Lusa — {label}: {od.pct:.0f}% > {lusa_threshold:.0f}%"
+                    )
+
+        # ── Scrape volume anomaly (primary: 7-day timeline) ────────────────
+        if tl.articles_daily_7d and len(tl.articles_daily_7d) >= 3:
+            vals = [float(v) for v in tl.articles_daily_7d]
+            n = len(vals)
+            mean_7d = sum(vals) / n
+            if n >= 2:
+                variance = sum((v - mean_7d) ** 2 for v in vals) / (n - 1)
+                std_7d = math.sqrt(variance)
+            else:
+                std_7d = 0.0
+            threshold = mean_7d - 2.0 * std_7d
+            if s.articles_today < threshold:
+                anomalies.append(
+                    f"⚠️ Volume de artigos baixo: {s.articles_today:,} < {threshold:.0f} "
+                    f"(média 7d: {mean_7d:.0f}, σ={std_7d:.0f})"
+                )
+
+        # ── Scrape volume anomaly (secondary: GHA baseline) ─────────────────
+        gha = self._get_daily_articles_threshold()
+        if gha["threshold"] is not None and s.articles_today < gha["threshold"]:
+            anomalies.append(
+                f"⚠️ Volume abaixo do baseline GHA: {s.articles_today:,} < {gha['threshold']:.0f} "
+                f"(esperado: {gha['expected_mean']:.0f} ± {gha['expected_std']:.0f})"
+            )
 
         if anomalies:
             lines.append("⚡ <b>Alertas</b>")
@@ -197,7 +278,6 @@ class TelegramBot:
             lines.append(f"   ❌ Último erro: {sys_m.last_error[:80]}")
 
         # ── Timeline sparkline ──────────────────────────────────────────────
-        tl = stats.timelines
         if tl.articles_daily_7d:
             max_val = max(tl.articles_daily_7d) or 1
             bar_chars: list[str] = []
@@ -225,11 +305,11 @@ class TelegramBot:
 
         return lines
 
-    @staticmethod
     def _build_anomaly_alert(
+        self,
         anomaly_type: str,
         details: dict[str, Any],
-        divergence_threshold: float,
+        divergence_threshold: float | None = None,
     ) -> list[str]:
         """Build an anomaly alert message."""
         lines: list[str] = []

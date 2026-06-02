@@ -119,6 +119,7 @@ async def cmd_daily(
 ) -> int:
     """Send the daily Jornal do Contra briefing."""
     from src.alerts.telegram import TelegramBot
+    from src.alerts.baseline import BaselineThresholds
 
     # Load stats
     if stats_path:
@@ -147,7 +148,15 @@ async def cmd_daily(
             await session.close()
             await engine.dispose()
 
-    bot = TelegramBot(token, chat_id)
+    # Load data-driven thresholds from baseline
+    baseline = BaselineThresholds()
+    if baseline.is_loaded:
+        print(f"📊 Baseline loaded: {baseline.days_analyzed} days of history")
+        print(baseline.describe())
+    else:
+        print("📊 No baseline.json found — using hardcoded fallback thresholds")
+
+    bot = TelegramBot(token, chat_id, baseline=baseline)
     ok = await bot.send_daily_report(stats)
     if ok:
         print("✅ Daily briefing sent successfully!")

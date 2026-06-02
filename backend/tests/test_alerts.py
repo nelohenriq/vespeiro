@@ -10,6 +10,19 @@ import httpx
 import pytest
 
 from src.alerts.telegram import TelegramBot, DEFAULT_DIVERGENCE_THRESHOLD
+from src.alerts.baseline import BaselineThresholds
+
+# ── Fallback-only baseline for predictable test thresholds ───────────────────
+# The live BaselineThresholds() mines git history for data-driven thresholds
+# (e.g., divergence threshold ~0.46), which is higher than the sample stats'
+# publico divergence (0.42).  Using a fallback-only baseline with a
+# project_root that has no frontend/public/stats.json ensures both
+# baseline.json and stats history mining return fallback defaults,
+# so tests always use the hardcoded 0.35 threshold.
+_FALLBACK_BASELINE = BaselineThresholds(
+    baseline_path="/nonexistent/baseline.json",
+    project_root="/tmp",
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -70,11 +83,12 @@ def mock_http_client():
 
 @pytest.fixture
 def bot(mock_http_client):
-    """TelegramBot with mock client injection."""
+    """TelegramBot with mock client injection and fallback-only baseline."""
     return TelegramBot(
         bot_token="test:token",
         chat_id="12345",
         http_client=mock_http_client,
+        baseline=_FALLBACK_BASELINE,
     )
 
 
@@ -148,6 +162,62 @@ def sample_stats():
             "last_error": "Connection timeout on cm_jornal RSS feed",
         },
     }, "stats")
+
+
+@pytest.fixture
+def sample_stats_lusa_high():
+    """Stats with Lusa dependency values above the fallback threshold (80%)."""
+    return _make_obj({
+        "sources": {
+            "total": 30,
+            "active": 28,
+            "articles_total": 15678,
+            "articles_today": 1234,
+            "articles_per_source": {"lusa": 450, "publico": 320},
+            "per_category": {},
+        },
+        "lusa_dependency": {
+            "global_pct": 88.5,
+            "per_outlet": {
+                "cm_jornal": {"pct": 98.0, "stories": 50, "lusa_derived": 49},
+                "publico": {"pct": 85.3, "stories": 198, "lusa_derived": 169},
+                "observador": {"pct": 75.0, "stories": 152, "lusa_derived": 114},
+                "expresso": {"pct": 82.0, "stories": 100, "lusa_derived": 82},
+                "jn": {"pct": 60.0, "stories": 120, "lusa_derived": 72},
+            },
+            "per_topic": {"política": 0.7, "economia": 0.5},
+        },
+        "divergence": {
+            "global_avg": 0.2,
+            "per_outlet": {
+                "publico": {
+                    "avg": 0.2, "stories": 45,
+                    "avg_omission": 0.1, "avg_sentiment_shift": 0.0,
+                    "avg_quote_fidelity": 0.9, "avg_headline_divergence": 0.3,
+                },
+            },
+            "top_omitted_facts": [],
+        },
+        "silence": {
+            "today": 1,
+            "avg_7d": 0.5,
+            "top_silenced": [],
+        },
+        "timelines": {
+            "lusa_dependency_7d": [],
+            "divergence_avg_7d": [],
+            "articles_daily_7d": [1200, 1150, 1300],
+            "silence_daily_7d": [],
+            "dates_7d": [],
+        },
+        "system": {
+            "uptime_pct": 99.0,
+            "sources_healthy": 28,
+            "sources_failing": 2,
+            "last_scrape": "2026-05-27T08:45:00",
+            "last_error": None,
+        },
+    }, "stats_lusa_high")
 
 
 @pytest.fixture
@@ -421,6 +491,72 @@ class TestSendDailyReport:
         text = kwargs["json"]["text"]
         assert "Silêncios" not in text
 
+    async def test_daily_report_lusa_anomaly_flagged(self, bot, mock_http_client, sample_stats_lusa_high):
+        """Lusa anomaly is flagged when outlets exceed the baseline threshold (80%)."""
+        mock_response = MagicMock(spec=httpx.Response)
+        mock_response.is_success = True
+        mock_response.json.return_value = {"ok": True}
+        mock_http_client.post = AsyncMock(return_value=mock_response)
+
+        await bot.send_daily_report(sample_stats_lusa_high)
+        _, kwargs = mock_http_client.post.call_args
+        text = kwargs["json"]["text"]
+
+        # Lusa anomalies should appear in the alert section
+        assert "Dependência alta da Lusa" in text
+        assert "Cm Jornal" in text  # 98% > 80%
+        assert "98%" in text
+        assert "85%" in text  # publico 85.3% > 80%
+        # observador at 75% should NOT be flagged
+        assert "Observador" not in text or "75%" not in text or "14" in text  # 75 < 80
+
+    async def test_daily_report_lusa_anomaly_not_flagged(self, bot, mock_http_client, sample_stats):
+        """No Lusa anomaly when all outlets are at or below the baseline threshold (80%)."""
+        mock_response = MagicMock(spec=httpx.Response)
+        mock_response.is_success = True
+        mock_response.json.return_value = {"ok": True}
+        mock_http_client.post = AsyncMock(return_value=mock_response)
+
+        # sample_stats has all Lusa pct <= 80.0 (max is cm_jornal at 80.0)
+        await bot.send_daily_report(sample_stats)
+        _, kwargs = mock_http_client.post.call_args
+        text = kwargs["json"]["text"]
+
+        assert "Dependência alta da Lusa" not in text
+
+    async def test_daily_report_lusa_anomaly_suppressed_at_100pct(self, mock_http_client, sample_stats_lusa_high):
+        """No Lusa anomaly when threshold is exactly 100% (guard prevents false positives).
+
+        Uses a separate bot with isolated baseline to avoid mutating
+        the shared ``_FALLBACK_BASELINE`` object.
+        """
+        import unittest.mock as mock
+        from src.alerts.baseline import BaselineThresholds
+
+        baseline = BaselineThresholds(
+            baseline_path="/nonexistent/baseline.json",
+            project_root="/tmp",
+        )
+        baseline.get_lusa_dependency_threshold = mock.MagicMock(return_value=100.0)
+        isolated_bot = TelegramBot(
+            bot_token="test:token",
+            chat_id="12345",
+            http_client=mock_http_client,
+            baseline=baseline,
+        )
+
+        mock_response = MagicMock(spec=httpx.Response)
+        mock_response.is_success = True
+        mock_response.json.return_value = {"ok": True}
+        mock_http_client.post = AsyncMock(return_value=mock_response)
+
+        await isolated_bot.send_daily_report(sample_stats_lusa_high)
+        _, kwargs = mock_http_client.post.call_args
+        text = kwargs["json"]["text"]
+
+        # Even though outlets are at 98%, threshold is 100% so no anomaly
+        assert "Dependência alta da Lusa" not in text
+
     async def test_daily_report_html_escaping(self, bot, mock_http_client, sample_stats):
         """HTML special characters in titles should be safe (we pass as HTML)."""
         # Add a story with HTML-like content
@@ -532,81 +668,142 @@ class TestSendAnomalyAlert:
 
 
 class TestBuildDailyReport:
-    """Static ``_build_daily_report()`` unit tests."""
+    """Instance ``_build_daily_report()`` unit tests."""
 
-    def test_header_contains_date(self, sample_stats):
+    @pytest.fixture
+    def bot(self):
+        """A lightweight bot without HTTP client, using fallback-only baseline."""
+        return TelegramBot("test:token", "12345", baseline=_FALLBACK_BASELINE)
+
+    def test_header_contains_date(self, sample_stats, bot):
         """Header includes the current date in Portuguese format."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         header = "\n".join(lines)
         assert "JORNAL DO CONTRA" in header
 
-    def test_source_metrics_present(self, sample_stats):
+    def test_source_metrics_present(self, sample_stats, bot):
         """Source metrics section contains active/total counts."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "Fonte" in text
 
-    def test_dependency_section_format(self, sample_stats):
+    def test_dependency_section_format(self, sample_stats, bot):
         """Dependency section shows global pct and per-outlet breakdown."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "67.3%" in text
 
-    def test_divergence_section_format(self, sample_stats):
+    def test_divergence_section_format(self, sample_stats, bot):
         """Divergence section shows global avg and per-outlet scores."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "34%" in text
         assert "42%" in text
         assert "⚠️" in text  # Público above threshold
 
-    def test_silence_section_format(self, sample_stats):
+    def test_silence_section_format(self, sample_stats, bot):
         """Silence section shows today count and top stories."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "3 hoje" in text
 
-    def test_anomalies_identified(self, sample_stats):
+    def test_anomalies_identified(self, sample_stats, bot):
         """Anomalies are flagged when divergence exceeds threshold."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "acima do limiar" in text
 
-    def test_system_health_present(self, sample_stats):
+    def test_system_health_present(self, sample_stats, bot):
         """System health section is always present."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "Estado do Sistema" in text
 
-    def test_sparkline_present(self, sample_stats):
+    def test_sparkline_present(self, sample_stats, bot):
         """Sparkline is included when articles_daily_7d has data."""
-        lines = TelegramBot._build_daily_report(sample_stats)
+        lines = bot._build_daily_report(sample_stats)
         text = "\n".join(lines)
         assert "7d" in text
 
-    def test_empty_stats(self, sample_empty_stats):
+    def test_lusa_anomaly_flagged(self, sample_stats_lusa_high, bot):
+        """Lusa anomaly appears when outlets exceed fallback threshold (80%)."""
+        lines = bot._build_daily_report(sample_stats_lusa_high)
+        text = "\n".join(lines)
+        assert "Dependência alta da Lusa" in text
+        assert "Cm Jornal" in text or "Cm" in text
+
+    def test_lusa_anomaly_not_flagged_below_threshold(self, sample_stats, bot):
+        """No Lusa anomaly when all outlets are at or below 80%."""
+        lines = bot._build_daily_report(sample_stats)
+        text = "\n".join(lines)
+        assert "Dependência alta da Lusa" not in text
+
+    def test_lusa_anomaly_suppressed_at_100pct_threshold(self, sample_stats_lusa_high):
+        """Lusa anomaly suppressed when threshold is exactly 100% (guard).
+
+        Uses a separate baseline instance to avoid mutating the shared
+        ``_FALLBACK_BASELINE`` object, which would affect other tests.
+        """
+        import unittest.mock as mock
+        from src.alerts.baseline import BaselineThresholds
+
+        baseline = BaselineThresholds(
+            baseline_path="/nonexistent/baseline.json",
+            project_root="/tmp",
+        )
+        baseline.get_lusa_dependency_threshold = mock.MagicMock(return_value=100.0)
+        bot = TelegramBot("test:token", "12345", baseline=baseline)
+
+        lines = bot._build_daily_report(sample_stats_lusa_high)
+        text = "\n".join(lines)
+        assert "Dependência alta da Lusa" not in text
+
+    def test_lusa_anomaly_no_dependency_no_crash(self, bot):
+        """No Lusa anomaly when global_pct is None (no crash)."""
+        stats = _make_obj({
+            "sources": {"total": 1, "active": 1, "articles_total": 0, "articles_today": 0,
+                        "articles_per_source": {}, "per_category": {}},
+            "lusa_dependency": {"global_pct": None, "per_outlet": {}, "per_topic": {}},
+            "divergence": {"global_avg": None, "per_outlet": {}, "top_omitted_facts": []},
+            "silence": {"today": 0, "avg_7d": 0.0, "top_silenced": []},
+            "timelines": {"lusa_dependency_7d": [], "divergence_avg_7d": [],
+                          "articles_daily_7d": [], "silence_daily_7d": [], "dates_7d": []},
+            "system": {"uptime_pct": 0.0, "sources_healthy": 1, "sources_failing": 0,
+                        "last_scrape": None, "last_error": None},
+        }, "stats_no_lusa")
+        lines = bot._build_daily_report(stats)
+        text = "\n".join(lines)
+        assert "Dependência alta da Lusa" not in text
+        assert "Alertas" not in text
+
+    def test_empty_stats(self, sample_empty_stats, bot):
         """Empty stats produce minimal output without crashing."""
-        lines = TelegramBot._build_daily_report(sample_empty_stats)
+        lines = bot._build_daily_report(sample_empty_stats)
         text = "\n".join(lines)
         assert "JORNAL DO CONTRA" in text
         assert "Resumo" in text
 
 
 class TestBuildAnomalyAlert:
-    """Static ``_build_anomaly_alert()`` unit tests."""
+    """Instance ``_build_anomaly_alert()`` unit tests."""
 
-    def test_divergence_alert(self):
+    @pytest.fixture
+    def bot(self):
+        """A lightweight bot without HTTP client, using fallback-only baseline."""
+        return TelegramBot("test:token", "12345", baseline=_FALLBACK_BASELINE)
+
+    def test_divergence_alert(self, bot):
         """Divergence alert has outlet, score, and threshold."""
-        lines = TelegramBot._build_anomaly_alert("divergence", {
+        lines = bot._build_anomaly_alert("divergence", {
             "outlet": "publico",
             "score": 0.42,
         }, divergence_threshold=DEFAULT_DIVERGENCE_THRESHOLD)
         text = "\n".join(lines)
         assert "Divergência" in text
 
-    def test_silence_alert(self):
+    def test_silence_alert(self, bot):
         """Silence alert has today count and average."""
-        lines = TelegramBot._build_anomaly_alert("silence", {
+        lines = bot._build_anomaly_alert("silence", {
             "today": 5,
             "avg_7d": 1.2,
             "threshold": 3.5,
@@ -616,9 +813,9 @@ class TestBuildAnomalyAlert:
         text = "\n".join(lines)
         assert "Silêncio" in text
 
-    def test_system_alert(self):
+    def test_system_alert(self, bot):
         """System alert has failing count and total."""
-        lines = TelegramBot._build_anomaly_alert("system", {
+        lines = bot._build_anomaly_alert("system", {
             "failing": 3,
             "total": 30,
         }, divergence_threshold=DEFAULT_DIVERGENCE_THRESHOLD)
@@ -651,7 +848,7 @@ class TestClientLifecycle:
         mock_response.json.return_value = {"ok": True}
         mock_http_client.post = AsyncMock(return_value=mock_response)
 
-        bot = TelegramBot("test:token", "12345", http_client=mock_http_client)
+        bot = TelegramBot("test:token", "12345", http_client=mock_http_client, baseline=_FALLBACK_BASELINE)
         await bot._send("hello")
         mock_http_client.post.assert_awaited_once()
 
@@ -662,7 +859,7 @@ class TestClientLifecycle:
         mock_response.json.return_value = {"ok": True}
         mock_http_client.post = AsyncMock(return_value=mock_response)
 
-        bot = TelegramBot("test:token", "12345", http_client=mock_http_client)
+        bot = TelegramBot("test:token", "12345", http_client=mock_http_client, baseline=_FALLBACK_BASELINE)
         await bot._send("hello")
 
         # The injected client should NOT be closed

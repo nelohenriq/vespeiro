@@ -1,0 +1,115 @@
+name: Baseline Update
+
+on:
+  schedule:
+    # Weekly: Sunday 04:00 UTC (after Sunday backup at 03:00)
+    - cron: '0 4 * * 0'
+
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Days of history to analyze'
+        required: false
+        default: '90'
+      dry_run:
+        description: 'Print data without committing'
+        type: boolean
+        required: false
+        default: false
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need full history for git operations
+          fetch-depth: 0
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          cd backend
+          pip install -e .
+
+      - name: Collect baseline data
+        id: baseline
+        run: |
+          cd backend
+          DAYS="${{ github.event.inputs.days || '90' }}"
+          DRY_RUN="${{ github.event.inputs.dry_run || 'false' }}"
+
+          if [ "$DRY_RUN" = "true" ]; then
+            python run_baseline.py --days "$DAYS" --dry-run
+          else
+            python run_baseline.py --days "$DAYS" --output ../data/baseline.json
+            echo "✅ Baseline collected for $DAYS days"
+          fi
+
+      - name: Verify baseline.json
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          if [ ! -f data/baseline.json ]; then
+            echo "❌ baseline.json not generated!"
+            exit 1
+          fi
+          echo "✅ baseline.json: $(wc -c < data/baseline.json) bytes"
+          python -c "
+          import json
+          d = json.load(open('data/baseline.json'))
+          wf = d.get('workflows', {})
+          print(f'Generated: {d[\"generated_at\"]}')
+          print(f'Days: {d[\"days_analyzed\"]}')
+          print(f'Workflows:', ', '.join(wf.keys()))
+          for name, data in wf.items():
+              groups = [g for g, v in data.get('groups', {}).items() if v.get('success', {}).get('n', 0) > 0]
+              print(f'  {name}: {data[\"n_runs\"]} runs, {len(groups)} groups')
+          "
+
+      - name: Commit baseline.json
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "vespeiro-bot"
+          git config user.email "bot@vespeiro.pt"
+          git add data/baseline.json
+
+          if git diff --staged --quiet; then
+            echo "📄 No changes to baseline.json — skipping commit"
+          else
+            git commit -m "chore: weekly baseline update [skip ci]"
+            git push
+            echo "✅ baseline.json committed and pushed"
+          fi
+
+      - name: Write GHA Summary
+        if: always()
+        run: |
+          {
+            echo '## 📊 Baseline Update'
+            echo ''
+            echo '| Step | Status |'
+            echo '|------|--------|'
+            if [ -f data/baseline.json ]; then
+              echo '| baseline.json | ✅ generated |'
+              SIZE=$(wc -c < data/baseline.json)
+              echo "| Size | $SIZE bytes |"
+              python -c "
+import json
+d = json.load(open('data/baseline.json'))
+wf = d.get('workflows', {})
+for name, data in wf.items():
+    groups = [g for g, v in data.get('groups', {}).items() if v.get('success', {}).get('n', 0) > 0]
+    print(f'| {name} | {data[\"n_runs\"]} runs, {len(groups)} groups with data |')
+"
+            else:
+              echo '| baseline.json | ❌ failed |'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
