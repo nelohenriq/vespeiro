@@ -16,6 +16,7 @@ Supported sources
 - Correio da Manhã (cmjornal.pt)
 - SAPO 24 (24noticias.sapo.pt)
 - Notícias ao Minuto (noticiasaominuto.com)
+- CNN Portugal (cnnportugal.iol.pt)
 
 Why subprocess?
 ---------------
@@ -86,6 +87,13 @@ SITE_CONFIGS: dict[str, SiteConfig] = {
         source_id="nam",
         site_url="https://www.noticiasaominuto.com",
         link_selector="a[href*='202']",  # Few <article> tags, date-based URLs
+    ),
+    "cnn_portugal": SiteConfig(
+        source_id="cnn_portugal",
+        site_url="https://cnnportugal.iol.pt",
+        # Broad selector catches all article links on the SSR homepage.
+        # Non-article pages (podcasts, videos) are filtered by _is_navigation_link().
+        link_selector="a[href^='https://cnnportugal.iol.pt/']",
     ),
 }
 
