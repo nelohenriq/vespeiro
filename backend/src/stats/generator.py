@@ -24,7 +24,7 @@ from src.stats.models import (
     OutletDivergence,
     OmittedFact,
     SourceMetrics,
-    LulaDependencyMetrics,
+    LusaDependencyMetrics,
     DivergenceMetrics,
     SilenceMetrics,
     Timelines,
@@ -71,7 +71,7 @@ class StatsGenerator:
 
     # ── Public API ──────────────────────────────────────────────────────────
 
-    async def collect(self) -> StatsPayload:
+    async def collect(self, fast: bool = False) -> StatsPayload:
         """Run all metric collectors and return the aggregated payload.
 
         Performance: before running any analyzer, we pre-populate the embedding
@@ -80,8 +80,10 @@ class StatsGenerator:
         instead of re-encoding the same texts independently.
         """
         # ── Pre-warm embedding cache ────────────────────────────────────────
+        # Skip warm-up in fast mode — no point loading the ML model if we're
+        # going to skip all the analyzers that use embeddings anyway.
         warm_start = datetime.now(timezone.utc)
-        if self.db is not None:
+        if self.db is not None and not fast:
             from src.pipeline.embedder import warm_embed_cache
             try:
                 cached_count = await warm_embed_cache(self.db, window_days=7)
@@ -97,23 +99,39 @@ class StatsGenerator:
         sources, system = await self._source_metrics(), await self._system_health()
 
         # ── Embedding-heavy Phase 1/2 collectors (cache now available) ──────
-        # Run in sequence so model is loaded once and shared across all three.
-        # Each call reuses cached embeddings from warm_embed_cache.
-        # _lusa_metrics and _silence_metrics return (metrics, timeline) tuples
-        # to avoid duplicate daily_timeline computation in _timelines.
-        lusa, lusa_dep_7d = await self._lusa_metrics()
-        divergence = self._divergence_metrics()
-        silence, silence_daily_7d = await self._silence_metrics()
-
-        # ── Timelines (reuses pre-computed lusa/silence timelines) ──────────
-        timelines = await self._timelines(lusa_dep_7d, silence_daily_7d)
+        # Skipped in fast mode (--fast) — heavy ML analyzers timeout in dev.
+        # In production (GHA with warm cache) set fast=False.
+        if fast:
+            lusa = LusaDependencyMetrics()
+            lusa_dep_7d = [0.0] * 7
+            divergence = self._divergence_metrics()
+            silence = SilenceMetrics()
+            silence_daily_7d = [0] * 7
+            timelines = await self._timelines(lusa_dep_7d, silence_daily_7d)
+        else:
+            # Run in sequence so model is loaded once and shared across all three.
+            # Each call reuses cached embeddings from warm_embed_cache.
+            # _lusa_metrics and _silence_metrics return (metrics, timeline) tuples
+            # to avoid duplicate daily_timeline computation in _timelines.
+            lusa, lusa_dep_7d = await self._lusa_metrics()
+            divergence = self._divergence_metrics()
+            silence, silence_daily_7d = await self._silence_metrics()
+            # ── Timelines (reuses pre-computed lusa/silence timelines) ────────
+            timelines = await self._timelines(lusa_dep_7d, silence_daily_7d)
 
         # ── Phase 3 collectors (regex-based, no embeddings) ─────────────────
-        # These are CPU-bound regex + term-frequency operations, not ML.
-        personnel = await self._personnel_metrics()
-        parliament_gap = await self._parliament_gap_metrics()
-        ad_correlation = await self._correlation_metrics()
-        influence = self._influence_metrics(personnel, parliament_gap, ad_correlation)
+        # Skipped in fast mode — PersonnelBuilder, GapAnalyzer, CorrelationAnalyzer
+        # all do heavy DB + NLP ops that timeout in dev.
+        if fast:
+            personnel = PersonnelNetworkMetrics()
+            parliament_gap = ParliamentGapMetrics()
+            ad_correlation = CorrelationMetrics()
+            influence = InfluenceMapMetrics()
+        else:
+            personnel = await self._personnel_metrics()
+            parliament_gap = await self._parliament_gap_metrics()
+            ad_correlation = await self._correlation_metrics()
+            influence = self._influence_metrics(personnel, parliament_gap, ad_correlation)
 
         return StatsPayload(
             generated_at=datetime.now(timezone.utc),
@@ -378,13 +396,13 @@ class StatsGenerator:
             logger.warning("Failed to query source metrics: %s", exc)
             return SourceMetrics()
 
-    # ── Lula dependency ─────────────────────────────────────────────────────
+    # ── Lusa dependency ─────────────────────────────────────────────────────
 
-    async def _lusa_metrics(self) -> tuple[LulaDependencyMetrics, list[float]]:
-        """Analyze dependency of Portuguese outlets on Lula news agency.
+    async def _lusa_metrics(self) -> tuple[LusaDependencyMetrics, list[float]]:
+        """Analyze dependency of Portuguese outlets on Lusa news agency.
 
-        Delegates to :class:`LulaDependencyAnalyzer` which compares outlet
-        articles to Lula articles using TF-IDF cosine similarity.
+        Delegates to :class:`LusaDependencyAnalyzer` which compares outlet
+        articles to Lusa articles using TF-IDF cosine similarity.
 
         Returns a tuple of (metrics, lusa_dep_7d_timeline) so callers don't
         need to re-run the analyzer for timeline data.
@@ -392,11 +410,11 @@ class StatsGenerator:
         Returns (empty defaults, zero timeline) if no DB session is available.
         """
         if self.db is None:
-            return LulaDependencyMetrics(), [0.0] * 7
+            return LusaDependencyMetrics(), [0.0] * 7
 
-        from src.analysis.dependency import LulaDependencyAnalyzer
+        from src.analysis.dependency import LusaDependencyAnalyzer
 
-        analyzer = LulaDependencyAnalyzer(db_session=self.db)
+        analyzer = LusaDependencyAnalyzer(db_session=self.db)
         metrics = await analyzer.analyze()
         timeline = await analyzer.daily_timeline(days=7)
         return metrics, timeline

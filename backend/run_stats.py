@@ -31,6 +31,7 @@ async def run(
     output_path: Path,
     db_url: str | None,
     reports_dir: str,
+    fast: bool = False,
 ) -> int:
     """Generate stats.json and write it to *output_path*.
 
@@ -73,7 +74,7 @@ async def run(
     generator = StatsGenerator(db_session=db_session, reports_dir=reports_dir)
 
     try:
-        payload: StatsPayload = await generator.collect()
+        payload: StatsPayload = await generator.collect(fast=fast)
     except Exception as exc:
         print(f"❌ Stats generation failed: {exc}")
         return 1
@@ -140,6 +141,13 @@ def _build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip all database queries (divergence-only mode, uses --reports-dir)",
     )
+    parser.add_argument(
+        "--fast",
+        action="store_true",
+        help="Skip heavy ML analyzers (LusaDependency, Silence, Gap, Correlation) "
+             "— produces a partial but fast stats.json with DB counts + divergence reports. "
+             "Use this for local development or when ML models are unavailable.",
+    )
 
     return parser
 
@@ -172,6 +180,7 @@ def main() -> None:
         output_path=output,
         db_url=db_url,
         reports_dir=reports,
+        fast=args.fast,
     ))
     sys.exit(exit_code)
 
