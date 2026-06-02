@@ -49,8 +49,6 @@ _ARTICLE_LINK_RE = re.compile(
 _STRIP_HTML_TAGS = re.compile(r'<[^>]+>')
 
 _MAX_ARTICLES = 30
-# Limit concurrent article page fetches
-_FETCH_SEMAPHORE = asyncio.Semaphore(5)
 
 
 def _extract_meta_metadata(html_text: str) -> dict:
@@ -95,9 +93,14 @@ async def _fetch_article(
     url: str,
     link_title: str,
     source_id: str,
+    semaphore: asyncio.Semaphore,
 ) -> ScrapedArticle | None:
-    """Fetch a single TSF article page and extract metadata + content."""
-    async with _FETCH_SEMAPHORE:
+    """Fetch a single TSF article page and extract metadata + content.
+
+    Args:
+        semaphore: Concurrency limiter owned by the spider instance.
+    """
+    async with semaphore:
         try:
             response = await client.get(url, timeout=15.0)
             if response.status_code != 200:
@@ -154,6 +157,7 @@ class TSFSpider(BaseSpider):
             follow_redirects=True,
             headers={"User-Agent": _BROWSER_UA},
         )
+        self._fetch_semaphore = asyncio.Semaphore(5)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
         """Fetch articles from the TSF homepage."""
@@ -193,7 +197,7 @@ class TSFSpider(BaseSpider):
 
             # 3. Fetch article pages concurrently
             tasks = [
-                _fetch_article(self.http_client, url, title, source_id)
+                _fetch_article(self.http_client, url, title, source_id, self._fetch_semaphore)
                 for url, title in matched[:_MAX_ARTICLES]
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)

@@ -708,9 +708,11 @@ class BaselineThresholds:
 
 
 def _make_series(values: list[float]) -> dict[str, Any]:
-    """Build a series dict from a list of values."""
-    stats = _compute_series_stats(values)
-    return {
-        **stats,
-        "values": values,
-    }
+    """Build a series dict from a list of values.
+
+    Returns summary stats without the raw values list to avoid retaining
+    thousands of data points in memory across the historical stats cache.
+    Only ``mean``, ``std``, ``min``, ``max``, ``n`` are returned — the
+    threshold methods only use these aggregates.
+    """
+    return dict(_compute_series_stats(values))

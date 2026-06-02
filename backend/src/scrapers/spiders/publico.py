@@ -20,27 +20,12 @@ import logging
 import subprocess
 import sys
 import tempfile
-from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 from src.scrapers.base import BaseSpider, ScrapedArticle
+from src.scrapers.scrapy_utils import _parse_date, _SCRAPY_PROJECT_DIR
 
 logger = logging.getLogger(__name__)
-
-# Path to the Scrapy project directory (containing scrapy.cfg)
-_SCRAPY_PROJECT_DIR = Path(__file__).parent.parent.parent.parent / "scrapy_project"
-
-
-def _parse_date(date_str: str | None) -> datetime | None:
-    """Parse an ISO 8601 date string, returning None on failure."""
-    if not date_str:
-        return None
-    try:
-        from dateutil import parser
-        return parser.parse(date_str)
-    except Exception:
-        return None
 
 
 class PublicoSpider(BaseSpider):

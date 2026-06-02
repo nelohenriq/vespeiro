@@ -22,7 +22,7 @@ import asyncio
 import html as html_mod
 import logging
 import re
-from datetime import datetime
+
 
 import httpx
 import trafilatura
@@ -40,7 +40,6 @@ _BROWSER_UA = (
 _NEWS_SITEMAP_URL = "https://www.jn.pt/feed/news/sitemap.xml"
 
 _MAX_ARTICLES = 30
-_FETCH_SEMAPHORE = asyncio.Semaphore(5)
 
 
 def _extract_sitemap_entries(xml_text: str) -> list[dict]:
@@ -86,8 +85,9 @@ async def _fetch_article(
     client: httpx.AsyncClient,
     url: str,
     title: str,
-    sitemap_date: datetime | None,
+    sitemap_date: "datetime | None",
     source_id: str,
+    semaphore: asyncio.Semaphore,
 ) -> ScrapedArticle | None:
     """Fetch a single JN article page and extract author + content.
 
@@ -96,8 +96,11 @@ async def _fetch_article(
     Falls back to ``<meta property="article:published_time">`` or
     ``<time dateTime>`` on the article page if the sitemap didn't
     provide a date.
+
+    Args:
+        semaphore: Concurrency limiter owned by the spider instance.
     """
-    async with _FETCH_SEMAPHORE:
+    async with semaphore:
         try:
             response = await client.get(url, timeout=15.0)
             if response.status_code != 200:
@@ -178,6 +181,7 @@ class JNSpider(BaseSpider):
             follow_redirects=True,
             headers={"User-Agent": _BROWSER_UA},
         )
+        self._fetch_semaphore = asyncio.Semaphore(5)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
         """Fetch articles via JN's Google News sitemap."""
@@ -210,6 +214,7 @@ class JNSpider(BaseSpider):
                     e["title"],
                     e["published_at"],
                     source_id,
+                    self._fetch_semaphore,
                 )
                 for e in urls_to_fetch
             ]

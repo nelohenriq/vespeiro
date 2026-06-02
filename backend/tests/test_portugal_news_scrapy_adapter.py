@@ -331,7 +331,7 @@ class TestDateParsing:
     """Verify _parse_date works correctly for various formats."""
 
     def test_import_from_publico(self):
-        from src.scrapers.spiders.publico import _parse_date
+        from src.scrapers.scrapy_utils import _parse_date
 
         # ISO 8601 with timezone
         dt = _parse_date("2026-05-28T10:30:00+01:00")

@@ -239,9 +239,15 @@ class CorrelationAnalyzer:
                 .group_by(Article.source_id)
             )
 
-            # Pre-initialize SentimentAnalyzer (lazy-loaded, no cost until first call)
-            from src.pipeline.sentiment import SentimentAnalyzer
-            sentiment = SentimentAnalyzer()
+            # Lazy-load SentimentAnalyzer — the model download/load is
+            # expensive (~10-30 s for PySentimiento on CPU) and blocking.
+            # By importing lazily here (inside the loop, not at module level)
+            # we avoid blocking the async event loop during DB queries that
+            # run before this point.  The model itself is cached after the
+            # first call and reused for subsequent outlets.
+            sent_analyzer: object | None = None
+            from src.pipeline.sentiment import SentimentAnalyzer as _SA
+            sent_analyzer = _SA()
 
             # Filter to only media outlet sources
             metrics: dict[str, dict] = {}
@@ -256,7 +262,7 @@ class CorrelationAnalyzer:
 
                 # ── Sentiment analysis (last 100 articles per outlet) ──
                 avg_sentiment = await self._compute_avg_sentiment(
-                    source_id, sentiment
+                    source_id, sent_analyzer
                 )
 
                 metrics[source_id] = {

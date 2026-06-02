@@ -39,7 +39,6 @@ _BROWSER_UA = (
 _SITEMAP_INDEX_URL = "https://www.dn.pt/sitemap.xml"
 
 _MAX_ARTICLES = 30
-_FETCH_SEMAPHORE = asyncio.Semaphore(5)
 
 
 def _extract_metadata(html_text: str) -> dict:
@@ -114,9 +113,15 @@ async def _fetch_article(
     client: httpx.AsyncClient,
     url: str,
     source_id: str,
+    semaphore: asyncio.Semaphore,
 ) -> ScrapedArticle | None:
-    """Fetch a single DN article page and extract metadata + content."""
-    async with _FETCH_SEMAPHORE:
+    """Fetch a single DN article page and extract metadata + content.
+
+    Args:
+        semaphore: Concurrency limiter (passed in so each spider instance
+            owns its own semaphore, avoiding cross-instance contention).
+    """
+    async with semaphore:
         try:
             response = await client.get(url, timeout=15.0)
             if response.status_code != 200:
@@ -169,6 +174,7 @@ class DNSpider(BaseSpider):
             follow_redirects=True,
             headers={"User-Agent": _BROWSER_UA},
         )
+        self._fetch_semaphore = asyncio.Semaphore(5)
 
     async def fetch(self, source_id: str, url: str = "") -> list[ScrapedArticle]:
         """Fetch articles via DN's daily sitemap."""
@@ -209,7 +215,7 @@ class DNSpider(BaseSpider):
             # 3. Fetch article pages concurrently
             urls_to_fetch = article_urls[:_MAX_ARTICLES]
             tasks = [
-                _fetch_article(self.http_client, art_url, source_id)
+                _fetch_article(self.http_client, art_url, source_id, self._fetch_semaphore)
                 for art_url in urls_to_fetch
             ]
             results = await asyncio.gather(*tasks, return_exceptions=True)

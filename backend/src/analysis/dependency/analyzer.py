@@ -345,17 +345,39 @@ class LusaDependencyAnalyzer:
 
         Returns the best-matching topic key from ``_CLASSIFY_TOPIC_KEYWORDS``
         or ``"outros"`` if no keywords match.
+
+        **Tie-breaking:** When two topics have the same keyword count, the
+        topic with the longer combined keyword string wins (more specific
+        = longer total keyword length).  This prevents tie-dependent
+        results from dict insertion order (e.g. ``"crime"`` vs ``"justiça"``
+        for criminal court cases).
         """
         if not text:
             return "outros"
         text_lower = text.lower()
         best_topic = "outros"
         best_score = 0
+        best_keyword_len = 0
+
+        # Pre-compute total keyword lengths for tie-breaking
+        _total_keyword_len: dict[str, int] = {
+            topic: sum(len(kw) for kw in keywords)
+            for topic, keywords in _CLASSIFY_TOPIC_KEYWORDS.items()
+        }
+
         for topic, keywords in _CLASSIFY_TOPIC_KEYWORDS.items():
             score = sum(1 for kw in keywords if kw in text_lower)
             if score > best_score:
                 best_score = score
                 best_topic = topic
+                best_keyword_len = _total_keyword_len[topic]
+            elif score == best_score and score > 0:
+                # Tie: prefer the topic with longer combined keyword length
+                # (more specific vocabulary → more discriminating topic)
+                kw_len = _total_keyword_len[topic]
+                if kw_len > best_keyword_len:
+                    best_topic = topic
+                    best_keyword_len = kw_len
         return best_topic
 
     @staticmethod

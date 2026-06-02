@@ -39,7 +39,7 @@ from pathlib import Path
 from typing import Any
 
 from src.scrapers.base import BaseSpider, ScrapedArticle
-from src.scrapers.spiders.publico import _parse_date, _SCRAPY_PROJECT_DIR
+from src.scrapers.scrapy_utils import _parse_date, _SCRAPY_PROJECT_DIR
 
 logger = logging.getLogger(__name__)
 
