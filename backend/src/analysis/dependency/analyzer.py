@@ -382,11 +382,12 @@ class LusaDependencyAnalyzer:
 
     @staticmethod
     def _embed_articles(articles: list[Article]) -> "np.ndarray | None":  # type: ignore[valid-type]
-        """Embed a list of articles into a (N, 1024) numpy array.
+        """Embed a list of articles into a numpy array.
 
-        Returns ``None`` if the embedding model is unavailable.
+        Uses the configured embedding provider (API or local).  Returns
+        ``None`` only if both API and local are unavailable.
         """
-        from src.pipeline.embedder import EmbeddingService, _get_model
+        from src.pipeline.embedder import EmbeddingService
 
         import numpy as np
 
@@ -394,16 +395,19 @@ class LusaDependencyAnalyzer:
         if not texts:
             return None
 
-        if _get_model() is None:
-            logger.warning(
-                "Embedding model not available. "
-                "Install sentence-transformers to enable embedding-based matching."
-            )
-            return None
-
         embedder = EmbeddingService()
         embeddings = embedder.embed_batch(texts)
-        return np.array(embeddings, dtype=np.float64)
+        if not embeddings:
+            return None
+
+        # Check if we got actual embeddings (not all zero-vectors)
+        arr = np.array(embeddings, dtype=np.float64)
+        if arr.size > 0 and np.count_nonzero(arr) == 0:
+            logger.warning(
+                "Embeddings are all zero-vectors. Check embedding provider config."
+            )
+            return None
+        return arr
 
     def _count_derived_from_vecs(
         self,

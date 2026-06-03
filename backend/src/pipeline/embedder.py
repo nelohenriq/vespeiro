@@ -1,27 +1,24 @@
-"""Embedding generation using sentence-transformers (local CPU, $0 API costs).
+"""Embedding generation with API-first strategy and local fallback.
 
-Provides a reusable EmbeddingService class that generates multilingual
-embeddings using the ``intfloat/multilingual-e5-large`` model.  All
-computation runs on local CPU — no API calls needed.
+Provider priority (controlled by ``settings.embedding_provider``):
 
-Embeddings are L2-normalised so that cosine similarity can be computed
-as a simple dot product.
+1. **API** (``"auto"`` / ``"api"``): Uses OpenAI-compatible ``/v1/embeddings``
+   endpoint.  Works with both **OpenAI** (``text-embedding-3-small``, 1536d,
+   $0.02/1M tokens) and **Jina AI** (``jina-embeddings-v3``, 1024d, 10M free
+   tokens).  Eliminates the ~26s sentence-transformers model load entirely.
+
+2. **Local** (``"local"`` / fallback): Uses ``sentence-transformers`` with
+   ``intfloat/multilingual-e5-large`` (1024d) on local CPU.  No API cost but
+   ~26s cold-start for model loading.
 
 Disk caching
 -----------
-Embeddings are automatically persisted to disk under ``EMBED_CACHE_DIR``
-(``data/embedding-cache/`` by default) as JSON files mapping text-hash →
-embedding vector.  This avoids re-embedding the same articles across
-consecutive stats runs, which is the dominant cost in the daily pipeline:
-
-- ``analyze()`` embeds all articles once → cache hit on subsequent runs
-- ``daily_timeline()`` re-uses those same embeddings for free
-- ``StatsGenerator.collect()`` pre-warms the cache before running analyzers
-
-The cache is keyed on the article text SHA-256 hash + model version so
-any content change forces a re-embed (correctness) while identical content
-reuses embeddings (performance).
+Embeddings are persisted to ``EMBED_CACHE_DIR`` as JSON (text-hash → vector).
+Cache keys include the provider name so switching providers never causes
+collisions.  Subsequent stats runs hit the cache and skip embedding entirely.
 """
+
+from __future__ import annotations
 
 import hashlib
 import json
@@ -35,13 +32,11 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-# ── Lazy-loaded model cache ─────────────────────────────────────────────────
+# ── Lazy-loaded model cache (local only) ────────────────────────────────────
 
 _MODEL: Any | None = None
-_MODEL_NAME: str = "intfloat/multilingual-e5-large"
 
 # ── Embedding cache (disk-persisted) ─────────────────────────────────────────
-# Saves re-embedding costs across stats runs.  Keyed by text-hash + model.
 
 EMBED_CACHE_DIR = Path(os.environ.get(
     "VESPERO_EMBED_CACHE",
@@ -50,11 +45,7 @@ EMBED_CACHE_DIR = Path(os.environ.get(
 
 
 def _text_hash(text: str) -> str:
-    """SHA-256 hex digest of normalized text — used as cache key.
-
-    Uses the full 64-char hex digest to avoid birthday-paradox collisions
-    when the cache grows to thousands of entries.
-    """
+    """SHA-256 hex digest of normalized text — used as cache key."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -64,10 +55,7 @@ def _embed_cache_path() -> Path:
 
 
 def _load_embed_cache() -> dict[str, list[float]]:
-    """Load embedding cache from disk.
-
-    Returns an empty dict if the cache file doesn't exist or is corrupt.
-    """
+    """Load embedding cache from disk."""
     cache_path = _embed_cache_path()
     if not cache_path.exists():
         return {}
@@ -80,7 +68,7 @@ def _load_embed_cache() -> dict[str, list[float]]:
 
 
 def _save_embed_cache(cache: dict[str, list[float]]) -> None:
-    """Persist embedding cache to disk atomically (write-then-rename)."""
+    """Persist embedding cache to disk atomically."""
     cache_path = _embed_cache_path()
     tmp_path = cache_path.with_suffix(".tmp")
     EMBED_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -93,13 +81,13 @@ def _save_embed_cache(cache: dict[str, list[float]]) -> None:
         logger.warning("Failed to save embedding cache: %s", exc)
 
 
+# ── Local model helpers ─────────────────────────────────────────────────────
+
 def _get_model(model_name: str = "intfloat/multilingual-e5-large") -> Any | None:
     """Lazy-load a SentenceTransformer model.
 
-    Caches the model globally so the same model is never loaded twice in
-    the same process.  Returns ``None`` if sentence-transformers is not
-    installed or the model cannot be loaded (e.g. no internet for first
-    download).
+    Returns ``None`` if sentence-transformers is not installed or the model
+    cannot be loaded.
     """
     global _MODEL
     if _MODEL is None:
@@ -107,12 +95,14 @@ def _get_model(model_name: str = "intfloat/multilingual-e5-large") -> Any | None
             from sentence_transformers import SentenceTransformer  # type: ignore[import-untyped]
 
             _MODEL = SentenceTransformer(model_name)
-            dim = getattr(_MODEL, "get_embedding_dimension", _MODEL.get_sentence_embedding_dimension)()
+            dim = getattr(
+                _MODEL, "get_embedding_dimension", _MODEL.get_sentence_embedding_dimension
+            )()
             logger.info("Loaded embedding model: %s (dim=%d)", model_name, dim)
         except Exception as exc:
             logger.warning(
                 "Failed to load embedding model '%s': %s. "
-                "EmbeddingService will return zero-vectors.",
+                "EmbeddingService will try API or return zero-vectors.",
                 model_name,
                 exc,
             )
@@ -120,54 +110,245 @@ def _get_model(model_name: str = "intfloat/multilingual-e5-large") -> Any | None
     return _MODEL if _MODEL is not False else None
 
 
+# ── API embedding (OpenAI-compatible) ───────────────────────────────────────
+
+# Provider presets: (base_url, default_model, default_dim)
+_PROVIDER_PRESETS: dict[str, tuple[str, str, int]] = {
+    "openai": ("https://api.openai.com/v1", "text-embedding-3-small", 1536),
+    "jina": ("https://api.jina.ai/v1", "jina-embeddings-v3", 1024),
+    "nvidia": ("https://integrate.api.nvidia.com/v1", "nvidia/nv-embed-v1", 4096),
+}
+
+
+def _detect_api_provider() -> tuple[str, str, str, int] | None:
+    """Auto-detect API provider from environment variables.
+
+    Returns (provider_name, api_key, base_url, dim) or None if no key found.
+
+    Detection priority:
+    1. Explicit ``embedding_api_base`` + ``embedding_api_model`` in settings
+    2. Known env vars: ``OPENAI_API_KEY`` → OpenAI, ``JINA_API_KEY`` → Jina
+    3. ``embedding_api_key`` in settings (base_url auto-detected)
+    4. None (local fallback)
+
+    Supported providers:
+    - OpenAI: ``OPENAI_API_KEY`` → text-embedding-3-small (1536d, $0.02/1M tokens)
+    - Jina AI: ``JINA_API_KEY`` → jina-embeddings-v3 (1024d, 10M free tokens)
+    - Nvidia NIM: ``NVIDIA_API_KEY`` → baai/bge-m3 (1024d, free for dev)
+    """
+    from src.config.settings import settings
+
+    # If user set explicit base URL + model, use those directly
+    if settings.embedding_api_base and settings.embedding_api_key:
+        # Infer dimension from model name if possible
+        dim = 1536  # default
+        model = settings.embedding_api_model or "text-embedding-3-small"
+        for preset_name, (p_base, p_model, p_dim) in _PROVIDER_PRESETS.items():
+            if settings.embedding_api_base == p_base or preset_name in settings.embedding_api_base:
+                dim = p_dim
+                if not settings.embedding_api_model:
+                    model = p_model
+                break
+        return ("custom", settings.embedding_api_key, settings.embedding_api_base, dim)
+
+    # Auto-detect from Settings (pydantic-settings loads .env into fields)
+    # Priority: OpenAI → Jina → Nvidia
+    if settings.openai_api_key:
+        base, model, dim = _PROVIDER_PRESETS["openai"]
+        return ("openai", settings.openai_api_key, base, dim)
+    if settings.jina_api_key:
+        base, model, dim = _PROVIDER_PRESETS["jina"]
+        return ("jina", settings.jina_api_key, base, dim)
+    if settings.nvidia_api_key:
+        base, model, dim = _PROVIDER_PRESETS["nvidia"]
+        return ("nvidia", settings.nvidia_api_key, base, dim)
+
+    # Fallback: embedding_api_key set in settings without base URL
+    if settings.embedding_api_key:
+        base = settings.embedding_api_base or "https://api.openai.com/v1"
+        model = settings.embedding_api_model or "text-embedding-3-small"
+        dim = 1536
+        for preset_name, (p_base, p_model, p_dim) in _PROVIDER_PRESETS.items():
+            if preset_name in base:
+                dim = p_dim
+                if not settings.embedding_api_model:
+                    model = p_model
+                break
+        return ("custom", settings.embedding_api_key, base, dim)
+
+    return None
+
+
+def _api_embed_batch(
+    texts: list[str],
+    api_key: str,
+    base_url: str,
+    model: str,
+    max_chars: int = 8192,
+    dim: int = 1536,
+) -> list[list[float]]:
+    """Call an OpenAI-compatible /v1/embeddings endpoint for a batch of texts.
+
+    Returns a list of embedding vectors (L2-normalised) in the same order
+    as the input.  Returns zero-vectors for any text that fails.
+
+    Args:
+        dim: Expected embedding dimension for error-case zero-vectors.
+    """
+    import httpx
+
+    truncated = [t[:max_chars] for t in texts]
+    url = f"{base_url.rstrip('/')}/embeddings"
+
+    try:
+        resp = httpx.post(
+            url,
+            json={"model": model, "input": truncated},
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=60.0,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+
+        # Sort by index to maintain order
+        items = sorted(data.get("data", []), key=lambda x: x["index"])
+        embeddings = [item["embedding"] for item in items]
+
+        if len(embeddings) != len(texts):
+            logger.warning(
+                "API returned %d embeddings for %d texts — padding with zeros",
+                len(embeddings), len(texts),
+            )
+            # Pad missing with zero-vectors
+            dim = len(embeddings[0]) if embeddings else dim
+            while len(embeddings) < len(texts):
+                embeddings.append([0.0] * dim)
+
+        # L2-normalise
+        vecs = np.array(embeddings, dtype=np.float64)
+        norms = np.linalg.norm(vecs, axis=1, keepdims=True)
+        norms[norms == 0] = 1.0
+        vecs = vecs / norms
+
+        usage = data.get("usage", {})
+        logger.debug(
+            "API embeddings: %d texts, %s tokens, %.1fms",
+            len(texts), usage.get("total_tokens", "?"),
+            resp.elapsed.total_seconds() * 1000,
+        )
+        return [row.tolist() for row in vecs]
+
+    except Exception as exc:
+        logger.warning("API embedding failed: %s — returning zero-vectors", exc)
+        return [[0.0] * dim] * len(texts)
+
+
 # ── Public API ──────────────────────────────────────────────────────────────
 
-
 class EmbeddingService:
-    """Multilingual embedding generation using sentence-transformers.
+    """Embedding generation with API-first strategy and local fallback.
 
-    Uses the ``intfloat/multilingual-e5-large`` model (1024-dimensional
-    embeddings) which supports 100+ languages including Portuguese,
-    English, Spanish, and French.
+    Provider selection (``settings.embedding_provider``):
 
-    All embeddings are L2-normalised so cosine similarity between any
-    two vectors is simply their dot product.
+    - ``"auto"`` (default): API if OPENAI_API_KEY, JINA_API_KEY, or
+      NVIDIA_API_KEY is set, else local sentence-transformers.
+    - ``"api"``: forces API (requires ``embedding_api_key``).
+    - ``"local"``: forces local sentence-transformers.
 
-    Falls back gracefully (returns zero-vectors) if the model cannot
-    be loaded.
+    Both OpenAI and Jina use the same OpenAI-compatible ``/v1/embeddings``
+    endpoint, so the same code path handles both.
 
-    Disk caching: see module-level documentation above.
+    All embeddings are L2-normalised so cosine similarity is a dot product.
+
+    Disk caching persists embeddings across runs (keyed by provider + model
+    + text hash).
 
     Usage:
         >>> embedder = EmbeddingService()
         >>> vec = embedder.embed_text("O governo anunciou novas medidas.")
-        >>> len(vec)
-        1024
+        >>> len(vec)  # 1536 (OpenAI) or 1024 (Jina / local)
+        1536
     """
 
-    def __init__(
-        self,
-        model_name: str = "intfloat/multilingual-e5-large",
-    ):
-        self.model_name = model_name
+    def __init__(self) -> None:
+        from src.config.settings import settings
+
         self._dim: int | None = None
-        self._cache: dict[str, list[float]] | None = None  # lazy-loaded
+        self._cache: dict[str, list[float]] | None = None
+
+        # Resolve provider
+        provider_setting = settings.embedding_provider
+
+        if provider_setting == "local":
+            self._provider = "local"
+            self._api_key = ""
+            self._api_base = ""
+            self._api_model = settings.embedding_local_model
+            self._model_name = settings.embedding_local_model
+        elif provider_setting == "api":
+            detected = _detect_api_provider()
+            if detected is None:
+                logger.warning(
+                    "embedding_provider='api' but no API key found — "
+                    "falling back to local"
+                )
+                self._provider = "local"
+                self._api_key = ""
+                self._api_base = ""
+                self._api_model = ""
+                self._model_name = settings.embedding_local_model
+            else:
+                name, key, base, dim = detected
+                self._provider = "api"
+                self._api_key = key
+                self._api_base = base
+                self._api_model = settings.embedding_api_model or _PROVIDER_PRESETS.get(
+                    name, (None, "text-embedding-3-small", 1536)
+                )[1]
+                self._model_name = f"api:{self._api_model}"
+                self._dim = dim
+        else:  # "auto"
+            detected = _detect_api_provider()
+            if detected is not None:
+                name, key, base, dim = detected
+                self._provider = "api"
+                self._api_key = key
+                self._api_base = base
+                self._api_model = _PROVIDER_PRESETS.get(
+                    name, (None, "text-embedding-3-small", 1536)
+                )[1]
+                self._model_name = f"api:{self._api_model}"
+                self._dim = dim
+                logger.info("Embedding provider: API (%s)", name)
+            else:
+                self._provider = "local"
+                self._api_key = ""
+                self._api_base = ""
+                self._api_model = ""
+                self._model_name = settings.embedding_local_model
+                logger.info("Embedding provider: local (no API key found)")
+
+    @property
+    def is_api(self) -> bool:
+        """True if using an API provider (no local model load needed)."""
+        return self._provider == "api"
 
     # ── Cache ────────────────────────────────────────────────────────────────
 
     def _cache_key(self, text: str) -> str:
-        """Build a cache key for a text using model-version + text hash."""
-        return f"{self.model_name}@{_text_hash(text)}"
+        """Build a cache key using provider-qualified model name + text hash."""
+        return f"{self._model_name}@{_text_hash(text)}"
 
     @property
     def _embed_cache(self) -> dict[str, list[float]]:
-        """Lazy-load the disk cache on first access."""
         if self._cache is None:
             self._cache = _load_embed_cache()
         return self._cache
 
     def _persist_cache(self) -> None:
-        """Write the in-memory cache to disk."""
         if self._cache is not None:
             _save_embed_cache(self._cache)
 
@@ -175,13 +356,18 @@ class EmbeddingService:
 
     @property
     def dimension(self) -> int:
-        """Return the embedding dimension (default 1024)."""
+        """Return the embedding dimension."""
         if self._dim is None:
-            model = _get_model(self.model_name)
-            if model is not None:
-                self._dim = getattr(model, "get_embedding_dimension", model.get_sentence_embedding_dimension)()
+            if self._provider == "local":
+                model = _get_model(self._model_name)
+                if model is not None:
+                    self._dim = getattr(
+                        model, "get_embedding_dimension", model.get_sentence_embedding_dimension
+                    )()
+                else:
+                    self._dim = 1024
             else:
-                self._dim = 1024  # Fallback: known dim for multilingual-e5-large
+                self._dim = 1024  # fallback
         return self._dim
 
     # ── Single text ─────────────────────────────────────────────────────────
@@ -189,19 +375,8 @@ class EmbeddingService:
     def embed_text(self, text: str, max_chars: int = 8192) -> list[float]:
         """Generate an embedding for a single text string.
 
-        Checks the disk cache before encoding.  Any newly-encoded text
-        is persisted to the cache so subsequent calls (including from
-        ``warm_embed_cache``) hit the cache.
-
-        Args:
-            text: The text to embed.
-            max_chars: Truncate to this many characters to avoid token
-                       limits (default 8192).
-
-        Returns:
-            A list of ``float`` values (L2-normalised embedding vector).
-            Returns a zero-vector if the model is unavailable or the
-            text is empty/blank.
+        Checks the disk cache first.  Returns a zero-vector for empty text
+        or when no provider is available.
         """
         if not text or not text.strip():
             return [0.0] * self.dimension
@@ -213,12 +388,19 @@ class EmbeddingService:
         if key in cache:
             return cache[key]
 
-        model = _get_model(self.model_name)
-        if model is None:
-            return [0.0] * self.dimension
+        # Generate embedding
+        if self._provider == "api":
+            results = _api_embed_batch(
+                [truncated], self._api_key, self._api_base, self._api_model, max_chars, dim=self.dimension
+            )
+            emb_list = results[0] if results else [0.0] * self.dimension
+        else:
+            model = _get_model(self._model_name)
+            if model is None:
+                return [0.0] * self.dimension
+            embedding = model.encode(truncated, normalize_embeddings=True)
+            emb_list = embedding.tolist()
 
-        embedding = model.encode(truncated, normalize_embeddings=True)
-        emb_list = embedding.tolist()
         cache[key] = emb_list
         self._persist_cache()
         return emb_list
@@ -232,33 +414,20 @@ class EmbeddingService:
     ) -> list[list[float]]:
         """Generate embeddings for a batch of texts with disk caching.
 
-        Each text is checked against the disk cache before embedding.
-        Newly embedded texts are cached to disk after the batch completes.
-        Cache hits avoid both the model encode cost AND the memory
-        allocation for zero-vectors.
-
-        Args:
-            texts: List of text strings to embed.
-            max_chars: Per-text character truncation limit.
-
-        Returns:
-            List of embedding vectors in the same order as the input.
+        Cache hits skip both the API call and local model encode.
         """
         if not texts:
             return []
 
-        model = _get_model(self.model_name)
-        if model is None:
-            return [[0.0] * self.dimension] * len(texts)
-
         cache = self._embed_cache
+        dim = self.dimension
         result: list[list[float]] = []
-        to_embed: list[tuple[int, str]] = []  # (index, truncated_text)
+        to_embed: list[tuple[int, str]] = []
         cached_count = 0
 
         for i, t in enumerate(texts):
             if not (t and t.strip()):
-                result.append([0.0] * self.dimension)
+                result.append([0.0] * dim)
                 continue
 
             truncated = t[:max_chars]
@@ -268,7 +437,7 @@ class EmbeddingService:
                 result.append(cache[key])
                 cached_count += 1
             else:
-                result.append([0.0] * self.dimension)  # placeholder
+                result.append([0.0] * dim)  # placeholder
                 to_embed.append((i, truncated))
 
         if to_embed:
@@ -277,16 +446,33 @@ class EmbeddingService:
                 "Cache miss for %d/%d texts — embedding now…",
                 len(to_embed), len(texts),
             )
-            embeddings = model.encode(
-                texts_to_encode,
-                normalize_embeddings=True,
-                show_progress_bar=False,
-            )
-            for (idx, _), emb in zip(to_embed, embeddings):
-                emb_list = emb.tolist()
-                result[idx] = emb_list
-                key = self._cache_key(texts[idx][:max_chars])
-                cache[key] = emb_list
+
+            if self._provider == "api":
+                api_results = _api_embed_batch(
+                    texts_to_encode, self._api_key, self._api_base,
+                    self._api_model, max_chars, dim=dim,
+                )
+                for (idx, txt), emb in zip(to_embed, api_results):
+                    emb_list = emb
+                    result[idx] = emb_list
+                    cache_key = self._cache_key(txt[:max_chars])
+                    cache[cache_key] = emb_list
+            else:
+                model = _get_model(self._model_name)
+                if model is None:
+                    # Leave zero-vectors in place
+                    pass
+                else:
+                    embeddings = model.encode(
+                        texts_to_encode,
+                        normalize_embeddings=True,
+                        show_progress_bar=False,
+                    )
+                    for (idx, txt), emb in zip(to_embed, embeddings):
+                        emb_list = emb.tolist()
+                        result[idx] = emb_list
+                        cache_key = self._cache_key(txt[:max_chars])
+                        cache[cache_key] = emb_list
 
         if to_embed:
             self._persist_cache()
@@ -296,8 +482,8 @@ class EmbeddingService:
             )
 
         logger.debug(
-            "embed_batch: %d texts, %d cache hits, %d embedded",
-            len(texts), cached_count, len(to_embed),
+            "embed_batch: %d texts, %d cache hits, %d embedded (provider=%s)",
+            len(texts), cached_count, len(to_embed), self._provider,
         )
         return result
 
@@ -305,11 +491,7 @@ class EmbeddingService:
 
     @staticmethod
     def cosine_similarity(v1: list[float], v2: list[float]) -> float:
-        """Cosine similarity between two embedding vectors.
-
-        Because embeddings are L2-normalised, this is equivalent to
-        the dot product.
-        """
+        """Cosine similarity between two embedding vectors."""
         v1_np = np.array(v1, dtype=np.float64)
         v2_np = np.array(v2, dtype=np.float64)
         norm1 = np.linalg.norm(v1_np)
@@ -328,15 +510,21 @@ class EmbeddingService:
         return normalized @ normalized.T
 
 
+# ── Module-level helper (backward compat) ───────────────────────────────────
+
+def is_api_available() -> bool:
+    """Check if an API embedding provider is configured and available."""
+    return _detect_api_provider() is not None
+
+
+# ── Cache warm-up ───────────────────────────────────────────────────────────
+
 async def warm_embed_cache(db_session, window_days: int = 7) -> int:
     """Pre-populate the embedding cache with articles from the last *window_days*.
 
-    Call this once before running ``StatsGenerator.collect()`` so that
-    all analyzers benefit from cache hits instead of re-encoding the
-    same articles independently.
-
-    Uses ``embed_batch()`` for efficiency (single model encode call) and
-    writes the cache file exactly once at the end (not per-text).
+    Call this before running ``StatsGenerator.collect()`` so that all analyzers
+    benefit from cache hits.  With API provider, this eliminates the 26s
+    model load entirely.
 
     Returns the number of texts actually embedded (new cache entries).
     """
@@ -347,14 +535,14 @@ async def warm_embed_cache(db_session, window_days: int = 7) -> int:
     now = datetime.now(timezone.utc)
     start = now - timedelta(days=window_days)
 
-    # Load existing cache so we don't overwrite entries already present
     cache = _load_embed_cache()
     initial_size = len(cache)
 
     embedder = EmbeddingService()
 
-    # Pre-load the model once so the first embed doesn't block
-    _get_model(embedder.model_name)
+    # Pre-load local model only if using local provider
+    if not embedder.is_api:
+        _get_model(embedder._model_name)
 
     try:
         result = await db_session.execute(
@@ -364,14 +552,13 @@ async def warm_embed_cache(db_session, window_days: int = 7) -> int:
                 (Article.content_text.isnot(None) & (Article.content_text != ""))
                 | (Article.summary.isnot(None) & (Article.summary != ""))
             )
-            .limit(2000)  # cap to avoid unbounded memory
+            .limit(2000)
         )
         articles = list(result.scalars().all())
     except Exception as exc:
         logger.warning("warm_embed_cache: DB query failed: %s", exc)
         return 0
 
-    # Build list of texts not yet in cache
     texts_to_cache: list[str] = []
     for article in articles:
         title = (article.title or "").strip()
@@ -386,14 +573,10 @@ async def warm_embed_cache(db_session, window_days: int = 7) -> int:
 
     if texts_to_cache:
         logger.info(
-            "warm_embed_cache: pre-embedding %d texts (cache has %d entries)…",
-            len(texts_to_cache), initial_size,
+            "warm_embed_cache: pre-embedding %d texts via %s (cache has %d entries)…",
+            len(texts_to_cache), embedder._provider, initial_size,
         )
-        # Use embed_batch for efficiency — single model encode call,
-        # results written to embedder._embed_cache (in-memory dict)
         embedder.embed_batch(texts_to_cache)
-
-        # Persist once at the end — not per-text (N writes → 1 write)
         embedder._persist_cache()
 
         new_entries = len(embedder._embed_cache) - initial_size
