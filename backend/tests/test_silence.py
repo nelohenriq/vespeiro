@@ -11,7 +11,8 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from src.analysis.silence.analyzer import SilenceAnalyzer, _article_text
+from src.analysis.silence.analyzer import SilenceAnalyzer
+from src.pipeline.embedder import article_text as _article_text
 from src.db.models import Article, Source
 from src.stats.models import SilenceMetrics
 

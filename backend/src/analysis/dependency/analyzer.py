@@ -27,9 +27,8 @@ Per-topic dependency percentages are computed and returned in
 from __future__ import annotations
 
 import logging
-import re
 from datetime import datetime, timedelta, timezone
-from html import unescape
+from src.pipeline.embedder import article_text as _article_text
 
 from sqlalchemy import select, func
 
@@ -502,59 +501,4 @@ class LusaDependencyAnalyzer:
         return list(result.scalars().all())
 
 
-# Known Portuguese news source suffixes commonly appended to RSS titles
-_TITLE_SUFFIX_RE = re.compile(r"\s[-|]\s([A-ZÀ-Ú][\wÀ-ú. ]+|[A-ZÀ-Ú]{2,})$")
 
-# Google News RSS sometimes generates placeholder titles when it can't extract
-# the real article title (e.g. "www.lusa.pt - LUSA", "Fotogalerias - LUSA").
-# These pollute matching, so we detect them and skip the title entirely.
-# We match known garbage patterns rather than broad heuristics to avoid false
-# positives on legitimate article titles.
-_AUTO_TITLE_RE = re.compile(
-    r"""
-    ^(?:                                         # Start of string, non-capturing group:
-        www\.[a-z]+\.[a-z]+                     #   Domain pattern: www.lusa.pt
-        | Fotogalerias                           #   Gallery section page
-        | Galeria\sde\s(?:Vídeos|Imagens|Fotos)  #   Gallery section page (pt)
-        | Adenda\s                               #   Agenda appendix
-    )
-    """,
-    re.IGNORECASE | re.VERBOSE,
-)
-
-
-def _article_text(article: Article) -> str:
-    """Build a matching text from an article: title + content heading.
-
-    Uses the full title plus the first 800 characters of content (enough to
-    capture the lead/heading paragraph which typically contains the key facts).
-    Falls back to ``summary`` when ``content_text`` is empty (mainstream RSS
-    scrapers only store summaries, not full body text). HTML tags and entities
-    are stripped from the summary since they typically contain RSS link wrappers.
-
-    When a Google News RSS article has an auto-generated placeholder title
-    (e.g. "www.lusa.pt - LUSA"), the title is discarded entirely so it doesn't
-    pollute embedding-based matching.
-    """
-    raw_title = (article.title or "").strip()
-
-    content = (article.content_text or "").strip()
-    if not content:
-        # Fall back to summary — strip HTML tags and decode HTML entities
-        summary = (article.summary or "").strip()
-        summary = re.sub(r"<[^>]+>", " ", summary)  # Remove HTML tags
-        summary = unescape(summary)  # Decode &nbsp; &amp; etc.
-        content = summary.strip()
-
-    # Use first 800 chars of content (roughly the lead paragraph)
-    lead = content[:800]
-
-    # Detect auto-generated Google News titles — if found, skip title entirely
-    if _AUTO_TITLE_RE.match(raw_title):
-        return lead.strip()
-
-    # Strip common RSS title suffixes: "- SourceName" or "| Section"
-    # Only strips if suffix looks like a proper name (capitalized) or acronym
-    title = _TITLE_SUFFIX_RE.sub("", raw_title).strip()
-
-    return f"{title} {lead}".strip()

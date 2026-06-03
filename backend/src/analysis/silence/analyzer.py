@@ -20,6 +20,8 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
+
+from src.pipeline.embedder import article_text as _article_text
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -363,13 +365,4 @@ class SilenceAnalyzer:
         return list(result.scalars().all())
 
 
-def _article_text(article: Article) -> str:
-    """Build a matching text from an article: title + content heading.
 
-    Uses the full title plus the first 800 characters of content (enough to
-    capture the lead/heading paragraph which typically contains the key facts).
-    """
-    title = (article.title or "").strip()
-    content = (article.content_text or "").strip()
-    lead = content[:800]
-    return f"{title} {lead}".strip()

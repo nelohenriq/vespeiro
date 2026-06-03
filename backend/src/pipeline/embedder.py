@@ -24,6 +24,8 @@ import hashlib
 import json
 import logging
 import os
+import re
+from html import unescape
 from pathlib import Path
 from typing import Any
 
@@ -532,6 +534,59 @@ class EmbeddingService:
         norms[norms == 0] = 1.0
         normalized = matrix / norms
         return normalized @ normalized.T
+
+
+# ── Article text builder (shared utility) ────────────────────────────────────
+
+# Known Portuguese news source suffixes commonly appended to RSS titles
+_TITLE_SUFFIX_RE = re.compile(r"\s[-|]\s([A-ZÀ-Ú][\wÀ-ú. ]+|[A-ZÀ-Ú]{2,})$")
+
+# Google News RSS sometimes generates placeholder titles when it can't extract
+# the real article title (e.g. "www.lusa.pt - LUSA", "Fotogalerias - LUSA").
+_AUTO_TITLE_RE = re.compile(
+    r"""
+    ^(?:
+        www\.[a-z]+\.[a-z]+
+        | Fotogalerias
+        | Galeria\sde\s(?:Vídeos|Imagens|Fotos)
+        | Adenda\s
+    )
+    """,
+    re.IGNORECASE | re.VERBOSE,
+)
+
+
+def article_text(article: object) -> str:
+    """Build a matching text from an article: title + content heading.
+
+    Uses the full title plus the first 800 characters of content (enough to
+    capture the lead/heading paragraph which typically contains the key facts).
+    Falls back to ``summary`` when ``content_text`` is empty (mainstream RSS
+    scrapers only store summaries, not full body text). HTML tags and entities
+    are stripped from the summary.
+
+    When a Google News RSS article has an auto-generated placeholder title
+    (e.g. "www.lusa.pt - LUSA"), the title is discarded entirely.
+
+    Accepts any object with ``title``, ``content_text``, and ``summary``
+    attributes (SQLAlchemy ``Article``, ``ScrapedArticle``, or mock).
+    """
+    raw_title = (getattr(article, "title", None) or "").strip()
+
+    content = (getattr(article, "content_text", None) or "").strip()
+    if not content:
+        summary = (getattr(article, "summary", None) or "").strip()
+        summary = re.sub(r"<[^>]+>", " ", summary)  # Remove HTML tags
+        summary = unescape(summary)  # Decode &nbsp; &amp; etc.
+        content = summary.strip()
+
+    lead = content[:800]
+
+    if _AUTO_TITLE_RE.match(raw_title):
+        return lead.strip()
+
+    title = _TITLE_SUFFIX_RE.sub("", raw_title).strip()
+    return f"{title} {lead}".strip()
 
 
 # ── Module-level helper (backward compat) ───────────────────────────────────

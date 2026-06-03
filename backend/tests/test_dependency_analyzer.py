@@ -7,7 +7,8 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from src.analysis.dependency.analyzer import LusaDependencyAnalyzer, _article_text
+from src.analysis.dependency.analyzer import LusaDependencyAnalyzer
+from src.pipeline.embedder import article_text as _article_text
 from src.db.models import Article
 from src.stats.models import LusaDependencyMetrics
 

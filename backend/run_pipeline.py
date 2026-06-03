@@ -112,7 +112,7 @@ async def fetch_and_store(source_id: str) -> int:
     if new_count > 0 and new_urls:
         try:
             from src.pipeline.embedder import EmbeddingService
-            from src.analysis.dependency.analyzer import _article_text
+            from src.pipeline.embedder import article_text as _article_text
             import time
 
             embedder = EmbeddingService()

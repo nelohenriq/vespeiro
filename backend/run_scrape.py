@@ -17,7 +17,7 @@ import sys
 from src.config import load_sources
 from src.scrapers.loader import get_spider
 from src.pipeline.embedder import EmbeddingService
-from src.analysis.dependency.analyzer import _article_text
+from src.pipeline.embedder import article_text as _article_text
 from src.supabase.client import get_supabase
 
 
