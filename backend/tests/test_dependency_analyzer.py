@@ -426,18 +426,19 @@ class TestClassifyTopic:
         assert topic == "outros"
 
     def test_politics_vs_economy_score_tiebreak(self):
-        """When scores are tied, the first topic in dict wins (política).
+        """When scores are tied, the topic with longer combined keyword length wins.
 
         Text with one political and one economic keyword → tied at 1 each.
-        política appears first in the dict so it wins.
+        economia has longer total keyword length so it wins (more specific).
         """
         topic = LusaDependencyAnalyzer._classify_topic(
             "O governo anunciou medidas para controlar a inflação"
         )
-        # "governo" → política (1 match)
-        # "inflação" → economia (1 match)
-        # Tied at 1 → política wins (first in dict)
-        assert topic == "política"
+        # "governo" → política (1 match, kw_len=440)
+        # "inflação" → economia (1 match, kw_len=497)
+        # Tied at 1 → economia wins (longer total keyword = more specific)
+        assert topic == "economia"
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

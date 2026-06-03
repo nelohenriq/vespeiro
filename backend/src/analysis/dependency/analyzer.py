@@ -146,7 +146,7 @@ _CLASSIFY_TOPIC_KEYWORDS: dict[str, set[str]] = {
     },
     "ciência": {
         "ciência", "tecnologia", "investigação científica", "inovação",
-        "inteligência artificial", "ia", "digital", "transformação digital",
+        "inteligência artificial", "digital", "transformação digital",
         "internet", "dados", "software", "aplicação", "app",
         "startup", "espaço", "satélite", "nasa", "esa",
         "agência espacial", "biologia", "genética", "dna",

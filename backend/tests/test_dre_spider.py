@@ -245,7 +245,8 @@ class TestDRESpider:
         spider = await _make_spider()
         spider._exa = mock_exa
         with patch.object(settings, "exa_api_key", "fake-key"):
-            articles = await spider.fetch("dre_appointments")
+            with patch.object(settings, "tavily_api_key", ""):
+                articles = await spider.fetch("dre_appointments")
 
         assert articles == []
 

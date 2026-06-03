@@ -15,6 +15,7 @@ venv/
 # Data
 data/*.db
 data/*.sqlite
+backend/data/embedding-cache/
 
 # IDE
 .vscode/

@@ -379,8 +379,7 @@ async def warm_embed_cache(db_session, window_days: int = 7) -> int:
         full_text = f"{title} {content}".strip()
         if not full_text:
             continue
-
-        truncated = full_text[:8192]
+        truncated = full_text[:800]
         key = embedder._cache_key(truncated)
         if key not in cache:
             texts_to_cache.append(truncated)
