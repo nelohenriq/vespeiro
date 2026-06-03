@@ -76,6 +76,7 @@ async def fetch_and_store(source_id: str) -> int:
 
     # 5. Store new articles (dedup by URL)
     new_count = 0
+    new_urls: list[str] = []
     async with session_factory() as session:
         for art in articles:
             if not art.url:
@@ -99,10 +100,43 @@ async def fetch_and_store(source_id: str) -> int:
                 published_at=art.published_at,
                 language=art.language or source_cfg.language,
             ))
+            new_urls.append(art.url)
             new_count += 1
 
         await session.commit()
         total = len(articles)
+
+    # 6. Background embed new articles into cache
+    # This pre-warms the disk cache so the stats pipeline hits cache
+    # immediately instead of re-embedding everything from scratch.
+    if new_count > 0 and new_urls:
+        try:
+            from src.pipeline.embedder import EmbeddingService
+            from src.analysis.dependency.analyzer import _article_text
+            import time
+
+            embedder = EmbeddingService()
+            t0 = time.time()
+
+            # Fetch newly stored articles for embedding using collected URLs
+            async with session_factory() as session:
+                result = await session.execute(
+                    select(Article)
+                    .where(Article.source_id == source_id)
+                    .where(Article.url.in_(new_urls))
+                )
+                new_articles = list(result.scalars().all())
+
+            texts = [_article_text(a) for a in new_articles]
+            texts = [t for t in texts if t.strip()]
+
+            if texts:
+                embedder.embed_batch(texts)
+                embedder._persist_cache()
+                elapsed = time.time() - t0
+                print(f"   🧠 {len(texts)} articles embedded in {elapsed:.1f}s ({embedder._provider})")
+        except Exception as exc:
+            print(f"   ⚠️  Embedding failed (non-fatal): {exc}")
 
     await engine.dispose()
 

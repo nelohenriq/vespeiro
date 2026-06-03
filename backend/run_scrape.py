@@ -17,6 +17,7 @@ import sys
 from src.config import load_sources
 from src.scrapers.loader import get_spider
 from src.pipeline.embedder import EmbeddingService
+from src.analysis.dependency.analyzer import _article_text
 from src.supabase.client import get_supabase
 
 
@@ -45,6 +46,8 @@ async def run_scrape(source_id: str) -> None:
         return
 
     new_count = 0
+    new_articles = []
+    new_embeddings = []
     for art in articles:
         # Check duplicate by URL
         existing = (
@@ -56,10 +59,26 @@ async def run_scrape(source_id: str) -> None:
         if existing.data:
             continue
 
-        # Generate embedding
-        text_to_embed = (art.content_text or art.title)[:8192]
-        embedding = embedder.embed_text(text_to_embed) if text_to_embed.strip() else None
+        new_articles.append(art)
+        new_count += 1
 
+    # Batch-embed all new articles (much faster than one-by-one with API)
+    embeddings: list[list[float]] = []
+    if new_articles:
+        try:
+            import time
+            t0 = time.time()
+            texts = [_article_text(a) for a in new_articles]
+            texts = [t for t in texts if t.strip()]
+            embeddings = embedder.embed_batch(texts)
+            embedder._persist_cache()
+            elapsed = time.time() - t0
+            print(f"   🧠 {len(texts)} articles embedded in {elapsed:.1f}s ({embedder._provider})")
+        except Exception as exc:
+            print(f"   ⚠️  Embedding failed (non-fatal): {exc}")
+            embeddings = [[0.0] * embedder.dimension] * len(new_articles)
+
+    for art, embedding in zip(new_articles, embeddings):
         supabase.table("articles").insert({
             "url": art.url,
             "title": art.title,
@@ -71,7 +90,6 @@ async def run_scrape(source_id: str) -> None:
             "source_id": source_cfg.id,
             "embedding": embedding,
         }).execute()
-        new_count += 1
 
     print(f"   ✅ Inserted {new_count} new articles")
 
