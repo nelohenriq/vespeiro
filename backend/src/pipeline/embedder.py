@@ -179,6 +179,11 @@ def _detect_api_provider() -> tuple[str, str, str, int] | None:
     return None
 
 
+# Nvidia NIM free tier is slow (~700ms/text).  Chunk large batches
+# to avoid timeouts and allow incremental progress logging.
+_API_BATCH_CHUNK_SIZE = 100
+
+
 def _api_embed_batch(
     texts: list[str],
     api_key: str,
@@ -189,61 +194,80 @@ def _api_embed_batch(
 ) -> list[list[float]]:
     """Call an OpenAI-compatible /v1/embeddings endpoint for a batch of texts.
 
-    Returns a list of embedding vectors (L2-normalised) in the same order
-    as the input.  Returns zero-vectors for any text that fails.
+    Large batches are automatically chunked to avoid timeouts and provide
+    incremental progress.  Returns a list of embedding vectors (L2-normalised)
+    in the same order as the input.
 
     Args:
         dim: Expected embedding dimension for error-case zero-vectors.
     """
     import httpx
 
-    truncated = [t[:max_chars] for t in texts]
     url = f"{base_url.rstrip('/')}/embeddings"
+    all_embeddings: list[list[float]] = []
+    total_tokens = 0
 
-    try:
-        resp = httpx.post(
-            url,
-            json={"model": model, "input": truncated},
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            timeout=60.0,
-        )
-        resp.raise_for_status()
-        data = resp.json()
+    for chunk_start in range(0, len(texts), _API_BATCH_CHUNK_SIZE):
+        chunk = [t[:max_chars] for t in texts[chunk_start:chunk_start + _API_BATCH_CHUNK_SIZE]]
+        chunk_idx = chunk_start // _API_BATCH_CHUNK_SIZE + 1
+        n_chunks = (len(texts) + _API_BATCH_CHUNK_SIZE - 1) // _API_BATCH_CHUNK_SIZE
 
-        # Sort by index to maintain order
-        items = sorted(data.get("data", []), key=lambda x: x["index"])
-        embeddings = [item["embedding"] for item in items]
-
-        if len(embeddings) != len(texts):
-            logger.warning(
-                "API returned %d embeddings for %d texts — padding with zeros",
-                len(embeddings), len(texts),
+        try:
+            resp = httpx.post(
+                url,
+                json={"model": model, "input": chunk},
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                timeout=120.0,
             )
-            # Pad missing with zero-vectors
-            dim = len(embeddings[0]) if embeddings else dim
-            while len(embeddings) < len(texts):
-                embeddings.append([0.0] * dim)
+            resp.raise_for_status()
+            data = resp.json()
 
-        # L2-normalise
-        vecs = np.array(embeddings, dtype=np.float64)
+            items = sorted(data.get("data", []), key=lambda x: x["index"])
+            chunk_embs = [item["embedding"] for item in items]
+
+            if len(chunk_embs) != len(chunk):
+                logger.warning(
+                    "API chunk %d/%d: returned %d for %d — padding",
+                    chunk_idx, n_chunks, len(chunk_embs), len(chunk),
+                )
+                cdim = len(chunk_embs[0]) if chunk_embs else dim
+                while len(chunk_embs) < len(chunk):
+                    chunk_embs.append([0.0] * cdim)
+
+            all_embeddings.extend(chunk_embs)
+            total_tokens += data.get("usage", {}).get("total_tokens", 0)
+            logger.debug(
+                "API chunk %d/%d: %d texts, %.1fms",
+                chunk_idx, n_chunks, len(chunk),
+                resp.elapsed.total_seconds() * 1000,
+            )
+
+        except Exception as exc:
+            logger.warning(
+                "API chunk %d/%d failed: %s — padding with zeros",
+                chunk_idx, n_chunks, exc,
+            )
+            all_embeddings.extend([[0.0] * dim] * len(chunk))
+
+    logger.info(
+        "API embeddings: %d texts, %d chunks, %s tokens",
+        len(texts),
+        max(1, (len(texts) + _API_BATCH_CHUNK_SIZE - 1) // _API_BATCH_CHUNK_SIZE),
+        total_tokens or "?",
+    )
+
+    # L2-normalise all embeddings
+    if all_embeddings:
+        vecs = np.array(all_embeddings, dtype=np.float64)
         norms = np.linalg.norm(vecs, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
         vecs = vecs / norms
-
-        usage = data.get("usage", {})
-        logger.debug(
-            "API embeddings: %d texts, %s tokens, %.1fms",
-            len(texts), usage.get("total_tokens", "?"),
-            resp.elapsed.total_seconds() * 1000,
-        )
         return [row.tolist() for row in vecs]
 
-    except Exception as exc:
-        logger.warning("API embedding failed: %s — returning zero-vectors", exc)
-        return [[0.0] * dim] * len(texts)
+    return [[0.0] * dim] * len(texts)
 
 
 # ── Public API ──────────────────────────────────────────────────────────────
