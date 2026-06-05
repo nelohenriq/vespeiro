@@ -1,0 +1,2896 @@
+{
+  "title": "BEP Job Offers in Municipalities with Party Changes (January 2026)",
+  "description": "Public sector job listings from municipalities where the ruling party changed after the October 2025 municipal elections.",
+  "period": "2026-01-01 to 2026-01-31",
+  "source": "BEP - Bolsa de Emprego Público (bep.gov.pt)",
+  "election_date": "2025-10-12",
+  "total_matches": 240,
+  "municipalities_with_matches": 27,
+  "municipalities_total": 43,
+  "generated_at": "2026-06-04T20:02:14.013186",
+  "municipalities": [
+    {
+      "municipality": "Almada",
+      "district": "Setúbal",
+      "previous_party": "PS/BE",
+      "new_party": "PSD/IL",
+      "job_count": 2,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0463",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Técnico Superior - Câmara Municipal de Almada",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Almada",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A atualmente detida pelo(a) trabalhador(a)",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143902"
+        },
+        {
+          "cod_oferta": "OE202601/0683",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Técnico Superior - Câmara Municipal de Almada",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Almada",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A atualmente detida pelo(a) trabalhador(a).",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144122"
+        }
+      ]
+    },
+    {
+      "municipality": "Amadora",
+      "district": "Lisboa",
+      "previous_party": "PS",
+      "new_party": "PSD/IL",
+      "job_count": 5,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0108",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "entidade": "Serviços Municipalizados",
+          "organismo": "Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.ª posição remuneratória, 16.º nível remuneratório da Tabela Remuneratória Única - 1.499,14 €.",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143547"
+        },
+        {
+          "cod_oferta": "OE202601/0106",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "entidade": "Serviços Municipalizados",
+          "organismo": "Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.ª posição remuneratória, 16.º nível remuneratório da Tabela Remuneratória Única - 1.499,14 €.",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143545"
+        },
+        {
+          "cod_oferta": "OE202601/0571",
+          "data_publicacao": "2026-01-22",
+          "titulo": "Técnico Superior - Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "entidade": "Serviços Municipalizados",
+          "organismo": "Serviços Intermunicipalizados de Água e Saneamento dos Municípios de Oeiras e Amadora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "De acordo com a remuneração auferida no serviço de origem.",
+          "data_limite": "2026-02-22",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144010"
+        },
+        {
+          "cod_oferta": "OE202601/0736",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Assistente Técnico - Câmara Municipal da Amadora",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal da Amadora",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979,05€ (novecentos e setenta e nove euros e cinco cêntimos)",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144175"
+        },
+        {
+          "cod_oferta": "OE202601/0735",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Técnico Superior - Câmara Municipal da Amadora",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal da Amadora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57€ (mil quatrocentos e quarenta e dois euros e cinquenta e sete cêntimos)",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144174"
+        }
+      ]
+    },
+    {
+      "municipality": "Barreiro",
+      "district": "Setúbal",
+      "previous_party": "CDU",
+      "new_party": "PS",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0426",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Técnico superior das áreas de diagnóstico e terapêutica - Centro Hospitalar Barreiro Montijo, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Centro Hospitalar Barreiro Montijo, E.P.E.",
+          "categoria": "Técnico superior das áreas de diagnóstico e terapêutica",
+          "remuneracao": "1389,93€ (mil trezentos e oitenta e nove euros e noventa e três cêntimos)",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143865"
+        }
+      ]
+    },
+    {
+      "municipality": "Beja",
+      "district": "Beja",
+      "previous_party": "PS",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 10,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0678",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144117"
+        },
+        {
+          "cod_oferta": "OE202601/0677",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144116"
+        },
+        {
+          "cod_oferta": "OE202601/0675",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144114"
+        },
+        {
+          "cod_oferta": "OE202601/0674",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144113"
+        },
+        {
+          "cod_oferta": "OE202601/0672",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144111"
+        },
+        {
+          "cod_oferta": "OE202601/0671",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144110"
+        },
+        {
+          "cod_oferta": "OE202601/0670",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144109"
+        },
+        {
+          "cod_oferta": "OE202601/0669",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144108"
+        },
+        {
+          "cod_oferta": "OE202601/0668",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144107"
+        },
+        {
+          "cod_oferta": "OE202601/0716",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Professor adjunto - Instituto Politécnico de Beja",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Beja",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3.321,72€",
+          "data_limite": "2026-03-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144155"
+        }
+      ]
+    },
+    {
+      "municipality": "Bragança",
+      "district": "Bragança",
+      "previous_party": "PSD",
+      "new_party": "PS",
+      "job_count": 3,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0517",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Politécnico de Bragança",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Bragança",
+          "categoria": "Professor adjunto",
+          "remuneracao": "Decreto-Lei n.º 408/89, de 18 de novembro.",
+          "data_limite": "2026-03-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143956"
+        },
+        {
+          "cod_oferta": "OE202601/0515",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor coordenador - Instituto Politécnico de Bragança",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Bragança",
+          "categoria": "Professor coordenador",
+          "remuneracao": "artigo 2.º-A do ECPDESP",
+          "data_limite": "2026-03-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143954"
+        },
+        {
+          "cod_oferta": "OE202601/0734",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Professor adjunto - Instituto Politécnico de Bragança",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Bragança",
+          "categoria": "Professor adjunto",
+          "remuneracao": "Decreto-Lei n.º 408/89, de 18 de novembro",
+          "data_limite": "2026-03-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144173"
+        }
+      ]
+    },
+    {
+      "municipality": "Cascais",
+      "district": "Lisboa",
+      "previous_party": "PSD/CDS-PP",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0216",
+          "data_publicacao": "2026-01-09",
+          "titulo": "Estagiario - Câmara Municipal de Cascais",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Cascais",
+          "categoria": "Estagiario",
+          "remuneracao": "Durante o Estágio corresponde a 878,41 €, Agente Municipal 2.ª classe corresponde a 979,05 €",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143655"
+        }
+      ]
+    },
+    {
+      "municipality": "Castelo Branco",
+      "district": "Castelo Branco",
+      "previous_party": "PSD",
+      "new_party": "PS",
+      "job_count": 2,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0080",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Hospitalar - Unidade Local de Saúde de Castelo Branco, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Castelo Branco, E.P.E.",
+          "categoria": "Assistente Hospitalar",
+          "remuneracao": "TRU, posição 1, nível 51, conforme Anexo 1 do DL. 46/2025 de 27.03",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143519"
+        },
+        {
+          "cod_oferta": "OE202601/0256",
+          "data_publicacao": "2026-01-12",
+          "titulo": "Técnico Superior - Câmara Municipal de Castelo Branco",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Castelo Branco",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida no cargo de origem",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143695"
+        }
+      ]
+    },
+    {
+      "municipality": "Coimbra",
+      "district": "Coimbra",
+      "previous_party": "PSD/CDS-PP/NC/PPM/Alliance/RIR/Volt",
+      "new_party": "PS/L/PAN",
+      "job_count": 9,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0035",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143474"
+        },
+        {
+          "cod_oferta": "OE202601/0513",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Investigador Auxiliar - Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "3.501,28€ correspondência níveis 53 e 54 da TRU",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143952"
+        },
+        {
+          "cod_oferta": "OE202601/0511",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Qualquer - Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53 €, correspondente à 1.ª posição, nível remuneratório 33 da TRU",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143950"
+        },
+        {
+          "cod_oferta": "OE202601/0520",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143959"
+        },
+        {
+          "cod_oferta": "OE202601/0584",
+          "data_publicacao": "2026-01-22",
+          "titulo": "Técnico Superior - Comunidade Intermunicipal da Região de Coimbra",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal da Região de Coimbra",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.ª posição remuneratória da carreira geral de Técnico Superior, atualmente fixada em 1442,57€",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144023"
+        },
+        {
+          "cod_oferta": "OE202601/0597",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Qualquer - Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53 €, correspondente à 1.ª posição, nível remuneratório 33 da TRU",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144036"
+        },
+        {
+          "cod_oferta": "OE202601/0639",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Comunidade Intermunicipal da Região de Coimbra",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal da Região de Coimbra",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A mesma detida no organismo de origem",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144078"
+        },
+        {
+          "cod_oferta": "OE202601/0721",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Qualquer - Universidade de Coimbra",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Coimbra",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53 €, correspondente à 1.ª posição, nível 33 da TRU",
+          "data_limite": "2026-02-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144160"
+        },
+        {
+          "cod_oferta": "OE202601/0804",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Assistente Operacional - Comunidade Intermunicipal da Região de Coimbra",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal da Região de Coimbra",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "A mesma detida no organismo de origem",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144243"
+        }
+      ]
+    },
+    {
+      "municipality": "Gondomar",
+      "district": "Porto",
+      "previous_party": "PS",
+      "new_party": "PSD/CDS-PP",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0273",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Assistente Técnico - Câmara Municipal de Gondomar",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Gondomar",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "A remuneração será a detida pelos trabalhadores na carreira/categoria no seu organismo de origem;",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143712"
+        }
+      ]
+    },
+    {
+      "municipality": "Guarda",
+      "district": "Guarda",
+      "previous_party": "Independent",
+      "new_party": "NC/PPM",
+      "job_count": 8,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0130",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Especialista de Sistemas e Tecnologias de Informação - Serviços Sociais da Guarda Nacional Republicana",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Serviços Sociais da Guarda Nacional Republicana",
+          "categoria": "Especialista de Sistemas e Tecnologias de Informação",
+          "remuneracao": "A definida nos termos legais",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143569"
+        },
+        {
+          "cod_oferta": "OE202601/0136",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Técnico Superior - Serviços Sociais da Guarda Nacional Republicana",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Serviços Sociais da Guarda Nacional Republicana",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Posição remuneratória de referência - 1ª posição remuneratória da carreira/ categoria",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143575"
+        },
+        {
+          "cod_oferta": "OE202601/0258",
+          "data_publicacao": "2026-01-12",
+          "titulo": "Técnico superior das áreas de diagnóstico e terapêutica - Unidade Local de Saúde da Guarda, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde da Guarda, E.P.E.",
+          "categoria": "Técnico superior das áreas de diagnóstico e terapêutica",
+          "remuneracao": "RB mensal ilíquida da 1.ª posição remuneratória, nível 15, da TRU, da categoria de TSDT.",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143697"
+        },
+        {
+          "cod_oferta": "OE202601/0268",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Assistente Operacional - Polícia de Segurança Pública",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Polícia de Segurança Pública",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Posição remuneratória em que se encontra posicionado no serviço de origem.",
+          "data_limite": "2026-01-27",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143707"
+        },
+        {
+          "cod_oferta": "OE202601/0267",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Técnico Superior - Polícia de Segurança Pública",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Polícia de Segurança Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Posição remuneratória em que se encontra posicionado no serviço de origem.",
+          "data_limite": "2026-01-27",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143706"
+        },
+        {
+          "cod_oferta": "OE202601/0306",
+          "data_publicacao": "2026-01-14",
+          "titulo": "Assistente Operacional - Câmara Municipal da Guarda",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal da Guarda",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143745"
+        },
+        {
+          "cod_oferta": "OE202601/0436",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Técnico Superior - Unidade Local de Saúde da Guarda, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde da Guarda, E.P.E.",
+          "categoria": "Técnico Superior",
+          "remuneracao": "RB mensal ilíquida 1.ª posição remuneratória, nível 16 da TRU, da categoria de técnico superior.",
+          "data_limite": "2026-02-02",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143875"
+        },
+        {
+          "cod_oferta": "OE202601/0521",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Unidade Local de Saúde da Guarda, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde da Guarda, E.P.E.",
+          "categoria": "Técnico Superior",
+          "remuneracao": "RB mensal ilíquida 1.ª posição remuneratória, nível 16 da TRU, da categoria de técnico superior.",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143960"
+        }
+      ]
+    },
+    {
+      "municipality": "Lisboa",
+      "district": "Lisboa",
+      "previous_party": "PSD/CDS-PP/Alliance/MPT/PPM",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 83,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0013",
+          "data_publicacao": "2026-01-02",
+          "titulo": "Técnico Superior - Instituto Superior de Agronomia da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Agronomia da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1 442,57€ ou 1 972,04€ (caso o candidato selecionado seja titular de grau académico de doutor)",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143452"
+        },
+        {
+          "cod_oferta": "OE202601/0077",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Operacional - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143516"
+        },
+        {
+          "cod_oferta": "OE202601/0076",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Operacional - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143515"
+        },
+        {
+          "cod_oferta": "OE202601/0086",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Coordenador Técnico - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Coordenador Técnico",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143525"
+        },
+        {
+          "cod_oferta": "OE202601/0081",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Farmacêutico assistente - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Farmacêutico assistente",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143520"
+        },
+        {
+          "cod_oferta": "OE202601/0026",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Instituto Superior de Engenharia de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Engenharia de Lisboa",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143465"
+        },
+        {
+          "cod_oferta": "OE202601/0023",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Instituto Superior de Engenharia de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Engenharia de Lisboa",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143462"
+        },
+        {
+          "cod_oferta": "OE202601/0022",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Instituto Superior de Engenharia de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Engenharia de Lisboa",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143461"
+        },
+        {
+          "cod_oferta": "OE202601/0048",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Investigador Auxiliar - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "Entre os níveis 53 e 54 da TRU (€ 3.501,28 ou € 2.334,19 - dedicação exclusiva ou tempo integral)",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143487"
+        },
+        {
+          "cod_oferta": "OE202601/0085",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Investigador Doutorado - Universidade Nova de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade Nova de Lisboa",
+          "categoria": "Investigador Doutorado",
+          "remuneracao": "3.501,28€",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143524"
+        },
+        {
+          "cod_oferta": "OE202601/0073",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Investigador Doutorado - Universidade Nova de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade Nova de Lisboa",
+          "categoria": "Investigador Doutorado",
+          "remuneracao": "2.351,53€",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143512"
+        },
+        {
+          "cod_oferta": "OE202601/0036",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Qualquer - Instituto de Ciências Sociais da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto de Ciências Sociais da Universidade de Lisboa",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53€",
+          "data_limite": "2026-02-02",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143475"
+        },
+        {
+          "cod_oferta": "OE202601/0033",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Qualquer - Instituto de Ciências Sociais da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto de Ciências Sociais da Universidade de Lisboa",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53€",
+          "data_limite": "2026-02-02",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143472"
+        },
+        {
+          "cod_oferta": "OE202601/0030",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Qualquer - Instituto de Ciências Sociais da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto de Ciências Sociais da Universidade de Lisboa",
+          "categoria": "Qualquer",
+          "remuneracao": "2.351,53€",
+          "data_limite": "2026-02-02",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143469"
+        },
+        {
+          "cod_oferta": "OE202601/0084",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Auxiliar de Saúde - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Técnico Auxiliar de Saúde",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143523"
+        },
+        {
+          "cod_oferta": "OE202601/0058",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior - Serviços Sociais da Administração Pública",
+          "entidade": "Ministério das Finanças",
+          "organismo": "Serviços Sociais da Administração Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Ver o ponto 6 do aviso integral",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143497"
+        },
+        {
+          "cod_oferta": "OE202601/0072",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior de Diagnóstico e Terapêutica - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Técnico Superior de Diagnóstico e Terapêutica",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143511"
+        },
+        {
+          "cod_oferta": "OE202601/0070",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior de Diagnóstico e Terapêutica - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Técnico Superior de Diagnóstico e Terapêutica",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143509"
+        },
+        {
+          "cod_oferta": "OE202601/0068",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior de Diagnóstico e Terapêutica - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Técnico Superior de Diagnóstico e Terapêutica",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da carreira",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143507"
+        },
+        {
+          "cod_oferta": "OE202601/0053",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Especialista de Sistemas e Tecnologias de Informação - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Especialista de Sistemas e Tecnologias de Informação",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-01-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143492"
+        },
+        {
+          "cod_oferta": "OE202601/0075",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143514"
+        },
+        {
+          "cod_oferta": "OE202601/0071",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143510"
+        },
+        {
+          "cod_oferta": "OE202601/0063",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143502"
+        },
+        {
+          "cod_oferta": "OE202601/0045",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Investigador Auxiliar - Faculdade de Letras da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Letras da Universidade de Lisboa",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "28-03-0501",
+          "data_limite": "2026-02-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143484"
+        },
+        {
+          "cod_oferta": "OE202601/0100",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Escola Superior de Enfermagem de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Escola Superior de Enfermagem de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "865,54 €",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143539"
+        },
+        {
+          "cod_oferta": "OE202601/0025",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57 €",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143464"
+        },
+        {
+          "cod_oferta": "OE202601/0024",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57€",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143463"
+        },
+        {
+          "cod_oferta": "OE202601/0091",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Técnico Superior - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Nível 16 da TRU, € 1.442,57, se a outra superior não tiverem direito",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143530"
+        },
+        {
+          "cod_oferta": "OE202601/0098",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Professor Auxiliar - Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3501,28",
+          "data_limite": "2026-02-18",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143537"
+        },
+        {
+          "cod_oferta": "OE202601/0093",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Professor Auxiliar - Faculdade de Ciências da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade de Lisboa",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3501,28",
+          "data_limite": "2026-02-18",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143532"
+        },
+        {
+          "cod_oferta": "OE202601/0159",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Técnico Superior - Serviços Sociais da Administração Pública",
+          "entidade": "Ministério das Finanças",
+          "organismo": "Serviços Sociais da Administração Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Até ao limite da 8.ª PR, N 46, ou a já detida pelo candidato na carreira técnico superior",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143598"
+        },
+        {
+          "cod_oferta": "OE202601/0138",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Técnico Superior - Serviços Sociais da Administração Pública",
+          "entidade": "Ministério das Finanças",
+          "organismo": "Serviços Sociais da Administração Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Ver ponto 6 do aviso integral",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143577"
+        },
+        {
+          "cod_oferta": "OE202601/0196",
+          "data_publicacao": "2026-01-08",
+          "titulo": "Farmacêutico Assessor Sénior - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Farmacêutico Assessor Sénior",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Farmacêutico Assessor Sénior",
+          "data_limite": "2026-01-22",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143635"
+        },
+        {
+          "cod_oferta": "OE202601/0205",
+          "data_publicacao": "2026-01-08",
+          "titulo": "Investigador Auxiliar - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "0",
+          "data_limite": "2026-02-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143644"
+        },
+        {
+          "cod_oferta": "OE202601/0204",
+          "data_publicacao": "2026-01-08",
+          "titulo": "Investigador Auxiliar - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "Entre os níveis 53 e 54 da TRU (€ 3.501,28 ou € 2.334,19 - dedicação exclusiva ou tempo integral)",
+          "data_limite": "2026-02-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143643"
+        },
+        {
+          "cod_oferta": "OE202601/0201",
+          "data_publicacao": "2026-01-08",
+          "titulo": "Investigador Auxiliar - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "Entre os níveis 53 e 54 da TRU (€ 3.501,28 ou € 2.334,19 - dedicação exclusiva ou tempo integral)",
+          "data_limite": "2026-02-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143640"
+        },
+        {
+          "cod_oferta": "OE202601/0219",
+          "data_publicacao": "2026-01-09",
+          "titulo": "Técnico de Sistemas e Tecnologias de Informação - Instituto Superior de Economia e Gestão da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Economia e Gestão da Universidade de Lisboa",
+          "categoria": "Técnico de Sistemas e Tecnologias de Informação",
+          "remuneracao": "1 337,30€",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143658"
+        },
+        {
+          "cod_oferta": "OE202601/0282",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143721"
+        },
+        {
+          "cod_oferta": "OE202601/0281",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143720"
+        },
+        {
+          "cod_oferta": "OE202601/0280",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143719"
+        },
+        {
+          "cod_oferta": "OE202601/0278",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143717"
+        },
+        {
+          "cod_oferta": "OE202601/0277",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143716"
+        },
+        {
+          "cod_oferta": "OE202601/0274",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro especialista - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro especialista",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Enfermeiro Especialista",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143713"
+        },
+        {
+          "cod_oferta": "OE202601/0285",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro gestor - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro gestor",
+          "remuneracao": "Correspondente à 1ª posição remuneratória da categoria de enfermeiro gestor",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143724"
+        },
+        {
+          "cod_oferta": "OE202601/0284",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Enfermeiro gestor - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro gestor",
+          "remuneracao": "Correspondente à 1ª posição remuneratória da categoria de enfermeiro gestor",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143723"
+        },
+        {
+          "cod_oferta": "OE202601/0269",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Investigador Auxiliar - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "Entre os níveis 53 e 54 da TRU (€ 3.501,28 ou € 2.334,19 - dedicação exclusiva ou tempo integral)",
+          "data_limite": "2026-02-24",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143708"
+        },
+        {
+          "cod_oferta": "OE202601/0290",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Técnico Superior de Saúde - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Técnico Superior de Saúde",
+          "remuneracao": "Corresponde à 1ª posição remuneratória da categoria de Assistente, da carreira de TSS",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143729"
+        },
+        {
+          "cod_oferta": "OE202601/0303",
+          "data_publicacao": "2026-01-14",
+          "titulo": "Assistente Técnico - Tribunal Central Administrativo do Sul - 2ª Instância",
+          "entidade": "Outros",
+          "organismo": "Tribunal Central Administrativo do Sul - 2ª Instância",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "A detida na categoria, até à 2.ª posição remuneratória/nível 8 da TRU",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143742"
+        },
+        {
+          "cod_oferta": "OE202601/0302",
+          "data_publicacao": "2026-01-14",
+          "titulo": "Técnico Superior - Tribunal Central Administrativo do Sul - 2ª Instância",
+          "entidade": "Outros",
+          "organismo": "Tribunal Central Administrativo do Sul - 2ª Instância",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida na categoria, até à 3.ª posição remuneratória/nível 26 da TRU",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143741"
+        },
+        {
+          "cod_oferta": "OE202601/0373",
+          "data_publicacao": "2026-01-15",
+          "titulo": "Enfermeiro gestor - Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Lisboa Ocidental, E.P.E.",
+          "categoria": "Enfermeiro gestor",
+          "remuneracao": "Correspondente à 1ª posição remuneratória da categoria de enfermeiro gestor",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143812"
+        },
+        {
+          "cod_oferta": "OE202601/0379",
+          "data_publicacao": "2026-01-15",
+          "titulo": "Técnico Superior - Polícia de Segurança Pública",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Polícia de Segurança Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Posição remuneratória em que se encontra posicionado no serviço de origem.",
+          "data_limite": "2026-01-29",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143818"
+        },
+        {
+          "cod_oferta": "OE202601/0378",
+          "data_publicacao": "2026-01-15",
+          "titulo": "Técnico Superior - Polícia de Segurança Pública",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Polícia de Segurança Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Posição remuneratória em que se encontra posicionado no serviço de origem.",
+          "data_limite": "2026-01-29",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143817"
+        },
+        {
+          "cod_oferta": "OE202601/0402",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Especialista de Sistemas e Tecnologias de Informação - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Especialista de Sistemas e Tecnologias de Informação",
+          "remuneracao": "€ 1.863,62 (1ª posição remuneratória, nível 24, da TRU), se a outra superior não tiver direito",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143841"
+        },
+        {
+          "cod_oferta": "OE202601/0403",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Qualquer - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Qualquer",
+          "remuneracao": "Nível 33 da tabela remuneratória única, no valor de € 2 351,53",
+          "data_limite": "2026-02-27",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143842"
+        },
+        {
+          "cod_oferta": "OE202601/0400",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Técnico Superior - Laboratório Nacional de Engenharia Civil, I.P.",
+          "entidade": "Ministério das Infraestruturas e da Habitação",
+          "organismo": "Laboratório Nacional de Engenharia Civil, I.P.",
+          "categoria": "Técnico Superior",
+          "remuneracao": "€ 1.442,57 (1ª posição remuneratória, nível 16, da TRU), se a outra superior não tiverem direito",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143839"
+        },
+        {
+          "cod_oferta": "OE202601/0382",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Assistente Operacional - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143821"
+        },
+        {
+          "cod_oferta": "OE202601/0385",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Assistente Técnico - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143824"
+        },
+        {
+          "cod_oferta": "OE202601/0383",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Assistente Técnico - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143822"
+        },
+        {
+          "cod_oferta": "OE202601/0384",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Técnico Superior - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-01-26",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143823"
+        },
+        {
+          "cod_oferta": "OE202601/0451",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Técnico Superior de Diagnóstico e Terapêutica - Instituto Português de Oncologia de Lisboa Francisco Gentil, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Instituto Português de Oncologia de Lisboa Francisco Gentil, E.P.E.",
+          "categoria": "Técnico Superior de Diagnóstico e Terapêutica",
+          "remuneracao": "1389,93 €",
+          "data_limite": "2026-02-02",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143890"
+        },
+        {
+          "cod_oferta": "OE202601/0473",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Assistente Técnico - Direção-Geral do Território",
+          "entidade": "Ministério da Coesão Territorial",
+          "organismo": "Direção-Geral do Território",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "A detida no serviço de origem",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143912"
+        },
+        {
+          "cod_oferta": "OE202601/0493",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Instituto de Higiene e Medicina Tropical da Universidade Nova de Lisboa - NOVA Institute of Hygiene",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto de Higiene e Medicina Tropical da Universidade Nova de Lisboa - NOVA Institute of Hygiene",
+          "categoria": "",
+          "remuneracao": "Artigo 22º do Regulamento n.º 577/2017, de 13 de outubro",
+          "data_limite": "2026-01-27",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143932"
+        },
+        {
+          "cod_oferta": "OE202601/0477",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Técnico Superior - Academia das Ciências de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Academia das Ciências de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Detida na Categoria de origem",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143916"
+        },
+        {
+          "cod_oferta": "OE202601/0469",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Técnico Superior - Academia das Ciências de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Academia das Ciências de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida na categoria de origem",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143908"
+        },
+        {
+          "cod_oferta": "OE202601/0462",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143901"
+        },
+        {
+          "cod_oferta": "OE202601/0434",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143873"
+        },
+        {
+          "cod_oferta": "OE202601/0512",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico/a Superior - Faculdade de Direito da Universidade Nova de Lisboa - NOVA School of Law",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Direito da Universidade Nova de Lisboa - NOVA School of Law",
+          "categoria": "Técnico/a Superior",
+          "remuneracao": "Art. 22 Reg.n.º 577/2017,13 de out",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143951"
+        },
+        {
+          "cod_oferta": "OE202601/0617",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Técnico Superior - Casa Pia de Lisboa, I.P.",
+          "entidade": "Ministério do Trabalho, Solidariedade e Segurança Social",
+          "organismo": "Casa Pia de Lisboa, I.P.",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144056"
+        },
+        {
+          "cod_oferta": "OE202601/0600",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Técnico Superior - Polícia de Segurança Pública",
+          "entidade": "Ministério da Administração Interna",
+          "organismo": "Polícia de Segurança Pública",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Posição remuneratória em que se encontra posicionado no serviço de origem",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144039"
+        },
+        {
+          "cod_oferta": "OE202601/0604",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior Técnico da Universidade de Lisboa",
+          "categoria": "",
+          "remuneracao": "2457,66 EUR",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144043"
+        },
+        {
+          "cod_oferta": "OE202601/0607",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Professor Catedratico - Faculdade de Direito da Universidade Nova de Lisboa - NOVA School of Law",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Direito da Universidade Nova de Lisboa - NOVA School of Law",
+          "categoria": "Professor Catedratico",
+          "remuneracao": "1º Escalão, Índice 85 - Categorias e Níveis Retributivos - Pessoal Docente (DL448/1979)",
+          "data_limite": "2026-03-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144046"
+        },
+        {
+          "cod_oferta": "OE202601/0658",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Direção-Geral do Território",
+          "entidade": "Ministério da Coesão Territorial",
+          "organismo": "Direção-Geral do Território",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida no serviço de origem",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144097"
+        },
+        {
+          "cod_oferta": "OE202601/0644",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Instituto Politécnico de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida pelo trabalhador",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144083"
+        },
+        {
+          "cod_oferta": "OE202601/0623",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Instituto Superior de Economia e Gestão da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Economia e Gestão da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1 442,57",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144062"
+        },
+        {
+          "cod_oferta": "OE202601/0636",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Assistente Operacional - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144075"
+        },
+        {
+          "cod_oferta": "OE202601/0635",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Especialista de Sistemas e Tecnologias de Informação - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Especialista de Sistemas e Tecnologias de Informação",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144074"
+        },
+        {
+          "cod_oferta": "OE202601/0641",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Técnico Superior - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-02-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144080"
+        },
+        {
+          "cod_oferta": "OE202601/0638",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Técnico Superior - Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências e Tecnologia da Universidade Nova de Lisboa - NOVA School of Science and Tech",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Conforme Regulamento 577/2017",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144077"
+        },
+        {
+          "cod_oferta": "OE202601/0722",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Técnico Superior - Instituto Superior de Agronomia da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Agronomia da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1 442,57€ ou 1 972,04€ (caso o candidato selecionado seja titular de grau académico de doutor)",
+          "data_limite": "2026-02-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144161"
+        },
+        {
+          "cod_oferta": "OE202601/0750",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Assistente Técnico - Faculdade de Medicina Dentária da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Medicina Dentária da Universidade de Lisboa",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "A detida no lugar de origem",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144189"
+        },
+        {
+          "cod_oferta": "OE202601/0745",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Assistente Técnico - Serviços Sociais da Administração Pública",
+          "entidade": "Ministério das Finanças",
+          "organismo": "Serviços Sociais da Administração Pública",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Ver ponto 6 do aviso integral",
+          "data_limite": "2026-02-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144184"
+        },
+        {
+          "cod_oferta": "OE202601/0752",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Técnico Superior - Faculdade de Medicina Dentária da Universidade de Lisboa",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Medicina Dentária da Universidade de Lisboa",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida no lugar de origem",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144191"
+        },
+        {
+          "cod_oferta": "OE202601/0797",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Assistente Técnico - Serviços Sociais da Administração Pública",
+          "entidade": "Ministério das Finanças",
+          "organismo": "Serviços Sociais da Administração Pública",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Ver ponto 6 do aviso integral",
+          "data_limite": "2026-02-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144236"
+        }
+      ]
+    },
+    {
+      "municipality": "Loures",
+      "district": "Lisboa",
+      "previous_party": "PS",
+      "new_party": "PSD/IL",
+      "job_count": 8,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0132",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Técnico Superior - Câmara Municipal de Loures",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Loures",
+          "categoria": "Técnico Superior",
+          "remuneracao": "ver ponto 7 do aviso de abertura integral",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143571"
+        },
+        {
+          "cod_oferta": "OE202601/0360",
+          "data_publicacao": "2026-01-15",
+          "titulo": "Assistente Operacional - Câmara Municipal de Loures",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Loures",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Artº38 da LTFP, no DL 84-F/2022, de 16/12, atualizado pelo DL 1/2025, de 16 de janeiro, (878,41 €)",
+          "data_limite": "2026-01-29",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143799"
+        },
+        {
+          "cod_oferta": "OE202601/0466",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Assistente Técnico - Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "1ª posição remuneratória da Tabela Remuneratória Única para a categoria de Assistente Técnico",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143905"
+        },
+        {
+          "cod_oferta": "OE202601/0552",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Câmara Municipal de Loures",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Loures",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Ver ponto 7 do aviso de abertura integral do procedimento de mobilidade.",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143991"
+        },
+        {
+          "cod_oferta": "OE202601/0576",
+          "data_publicacao": "2026-01-22",
+          "titulo": "Técnico Superior - Serviços Intermunicipalizados de Água e Resíduos dos Municípios de Loures e Odivelas",
+          "entidade": "Serviços Municipalizados",
+          "organismo": "Serviços Intermunicipalizados de Água e Resíduos dos Municípios de Loures e Odivelas",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Limite máximo Posição 6 / Nível 38 da TRU",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144015"
+        },
+        {
+          "cod_oferta": "OE202601/0574",
+          "data_publicacao": "2026-01-22",
+          "titulo": "Técnico Superior - Serviços Intermunicipalizados de Água e Resíduos dos Municípios de Loures e Odivelas",
+          "entidade": "Serviços Municipalizados",
+          "organismo": "Serviços Intermunicipalizados de Água e Resíduos dos Municípios de Loures e Odivelas",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Limite máximo Posição 6/Nível 38 TRU",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144013"
+        },
+        {
+          "cod_oferta": "OE202601/0749",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Farmacêutico assessor - Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "categoria": "Farmacêutico assessor",
+          "remuneracao": "Nº 3 e 4 do art 12º do DL 108/2017, de 30 de ago, na redação conferida pelo DL 45/2025, de 27 de mar",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144188"
+        },
+        {
+          "cod_oferta": "OE202601/0748",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Técnico superior das áreas de diagnóstico e terapêutica - Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Loures-Odivelas, E.P.E.",
+          "categoria": "Técnico superior das áreas de diagnóstico e terapêutica",
+          "remuneracao": "1.389,93€",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144187"
+        }
+      ]
+    },
+    {
+      "municipality": "Maia",
+      "district": "Porto",
+      "previous_party": "PS",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0686",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Assistente Operacional - Câmara Municipal da Maia",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal da Maia",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41€",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144125"
+        }
+      ]
+    },
+    {
+      "municipality": "Matosinhos",
+      "district": "Porto",
+      "previous_party": "PS",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0047",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente - Unidade Local de Saúde de Matosinhos, E.P.E.",
+          "entidade": "Ministério da Saúde",
+          "organismo": "Unidade Local de Saúde de Matosinhos, E.P.E.",
+          "categoria": "Assistente",
+          "remuneracao": "Corresponderá à que, à data da sua contratação, esteja definido na legislação em vigor",
+          "data_limite": "2026-01-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143486"
+        }
+      ]
+    },
+    {
+      "municipality": "Montijo",
+      "district": "Setúbal",
+      "previous_party": "PS",
+      "new_party": "PSD",
+      "job_count": 6,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0088",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Assistente Operacional - Junta de Freguesia de Montijo e Afonsoeiro",
+          "entidade": "Juntas de Freguesia",
+          "organismo": "Junta de Freguesia de Montijo e Afonsoeiro",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "1ª posição Assistente Operacional",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143527"
+        },
+        {
+          "cod_oferta": "OE202601/0087",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Assistente Técnico - Junta de Freguesia de Montijo e Afonsoeiro",
+          "entidade": "Juntas de Freguesia",
+          "organismo": "Junta de Freguesia de Montijo e Afonsoeiro",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "1ª posição Assistente Técnico",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143526"
+        },
+        {
+          "cod_oferta": "OE202601/0300",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Técnico Superior - Câmara Municipal do Montijo",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Montijo",
+          "categoria": "Técnico Superior",
+          "remuneracao": "idêntica à detida no órgão de origem",
+          "data_limite": "2026-01-27",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143739"
+        },
+        {
+          "cod_oferta": "OE202601/0314",
+          "data_publicacao": "2026-01-14",
+          "titulo": "Técnico Superior - Câmara Municipal do Montijo",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Montijo",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Idêntica à detida no órgão de origem.",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143753"
+        },
+        {
+          "cod_oferta": "OE202601/0531",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Assistente Técnico - Câmara Municipal do Montijo",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Montijo",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979,05 €",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143970"
+        },
+        {
+          "cod_oferta": "OE202601/0744",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Técnico Superior - Câmara Municipal do Montijo",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Montijo",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144183"
+        }
+      ]
+    },
+    {
+      "municipality": "Odivelas",
+      "district": "Lisboa",
+      "previous_party": "PS",
+      "new_party": "PSD/IL",
+      "job_count": 4,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0150",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Técnico Superior - Câmara Municipal de Odivelas",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Odivelas",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A remuneração a auferir, corresponde à detida no serviço de Origem",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143589"
+        },
+        {
+          "cod_oferta": "OE202601/0554",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Assistente Técnico - Câmara Municipal de Odivelas",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Odivelas",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "A remuneração a auferir, corresponde à detida no Serviço de Origem.",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143993"
+        },
+        {
+          "cod_oferta": "OE202601/0529",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Câmara Municipal de Odivelas",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Odivelas",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A remuneração a auferir, corresponde à detida no Serviço de Origem",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143968"
+        },
+        {
+          "cod_oferta": "OE202601/0649",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Odivelas",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Odivelas",
+          "categoria": "Técnico Superior",
+          "remuneracao": "€1.442,57",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144088"
+        }
+      ]
+    },
+    {
+      "municipality": "Oeiras",
+      "district": "Lisboa",
+      "previous_party": "PSD",
+      "new_party": "PSD/IL",
+      "job_count": 15,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0630",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Operacional - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144069"
+        },
+        {
+          "cod_oferta": "OE202601/0629",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Operacional - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144068"
+        },
+        {
+          "cod_oferta": "OE202601/0627",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Operacional - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144066"
+        },
+        {
+          "cod_oferta": "OE202601/0640",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Técnico - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144079"
+        },
+        {
+          "cod_oferta": "OE202601/0632",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Técnico - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144071"
+        },
+        {
+          "cod_oferta": "OE202601/0631",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Assistente Técnico - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144070"
+        },
+        {
+          "cod_oferta": "OE202601/0652",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Especialista de Sistemas e Tecnologias de Informação - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Especialista de Sistemas e Tecnologias de Informação",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144091"
+        },
+        {
+          "cod_oferta": "OE202601/0648",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144087"
+        },
+        {
+          "cod_oferta": "OE202601/0647",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144086"
+        },
+        {
+          "cod_oferta": "OE202601/0646",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144085"
+        },
+        {
+          "cod_oferta": "OE202601/0645",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144084"
+        },
+        {
+          "cod_oferta": "OE202601/0642",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144081"
+        },
+        {
+          "cod_oferta": "OE202601/0650",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico de Sistemas e Tecnologias de Informação - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico de Sistemas e Tecnologias de Informação",
+          "remuneracao": "Valor auferido no serviço de origem (ver mais no campo \"Observações\")",
+          "data_limite": "2026-12-31",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144089"
+        },
+        {
+          "cod_oferta": "OE202601/0698",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Técnico Superior - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A remuneração a auferir corresponde ao valor auferido no serviço de origem.",
+          "data_limite": "2026-04-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144137"
+        },
+        {
+          "cod_oferta": "OE202601/0779",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Assistente Operacional - Câmara Municipal de Oeiras",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Oeiras",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "934,99€",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144218"
+        }
+      ]
+    },
+    {
+      "municipality": "Porto",
+      "district": "Porto",
+      "previous_party": "Independent",
+      "new_party": "PSD/CDS-PP/IL",
+      "job_count": 50,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0034",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Doutorado/a de Nível Inicial - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado/a de Nível Inicial",
+          "remuneracao": "2 351,53€",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143473"
+        },
+        {
+          "cod_oferta": "OE202601/0061",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Professor adjunto - Instituto Politécnico do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "Remuneração prevista no sistema retributivo do pessoal docente do ensino politécnico",
+          "data_limite": "2026-02-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143500"
+        },
+        {
+          "cod_oferta": "OE202601/0055",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Professor adjunto - Instituto Politécnico do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "Remuneração prevista no sistema retributivo do pessoal docente do ensino politécnico",
+          "data_limite": "2026-02-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143494"
+        },
+        {
+          "cod_oferta": "OE202601/0031",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Professor auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Professor auxiliar",
+          "remuneracao": "Escalão 1, Índice 195",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143470"
+        },
+        {
+          "cod_oferta": "OE202601/0074",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "16A (1.648,65€)",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143513"
+        },
+        {
+          "cod_oferta": "OE202601/0066",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "16A (1.648,65€)",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143505"
+        },
+        {
+          "cod_oferta": "OE202601/0051",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Técnico Superior - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "16A (1.648,65€)",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143490"
+        },
+        {
+          "cod_oferta": "OE202601/0038",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado Nível Inicial",
+          "remuneracao": "03-02-0956",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143477"
+        },
+        {
+          "cod_oferta": "OE202601/0019",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado Nível Inicial",
+          "remuneracao": "2351,53 euros",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143458"
+        },
+        {
+          "cod_oferta": "OE202601/0042",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado de Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado de Nível Inicial",
+          "remuneracao": "2.622,59 €,",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143481"
+        },
+        {
+          "cod_oferta": "OE202601/0040",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado de Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado de Nível Inicial",
+          "remuneracao": "€2.351,53",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143479"
+        },
+        {
+          "cod_oferta": "OE202601/0126",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado/a Equiparado/a a Investigador/a Auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado/a Equiparado/a a Investigador/a Auxiliar",
+          "remuneracao": "3 501,28€",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143565"
+        },
+        {
+          "cod_oferta": "OE202601/0127",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado/a de Nível Inicial - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado/a de Nível Inicial",
+          "remuneracao": "2 351,53€",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143566"
+        },
+        {
+          "cod_oferta": "OE202601/0125",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Doutorado/a de Nível Inicial - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado/a de Nível Inicial",
+          "remuneracao": "2 351,33€",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143564"
+        },
+        {
+          "cod_oferta": "OE202601/0044",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Estagiário de Investigação - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Estagiário de Investigação",
+          "remuneracao": "1600,46 €,",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143483"
+        },
+        {
+          "cod_oferta": "OE202601/0162",
+          "data_publicacao": "2026-01-07",
+          "titulo": "Doutorado/a Equiparado/a a Investigador/a Auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado/a Equiparado/a a Investigador/a Auxiliar",
+          "remuneracao": "3,501,28€",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143601"
+        },
+        {
+          "cod_oferta": "OE202601/0221",
+          "data_publicacao": "2026-01-09",
+          "titulo": "Assistente Operacional - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "1.003,90€",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143660"
+        },
+        {
+          "cod_oferta": "OE202601/0246",
+          "data_publicacao": "2026-01-09",
+          "titulo": "Técnico Superior - Faculdade de Medicina da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Medicina da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1. ª Pos. Rem. TRU U. Porto",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143685"
+        },
+        {
+          "cod_oferta": "OE202601/0265",
+          "data_publicacao": "2026-01-12",
+          "titulo": "Técnico Superior - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "2.253,76€",
+          "data_limite": "2026-01-19",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143704"
+        },
+        {
+          "cod_oferta": "OE202601/0298",
+          "data_publicacao": "2026-01-13",
+          "titulo": "Técnico Superior - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.648,65€",
+          "data_limite": "2026-01-20",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143737"
+        },
+        {
+          "cod_oferta": "OE202601/0412",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Doutorado nível inicial - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Doutorado nível inicial",
+          "remuneracao": "2 351,53€",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143851"
+        },
+        {
+          "cod_oferta": "OE202601/0432",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Técnico Superior - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1648,65 €",
+          "data_limite": "2026-01-23",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143871"
+        },
+        {
+          "cod_oferta": "OE202601/0479",
+          "data_publicacao": "2026-01-20",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143918"
+        },
+        {
+          "cod_oferta": "OE202601/0564",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Assistente Operacional - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "1.003,90€",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144003"
+        },
+        {
+          "cod_oferta": "OE202601/0561",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144000"
+        },
+        {
+          "cod_oferta": "OE202601/0558",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143997"
+        },
+        {
+          "cod_oferta": "OE202601/0556",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143995"
+        },
+        {
+          "cod_oferta": "OE202601/0553",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143992"
+        },
+        {
+          "cod_oferta": "OE202601/0543",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143982"
+        },
+        {
+          "cod_oferta": "OE202601/0538",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143977"
+        },
+        {
+          "cod_oferta": "OE202601/0527",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143966"
+        },
+        {
+          "cod_oferta": "OE202601/0523",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143962"
+        },
+        {
+          "cod_oferta": "OE202601/0507",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor adjunto - Instituto Superior de Contabilidade e Administração do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Superior de Contabilidade e Administração do Porto",
+          "categoria": "Professor adjunto",
+          "remuneracao": "3321,72€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143946"
+        },
+        {
+          "cod_oferta": "OE202601/0590",
+          "data_publicacao": "2026-01-22",
+          "titulo": "Técnico Superior - Comissão para a Cidadania e a Igualdade de Género",
+          "entidade": "Ministério da Cultura, Juventude e Desporto.",
+          "organismo": "Comissão para a Cidadania e a Igualdade de Género",
+          "categoria": "Técnico Superior",
+          "remuneracao": "A detida na carreira/categoria de origem",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144029"
+        },
+        {
+          "cod_oferta": "OE202601/0580",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Doutorado Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado Nível Inicial",
+          "remuneracao": "€ 3 238,44",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144019"
+        },
+        {
+          "cod_oferta": "OE202601/0581",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Doutorado de Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado de Nível Inicial",
+          "remuneracao": "€2351.53",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144020"
+        },
+        {
+          "cod_oferta": "OE202601/0579",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Doutorado de Nível Inicial - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Doutorado de Nível Inicial",
+          "remuneracao": "€2.351,53",
+          "data_limite": "2026-02-05",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144018"
+        },
+        {
+          "cod_oferta": "OE202601/0605",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Estagiário de Investigação - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Estagiário de Investigação",
+          "remuneracao": "1.337,30",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144044"
+        },
+        {
+          "cod_oferta": "OE202601/0614",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Técnico Superior - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1648,45 €",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144053"
+        },
+        {
+          "cod_oferta": "OE202601/0697",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Professor Auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3501,28€",
+          "data_limite": "2026-03-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144136"
+        },
+        {
+          "cod_oferta": "OE202601/0696",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Professor Auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3501.28€",
+          "data_limite": "2026-03-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144135"
+        },
+        {
+          "cod_oferta": "OE202601/0695",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Professor Auxiliar - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3501.28€",
+          "data_limite": "2026-03-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144134"
+        },
+        {
+          "cod_oferta": "OE202601/0703",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Técnico Superior - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.648,65€",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144142"
+        },
+        {
+          "cod_oferta": "OE202601/0709",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Técnico/a Superior - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Técnico/a Superior",
+          "remuneracao": "1 648,65 €",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144148"
+        },
+        {
+          "cod_oferta": "OE202601/0746",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Assistente de Investigação - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Assistente de Investigação",
+          "remuneracao": "€ 1.917,83",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144185"
+        },
+        {
+          "cod_oferta": "OE202601/0723",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Assistente de Investigação - Faculdade de Engenharia da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Engenharia da Universidade do Porto",
+          "categoria": "Assistente de Investigação",
+          "remuneracao": "1.917,83",
+          "data_limite": "2026-02-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144162"
+        },
+        {
+          "cod_oferta": "OE202601/0747",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Doutorado Equiparado a Investigador Auxiliar - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Doutorado Equiparado a Investigador Auxiliar",
+          "remuneracao": "3 501,28€",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144186"
+        },
+        {
+          "cod_oferta": "OE202601/0782",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Assistente de Investigação - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Assistente de Investigação",
+          "remuneracao": "€ 1.917,83",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144221"
+        },
+        {
+          "cod_oferta": "OE202601/0776",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Doutorado de Nível Inicial - Faculdade de Ciências da Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Faculdade de Ciências da Universidade do Porto",
+          "categoria": "Doutorado de Nível Inicial",
+          "remuneracao": "2 351,53€",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144215"
+        },
+        {
+          "cod_oferta": "OE202601/0811",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Técnico Superior - Universidade do Porto",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade do Porto",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1.648,65",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144250"
+        }
+      ]
+    },
+    {
+      "municipality": "Santarém",
+      "district": "Santarém",
+      "previous_party": "PSD",
+      "new_party": "PSD/CDS-PP",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0572",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Investigador Auxiliar - Instituto Politécnico de Santarém",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Santarém",
+          "categoria": "Investigador Auxiliar",
+          "remuneracao": "Decreto-Lei n.º 408/89, de 18 de novembro",
+          "data_limite": "2026-02-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144011"
+        }
+      ]
+    },
+    {
+      "municipality": "Seixal",
+      "district": "Setúbal",
+      "previous_party": "CDU",
+      "new_party": "PS",
+      "job_count": 6,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0449",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-03",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143888"
+        },
+        {
+          "cod_oferta": "OE202601/0550",
+          "data_publicacao": "2026-01-26",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143989"
+        },
+        {
+          "cod_oferta": "OE202601/0542",
+          "data_publicacao": "2026-01-27",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-09",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143981"
+        },
+        {
+          "cod_oferta": "OE202601/0557",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143996"
+        },
+        {
+          "cod_oferta": "OE202601/0544",
+          "data_publicacao": "2026-01-28",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-10",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143983"
+        },
+        {
+          "cod_oferta": "OE202601/0578",
+          "data_publicacao": "2026-01-29",
+          "titulo": "Câmara Municipal do Seixal",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal do Seixal",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-11",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144017"
+        }
+      ]
+    },
+    {
+      "municipality": "Setúbal",
+      "district": "Setúbal",
+      "previous_party": "CDU",
+      "new_party": "Independent",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0092",
+          "data_publicacao": "2026-01-06",
+          "titulo": "Professor coordenador principal - Instituto Politécnico de Setúbal",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Setúbal",
+          "categoria": "Professor coordenador principal",
+          "remuneracao": "De acordo com o Estatuto Remuneratório da Carreira, em conjugação com LOE vigente.",
+          "data_limite": "2026-02-18",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143531"
+        }
+      ]
+    },
+    {
+      "municipality": "Silves",
+      "district": "Faro",
+      "previous_party": "PSD",
+      "new_party": "PS",
+      "job_count": 4,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0018",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Encarregado Operacional - Câmara Municipal de Silves",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Silves",
+          "categoria": "Encarregado Operacional",
+          "remuneracao": "1 017,98€",
+          "data_limite": "2026-01-16",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143457"
+        },
+        {
+          "cod_oferta": "OE202601/0358",
+          "data_publicacao": "2026-01-15",
+          "titulo": "Assistente Operacional - Câmara Municipal de Silves",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Silves",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41€",
+          "data_limite": "2026-01-28",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143797"
+        },
+        {
+          "cod_oferta": "OE202601/0431",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Assistente Técnico - Câmara Municipal de Silves",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Silves",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979,05€",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143870"
+        },
+        {
+          "cod_oferta": "OE202601/0430",
+          "data_publicacao": "2026-01-19",
+          "titulo": "Assistente Técnico - Câmara Municipal de Silves",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Silves",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979,05€",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143869"
+        }
+      ]
+    },
+    {
+      "municipality": "Sintra",
+      "district": "Lisboa",
+      "previous_party": "PS",
+      "new_party": "PSD/IL",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0364",
+          "data_publicacao": "2026-01-16",
+          "titulo": "Qualquer - Câmara Municipal de Sintra",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Sintra",
+          "categoria": "Qualquer",
+          "remuneracao": "De acordo com a posição e nível remuneratório detidos no organismo de origem.",
+          "data_limite": "2026-01-30",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143803"
+        }
+      ]
+    },
+    {
+      "municipality": "Tomar",
+      "district": "Santarém",
+      "previous_party": "PSD",
+      "new_party": "PS",
+      "job_count": 1,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0774",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Professor adjunto - Instituto Politécnico de Tomar",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Instituto Politécnico de Tomar",
+          "categoria": "Professor adjunto",
+          "remuneracao": "Nos termos do artigo 35.º, n.º 1, ECPDESP",
+          "data_limite": "2026-03-12",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144213"
+        }
+      ]
+    },
+    {
+      "municipality": "Trofa",
+      "district": "Porto",
+      "previous_party": "PS",
+      "new_party": "PSD/CDS-PP",
+      "job_count": 4,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0082",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Operacional - Câmara Municipal de Trofa",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Trofa",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41€",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143521"
+        },
+        {
+          "cod_oferta": "OE202601/0079",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Operacional - Câmara Municipal de Trofa",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Trofa",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41€",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143518"
+        },
+        {
+          "cod_oferta": "OE202601/0078",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Operacional - Câmara Municipal de Trofa",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Trofa",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41€",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143517"
+        },
+        {
+          "cod_oferta": "OE202601/0083",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Técnico - Câmara Municipal de Trofa",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Trofa",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979,05€",
+          "data_limite": "2026-01-21",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143522"
+        }
+      ]
+    },
+    {
+      "municipality": "Viseu",
+      "district": "Viseu",
+      "previous_party": "PSD",
+      "new_party": "PS",
+      "job_count": 4,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0620",
+          "data_publicacao": "2026-01-23",
+          "titulo": "Assistente Operacional - Câmara Municipal de Viseu",
+          "entidade": "Câmaras Municipais",
+          "organismo": "Câmara Municipal de Viseu",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "878,41 €",
+          "data_limite": "2026-02-06",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144059"
+        },
+        {
+          "cod_oferta": "OE202601/0786",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Assistente Operacional - Comunidade Intermunicipal Viseu Dão Lafões",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal Viseu Dão Lafões",
+          "categoria": "Assistente Operacional",
+          "remuneracao": "934,99€",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144225"
+        },
+        {
+          "cod_oferta": "OE202601/0789",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Técnico Superior - Comunidade Intermunicipal Viseu Dão Lafões",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal Viseu Dão Lafões",
+          "categoria": "Técnico Superior",
+          "remuneracao": "Nível remuneratório detido na entidade de origem",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144228"
+        },
+        {
+          "cod_oferta": "OE202601/0784",
+          "data_publicacao": "2026-01-30",
+          "titulo": "Técnico Superior - Comunidade Intermunicipal Viseu Dão Lafões",
+          "entidade": "Outros",
+          "organismo": "Comunidade Intermunicipal Viseu Dão Lafões",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57€",
+          "data_limite": "2026-02-13",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=144223"
+        }
+      ]
+    },
+    {
+      "municipality": "Évora",
+      "district": "Évora",
+      "previous_party": "CDU",
+      "new_party": "PS",
+      "job_count": 8,
+      "listings": [
+        {
+          "cod_oferta": "OE202601/0041",
+          "data_publicacao": "2026-01-05",
+          "titulo": "Assistente Técnico - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "979.05",
+          "data_limite": "2026-01-15",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143480"
+        },
+        {
+          "cod_oferta": "OE202601/0208",
+          "data_publicacao": "2026-01-08",
+          "titulo": "Assistente Técnico - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Assistente Técnico",
+          "remuneracao": "O trabalhador manterá a remuneração auferida no lugar de origem",
+          "data_limite": "2026-01-22",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143647"
+        },
+        {
+          "cod_oferta": "OE202601/0559",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Professor Auxiliar - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Professor Auxiliar",
+          "remuneracao": "3 501,28€",
+          "data_limite": "2026-03-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143998"
+        },
+        {
+          "cod_oferta": "OE202601/0551",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57€",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143990"
+        },
+        {
+          "cod_oferta": "OE202601/0547",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57€",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143986"
+        },
+        {
+          "cod_oferta": "OE202601/0541",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Técnico Superior - Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "Técnico Superior",
+          "remuneracao": "1442,57 €",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143980"
+        },
+        {
+          "cod_oferta": "OE202601/0549",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "",
+          "remuneracao": "3276,88 EUR",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143988"
+        },
+        {
+          "cod_oferta": "OE202601/0546",
+          "data_publicacao": "2026-01-21",
+          "titulo": "Universidade de Évora",
+          "entidade": "Ministério da Educação, Ciência e Inovação",
+          "organismo": "Universidade de Évora",
+          "categoria": "",
+          "remuneracao": "2867,27 EUR",
+          "data_limite": "2026-02-04",
+          "url": "https://www.bep.gov.pt/pages/oferta/Oferta_Detalhes.aspx?CodOferta=143985"
+        }
+      ]
+    }
+  ]
+}

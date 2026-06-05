@@ -1,0 +1,35 @@
+{
+  "title": "Contract Momentum: Lisboa",
+  "summary": "3416 contracts in the last 30 days",
+  "scope": {
+    "municipalityCode": "1106",
+    "municipalityName": "Lisboa",
+    "parishCode": null,
+    "parishName": null
+  },
+  "window": {
+    "currentFrom": "2026-05-05T16:57:10.488Z",
+    "previousFrom": "2026-04-05T16:57:10.488Z",
+    "currentTo": "2026-06-04T16:57:10.488Z"
+  },
+  "metrics": {
+    "contractsLast1m": 3416,
+    "contractsPrev1m": 3261,
+    "contractsTrendPct": 4.75,
+    "announcementsLast1m": 131,
+    "announcementsPrev1m": 139,
+    "announcementsTrendPct": -5.76,
+    "awardValueLast1mEur": 443744539.30,
+    "awardValuePrev1mEur": 388981230.43,
+    "awardValueTrendPct": 14.08,
+    "unmatchedAnnouncementsLast1m": 126,
+    "unmatchedRatePct": 96.18,
+    "contractsPer10kResidents": 60.23,
+    "announcementsPer10kResidents": 2.31,
+    "awardValuePerResidentEur": 782.44
+  },
+  "denominator": {
+    "residentPopulation": 567131,
+    "residentPopulationPeriod": "2023"
+  }
+}

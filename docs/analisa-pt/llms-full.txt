@@ -1,0 +1,251 @@
+# Analisa.pt — Complete Reference
+
+> Interactive quality-of-life explorer for all 308 municipalities in Portugal. Free, open-data platform with maps, rankings, and 230+ indicators from official government sources.
+
+## Overview
+
+Analisa.pt is a comprehensive web platform that aggregates data from 7+ official Portuguese government sources to provide an interactive quality-of-life analysis of every municipality in Portugal. It uses hexagonal maps (H3 resolution 7), 230+ indicators across 13 categories, and composite scoring to help users understand and compare living conditions across the country.
+
+## Core Features
+
+### Interactive Map
+- Hexagonal grid overlay on Portugal's geography
+- Two visualization modes: discrete hex scoring and heatmap intensity
+- Click any municipality for detailed indicator breakdown
+- Color-coded scoring from worst (red) to best (green)
+
+### Quality-of-Life Indicators (230+)
+Organized into 13 categories with data from official sources:
+
+#### 1. Safety
+- Overall crime rate per 1,000 residents
+- Crimes against physical integrity
+- Vehicle theft rate
+- Property crime rate
+- Drunk driving incidents
+- Drug-related crimes
+- Domestic violence rate
+
+#### 2. Economy
+- Unemployment rate (IEFP data)
+- Average and median income
+- Purchasing power per capita
+- Companies per 1,000 residents
+- Public contracts per 10,000 residents
+- Tax revenue per capita
+- GDP contribution
+- Business creation rate
+
+#### 3. Housing
+- House purchase price (EUR/m2)
+- House rental price (EUR/m2)
+- Buy affordability effort (years of income)
+- Rent affordability effort (% of income)
+- Housing credit conditions
+- Building permits count
+- Vacant housing share
+- Construction activity index
+
+#### 4. Health
+- Pharmacies per 1,000 residents
+- Hospital distance (km)
+- Mortality rate
+- NHS emergency episodes per month
+- Hospital bed occupancy rate
+- Infant mortality rate
+- Life expectancy indicators
+- Doctor density
+
+#### 5. Environment
+- Climate comfort days percentage
+- Average temperature
+- PM2.5 daily average
+- European Air Quality Index
+- Water quality compliance
+- Water network losses
+- Wastewater treatment rate
+- ERSAR water safety score
+- Recycling rate
+- Green space coverage
+
+#### 6. Infrastructure
+- Airport access distance (km)
+- Highway access distance (km)
+- Rail station access distance (km)
+- Broadband coverage percentage
+- Median download speed (Mbps)
+- Mobile 4G/5G coverage
+- Multimodal mobility score
+- EV charging station density
+- Fiber optic coverage
+
+#### 7. Education
+- Higher education institutions per 10,000 residents
+- Students enrolled (primary, secondary, higher)
+- Retention and dropout rates
+- School transition rates
+- University access distance
+- Early childhood education coverage
+- Adult literacy rate
+
+#### 8. Leisure
+- Park count and green space presence
+- Beach access distance (km)
+- Cinema access distance (km)
+- Cultural amenity access distance (km)
+- Parks per 10,000 residents
+- Leisure diversity score
+- Sports facility density
+- Restaurant and cafe density
+- Heritage site count
+
+#### 9. Demographics
+- Birth rate
+- Foreign residents percentage
+- Aging index
+- Population density
+- Resident population (total)
+- Migration balance
+- Dependency ratio
+- Household count
+- Youth population share
+- Working-age population share
+
+#### 10. Tourism
+- Overnight stays
+- Tourist guests
+- Occupancy rate
+- Tourism intensity (tourists per resident)
+- Tourism density (tourists per km2)
+- Average stay duration
+- Tourism revenue per capita
+- Accommodation capacity
+
+#### 11. Elections
+- Voter turnout percentage
+- Abstention rate
+- Winner vote share
+- Fragmentation index
+- Turnout change (trend)
+
+#### 12. Social Protection
+- Pensioners share percentage
+- Social security beneficiaries per 1,000
+- Social dependency index
+- Elderly concentration index
+- Social housing availability
+
+#### 13. Composite Scores
+- Aging pressure index
+- Population momentum
+- Housing affordability composite
+- Tourism pressure index
+- Economic dynamism score
+- Sustainability index
+- Family-friendliness score
+- Silver economy potential
+- Municipal resilience index
+- Digital readiness score
+
+### Municipality Rankings
+- Rank all 308 municipalities by any indicator
+- Custom weight profiles for personalized rankings
+- Filter by district, NUTS II/III region
+- Pre-built personas: Family, Digital Nomad, Retiree, Student
+
+### Municipality Comparison
+- Side-by-side comparison of up to 3 municipalities
+- All indicators displayed in comparative format
+- Radar charts for visual comparison
+- Historical trend overlays
+
+### Public Contracts Explorer
+- Search and browse public procurement contracts
+- Filter by municipality, entity, value, date
+- Aggregated spending analytics
+- Entity relationship graphs
+- Contract trend analysis over time
+
+### PQ Index (Peace & Quiet Score)
+- Composite score from 0-100
+- Customizable weights across all categories
+- Designed to identify the most peaceful, livable municipalities
+- Accounts for safety, environment, demographics, and infrastructure
+
+## Data Sources
+
+| Source | Data Provided | Update Frequency |
+|--------|--------------|-----------------|
+| INE (Instituto Nacional de Estatistica) | Population, economy, housing, demographics | Quarterly/Yearly |
+| SNS Transparencia | Hospital metrics, health system data | Monthly |
+| IPMA | Climate, weather data | Daily |
+| PORDATA | Cross-cutting statistics | Yearly |
+| ERSAR | Water quality, sanitation | Yearly |
+| IEFP | Unemployment, employment data | Monthly |
+| BASE.gov.pt | Public procurement contracts | Daily |
+| ANACOM | Broadband, connectivity data | Yearly |
+| APA/QualAr | Air quality measurements | Daily |
+
+## Geographic Coverage
+
+- All 308 municipalities of mainland Portugal and autonomous regions
+- Parish-level granularity (3,000+ parishes) for geographic visualization
+- District-level aggregation (18 districts + 2 autonomous regions)
+- NUTS II (7 regions) and NUTS III (25 sub-regions) classification
+
+## Municipality Codes
+
+Municipalities use 4-digit INE codes (e.g., "1106" for Lisboa, "1312" for Porto). Parishes use 6-digit codes derived from municipality codes.
+
+## Languages
+
+- Portuguese (pt-PT) — primary language
+- English (en) — full translation available
+
+## API Access
+
+Analisa.pt provides a Model Context Protocol (MCP) endpoint with 5 tools:
+
+1. **search_municipalities** — Search municipalities by name, returns code, name, district, coordinates
+2. **get_municipality_indicators** — Get all quality-of-life indicators for a municipality by code
+3. **rank_municipalities** — Get top/bottom N municipalities for any specific metric
+4. **get_municipality_history** — Historical time series data for any municipality-indicator pair
+5. **compare_municipalities** — Side-by-side comparison of 2-5 municipalities across all indicators
+
+## Frequently Asked Questions
+
+### What is Analisa.pt?
+Analisa.pt is a free, interactive platform that lets you explore quality of life across all 308 municipalities in Portugal using official government data. It provides maps, rankings, and detailed comparisons.
+
+### How often is the data updated?
+Data update frequency varies by source: air quality and weather data are updated daily, unemployment and health data monthly, economic indicators quarterly, and census data yearly.
+
+### What data sources does Analisa.pt use?
+All data comes from official Portuguese government sources including INE, SNS, IPMA, PORDATA, ERSAR, IEFP, BASE.gov.pt, ANACOM, and APA.
+
+### Can I compare municipalities?
+Yes, you can compare up to 3 municipalities side-by-side across all 230+ indicators with visual charts and rankings.
+
+### Is Analisa.pt free?
+Yes, Analisa.pt is completely free to use with no registration required.
+
+### What is the PQ Index?
+The PQ Index (Peace & Quiet Index) is a composite score from 0-100 that measures overall livability by combining safety, environment, demographics, and infrastructure indicators with customizable weights.
+
+### Can I access the data programmatically?
+Yes, Analisa.pt provides a Model Context Protocol (MCP) endpoint for programmatic access to search, rank, compare, and retrieve historical data for municipalities.
+
+### What municipalities are covered?
+All 308 municipalities of mainland Portugal and the autonomous regions of Azores and Madeira.
+
+### How are the hexagonal maps generated?
+The maps use the H3 hexagonal grid system at resolution 7, which provides consistent-area cells for fair geographic comparison across municipalities.
+
+### What persona profiles are available?
+Four pre-built profiles: Family (prioritizes safety, education, health), Digital Nomad (connectivity, cost, lifestyle), Retiree (health, safety, climate), and Student (education, cost, leisure).
+
+## Website
+
+- Homepage: https://analisa.pt
+- Contracts Explorer: https://analisa.pt/contracts
+- Sitemap: https://analisa.pt/sitemap.xml

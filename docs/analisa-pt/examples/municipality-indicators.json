@@ -1,0 +1,26 @@
+{
+  "title": "Municipality Indicators: Lisboa",
+  "summary": "361 indicators for municipality code 1106",
+  "columns": [
+    { "key": "indicatorKey", "label": "Indicator" },
+    { "key": "value", "label": "Value", "align": "right" },
+    { "key": "period", "label": "Period" }
+  ],
+  "rows": [
+    { "indicatorKey": "crime", "value": 57.0, "period": "2025" },
+    { "indicatorKey": "crimeAgainstPhysicalIntegrity", "value": 6.2, "period": "2025" },
+    { "indicatorKey": "crimePickpocketingPublicWay", "value": 3.0, "period": "2025" },
+    { "indicatorKey": "crimeVehicleTheft", "value": 5.2, "period": "2025" },
+    { "indicatorKey": "houseBuyPrice", "value": 4875.0, "period": "4th Quarter 2025" },
+    { "indicatorKey": "houseRentPrice", "value": 15.93, "period": "2024" },
+    { "indicatorKey": "buyEffort", "value": 100.2765, "period": "2023" },
+    { "indicatorKey": "populationDensity", "value": 5754.5, "period": "2024" },
+    { "indicatorKey": "snsConsultAdequatePct", "value": 37.6, "period": "2026-02" },
+    { "indicatorKey": "snsBedOccupancyRatePct", "value": 91.3, "period": "2026-03" },
+    { "indicatorKey": "climateAvgTempC", "value": 17.62, "period": "2025" },
+    { "indicatorKey": "climateComfortDaysPct", "value": 32.88, "period": "2025" },
+    { "indicatorKey": "pm25DailyAvg", "value": 4.2, "period": "2026-02-15" },
+    { "indicatorKey": "downloadMbpsMedian", "value": 94.3, "period": "2025-Q3" },
+    { "indicatorKey": "pordataResidentPopulation", "value": 544716, "period": "2024" }
+  ]
+}

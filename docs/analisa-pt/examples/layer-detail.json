@@ -1,0 +1,19 @@
+{
+  "title": "Dataset Layer: crime",
+  "summary": "Total crime",
+  "key": "crime",
+  "label": "Total crime",
+  "unit": "per 1000",
+  "direction": "higher-worse",
+  "defaultWeight": 0.2,
+  "defaultEnabled": true,
+  "missingStrategy": null,
+  "frequency": "yearly",
+  "source": "INE",
+  "sourceCode": "0012260",
+  "plugin": {
+    "id": "ine-composite",
+    "name": "INE Composite (Crime, Economy, Housing)",
+    "description": "Aggregated data from INE (Instituto Nacional de Estatística): crime rates and categories, unemployment, income tax, housing prices/credit, pharmacies per 1000, income averages/medians, aging index, population density, mortality rate, birth rate, births, and divorce."
+  }
+}

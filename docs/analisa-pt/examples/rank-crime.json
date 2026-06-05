@@ -1,0 +1,22 @@
+{
+  "title": "Municipality Rankings: crime",
+  "summary": "Top 10 municipalities by crime rate (per 1,000 residents)",
+  "columns": [
+    { "key": "rank", "label": "#", "align": "right" },
+    { "key": "municipality", "label": "Municipality" },
+    { "key": "code", "label": "Code" },
+    { "key": "value", "label": "Crime Rate", "align": "right" }
+  ],
+  "rows": [
+    { "rank": 1, "municipality": "Albufeira", "code": "0801", "value": 86.0 },
+    { "rank": 2, "municipality": "Sines", "code": "1512", "value": 70.0 },
+    { "rank": 3, "municipality": "Porto", "code": "1312", "value": 64.9 },
+    { "rank": 4, "municipality": "Vila do Bispo", "code": "0811", "value": 62.8 },
+    { "rank": 5, "municipality": "Avis", "code": "0702", "value": 60.9 },
+    { "rank": 6, "municipality": "Loulé", "code": "0808", "value": 60.8 },
+    { "rank": 7, "municipality": "Santa Cruz das Flores", "code": "0107", "value": 60.5 },
+    { "rank": 8, "municipality": "Aljezur", "code": "0802", "value": 58.1 },
+    { "rank": 9, "municipality": "Idanha-a-Nova", "code": "0906", "value": 57.6 },
+    { "rank": 10, "municipality": "Lisboa", "code": "1106", "value": 57.0 }
+  ]
+}

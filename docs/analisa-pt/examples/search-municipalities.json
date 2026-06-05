@@ -1,0 +1,20 @@
+{
+  "title": "Municipalities matching \"Lisboa\"",
+  "summary": "1 result(s) found",
+  "columns": [
+    { "key": "name", "label": "Name" },
+    { "key": "code", "label": "Code" },
+    { "key": "district", "label": "District" },
+    { "key": "lat", "label": "Lat", "align": "right" },
+    { "key": "lng", "label": "Lng", "align": "right" }
+  ],
+  "rows": [
+    {
+      "name": "Lisboa",
+      "code": "1106",
+      "district": null,
+      "lat": 38.741634399999995,
+      "lng": -9.161434199999999
+    }
+  ]
+}

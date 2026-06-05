@@ -1,0 +1,22 @@
+{
+  "title": "Contract Concentration",
+  "summary": "346696 contract(s) in scope",
+  "municipalityCode": "1106",
+  "cpvCode": null,
+  "hhi": 0.0037,
+  "totalValue": 23057555270,
+  "supplierCount": 43483,
+  "contractCount": 346696,
+  "topSuppliers": [
+    { "supplierId": "141", "value": 476579163, "share": 0.0207, "name": "JANSSEN CILAG FARMACEUTICA, LDA." },
+    { "supplierId": "1635", "value": 464243125, "share": 0.0201, "name": "GILEAD SCIENCES LDA." },
+    { "supplierId": "100", "value": 372260929, "share": 0.0161, "name": "ROCHE FARMACEUTICA QUIMICA, LDA" },
+    { "supplierId": "100526", "value": 321888000, "share": 0.0140, "name": "METROS. SEBASTIÃO ALCÃNTARA, ACE" },
+    { "supplierId": "1361", "value": 310330478, "share": 0.0135, "name": "MERCK SHARP DOHME" },
+    { "supplierId": "132", "value": 283473802, "share": 0.0123, "name": "Novartis Farma - Produtos Farmacêuticos, S.A." },
+    { "supplierId": "231", "value": 237580010, "share": 0.0103, "name": "Iberdrola Clientes Portugal Unipessoal" },
+    { "supplierId": "25", "value": 225534867, "share": 0.0098, "name": "Medtronic Portugal, Lda." },
+    { "supplierId": "2737", "value": 220232723, "share": 0.0096, "name": "VIIVHIV HEALTHCARE, UNIPESSOAL. LDA" },
+    { "supplierId": "51", "value": 215353001, "share": 0.0093, "name": "LAB. PFIZER, LDA." }
+  ]
+}

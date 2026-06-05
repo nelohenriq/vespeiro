@@ -1,0 +1,81 @@
+{
+  "title": "Dataset Feature: parish:110658",
+  "summary": "Lisboa · Belém",
+  "generatedAt": "2026-06-04T14:06:17.309Z",
+  "areaCode": "parish:110658",
+  "labels": {
+    "municipality": "Lisboa",
+    "municipalityCode": "1106",
+    "freguesia": "Belém",
+    "freguesiaCode": "110658",
+    "lauId": "PT_110658",
+    "district": "Lisboa",
+    "region": "Grande Lisboa",
+    "nuts2": "Continental",
+    "nuts3": "Grande Lisboa"
+  },
+  "geometry": {
+    "type": "Point",
+    "coordinates": [-9.211517, 38.702205]
+  },
+  "layers": {
+    "crime": 57.0,
+    "crimeAgainstPhysicalIntegrity": 6.2,
+    "crimePickpocketingPublicWay": 3.0,
+    "crimeVehicleTheft": 5.2,
+    "crimeDrunkDriving": 1.8,
+    "crimeDrivingWithoutLicense": 2.5,
+    "crimeAgainstProperty": 15.9,
+    "houseBuyPrice": 4875.0,
+    "houseRentPrice": 15.93,
+    "buyEffort": 100.2765,
+    "populationDensity": 5754.5,
+    "snsConsultAdequatePct": 37.6,
+    "snsBedOccupancyRatePct": 91.3,
+    "hospitalDistanceKm": 2.1,
+    "parkCount": 12,
+    "greenSpacePresence": 100,
+    "climateAvgTempC": 17.62,
+    "climateComfortDaysPct": 32.88,
+    "pm25DailyAvg": 4.2,
+    "downloadMbpsMedian": 94.3,
+    "pordataResidentPopulation": 544716,
+    "compositeMunicipalResilience": 72.5
+  },
+  "provenance": {
+    "crime": {
+      "granularity": "municipality",
+      "isFallback": false,
+      "fallbackType": null
+    },
+    "houseBuyPrice": {
+      "granularity": "municipality",
+      "isFallback": false,
+      "fallbackType": null
+    },
+    "snsConsultAdequatePct": {
+      "granularity": "sub-region",
+      "isFallback": true,
+      "fallbackType": "derived",
+      "chain": {
+        "resolvedAt": "district-or-sub-region"
+      }
+    },
+    "pm25DailyAvg": {
+      "granularity": "municipality",
+      "isFallback": true,
+      "fallbackType": "derived",
+      "chain": {
+        "resolvedAt": "municipality"
+      }
+    },
+    "downloadMbpsMedian": {
+      "granularity": "municipality",
+      "isFallback": true,
+      "fallbackType": "other",
+      "chain": {
+        "resolvedAt": "municipality"
+      }
+    }
+  }
+}
