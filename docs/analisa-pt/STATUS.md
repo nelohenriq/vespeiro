@@ -63,27 +63,38 @@
 
 ---
 
+### Law Project Tracker (`law_tracker.py` + `law_db.py`) — ✅ WORKING
+- [x] Fetch law projects from `api.votoaberto.org` (paginated, legislature/tipo filters)
+- [x] SQLite schema: `law_projects`, `law_events`, `law_votes`, `law_deputies`, `law_parties`
+- [x] Lifecycle event tracking: Entrada → Admissão → Comissão → Votação → DAR
+- [x] Vote result extraction from events (Aprovado/Rejeitado)
+- [x] CLI: `fetch`, `votes`, `deputies`, `parties`, `search`, `show`, `stats`
+- [x] MCP server mode (JSON-RPC over stdio) with 5 tools
+- [x] Deputy + party registry fetching
+- [x] WAL mode + busy_timeout for reliability
+- [x] Verified: fetches projects, events, deputies, parties from L17 legislature
+- [x] Code reviewed and approved
+
+---
+
 ## ❌ Not Started
 
-### Law Project Tracker
-- [ ] Build scraper for `api.votoaberto.org` — law projects, authors, votes
-- [ ] Store law projects in SQLite
-- [ ] Track law lifecycle: proposal → committee → vote → DRE publication
-
-### DRE Publication Crawler
-- [ ] Enumerate recent DRE publications by date range (not search-based)
-- [ ] Download + extract law text from `files.dre.pt`
-- [ ] Store in SQLite for RAG pipeline
+### DRE Publication Crawler (`dre_crawler.py` + `dre_db.py`) — ✅ WORKING
+- [x] Enumerate DRE publications via ELI URI probing (série 1 + série 2)
+- [x] Follow redirects to get canonical URLs and unique IDs
+- [x] SQLite schema: `dre_publications`, `dre_documents`
+- [x] CLI: `fetch`, `search`, `stats`, `crossref`
+- [x] Consecutive-miss stopping for efficient enumeration
+- [x] Verified: 218 publications indexed (109 serie 1 + 109 serie 2)
+- [x] Cross-reference framework with BEP + Law projects
+- [x] Code reviewed and approved
+- [ ] Extract publication dates (blocked: DRE site is JS-rendered)
+- [ ] Extract individual documents within each issue
 
 ### Parliament Law RAG
 - [ ] Chunk law projects into searchable text
 - [ ] Index into LanceDB with embeddings
 - [ ] Semantic search over Portuguese legislation
-
-### Parliament Research → Implementation
-- [ ] Evaluate `api.votoaberto.org` endpoints (test with curl)
-- [ ] Evaluate `oparlamento.pt` data format
-- [ ] Decide on primary data source for law tracking
 
 ---
 
