@@ -298,7 +298,7 @@ def main():
     print(f"Generating PDF report for {entity['display_name']}...")
 
     listings = get_entity_listings(entity["id"])
-    contracts = get_entity_contracts(entity.get("nif", ""))
+    contracts = get_entity_contracts(entity.get("nif", ""), entity_name=entity.get("display_name", ""), entidade=entity.get("entidade", ""))
     dre = get_entity_dre(entity["display_name"])
     laws = get_entity_laws(entity["display_name"])
 

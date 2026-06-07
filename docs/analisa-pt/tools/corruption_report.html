@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Corruption Detection Report — Analisa.pt</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.6; }
+  .header { background: linear-gradient(135deg, #1e293b, #334155); padding: 2rem; border-bottom: 2px solid #f59e0b; }
+  .header h1 { font-size: 1.8rem; color: #f59e0b; }
+  .header p { color: #94a3b8; margin-top: 0.5rem; }
+  .stats-bar { display: flex; gap: 1rem; padding: 1rem 2rem; background: #1e293b; flex-wrap: wrap; }
+  .stat { background: #334155; padding: 1rem 1.5rem; border-radius: 8px; min-width: 180px; }
+  .stat .value { font-size: 1.5rem; font-weight: 700; color: #f59e0b; }
+  .stat .label { font-size: 0.85rem; color: #94a3b8; }
+  .section { padding: 2rem; }
+  .section h2 { font-size: 1.3rem; color: #f59e0b; margin-bottom: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th { background: #334155; padding: 0.75rem; text-align: left; color: #f59e0b; position: sticky; top: 0; }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; }
+  tr:hover { background: #1e293b; }
+  .flag { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; }
+  .flag-critical { background: #dc2626; color: white; }
+  .flag-warning { background: #f59e0b; color: #0f172a; }
+  .flag-info { background: #3b82f6; color: white; }
+  .value { text-align: right; font-variant-numeric: tabular-nums; }
+  .risk-bar { height: 8px; border-radius: 4px; background: #334155; display: inline-block; width: 100px; }
+  .risk-fill { height: 100%; border-radius: 4px; }
+  .footer { padding: 1rem 2rem; text-align: center; color: #64748b; font-size: 0.8rem; border-top: 1px solid #334155; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🛡️ Corruption Detection Report</h1>
+  <p>Procurement anomaly analysis — 5146 entities, 245,225 contracts</p>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="value">3703</div><div class="label">Concentration Alerts</div></div>
+  <div class="stat"><div class="value">1</div><div class="label">Self-Referencing</div></div>
+  <div class="stat"><div class="value">7958</div><div class="label">Cross-Municipality (3+)</div></div>
+  <div class="stat"><div class="value">€20.4B</div><div class="label">Flagged Value</div></div>
+</div>
+
+<div class="section">
+<h2>🚨 Self-Referencing Entities</h2>
+<table>
+<tr><th>#</th><th>Entity</th><th>NIF</th><th>Contracts</th><th class="value">Total Value</th><th>Flag</th></tr>
+<tr><td>1</td><td>Santa Casa da Misericórdia de Rio Maior</td><td>501144269</td><td>1</td><td class="value">€0</td><td><span class="flag flag-critical">SELF-REF</span></td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>⚠️ Spending Concentration (>40%)</h2>
+<table>
+<tr><th>#</th><th>Buyer</th><th>Winner</th><th>Share</th><th>Contracts</th><th class="value">Value</th></tr>
+<tr><td>1</td><td>Infraestruturas de Portugal, S. A.</td><td>AVAN Norte – Gestão da Ferrovia de </td><td>84.8%</td><td>1</td><td class="value">€1,661,362,812</td><td><span class="flag flag-critical">85%</span></td></tr>
+<tr><td>2</td><td>CP - Comboios de Portugal, E. P. E.</td><td>Alstom Ferroviaria Portugal,  S.A.</td><td>91.2%</td><td>1</td><td class="value">€746,042,425</td><td><span class="flag flag-critical">91%</span></td></tr>
+<tr><td>3</td><td>EEM - Empresa de Electricidade da Madeir</td><td>Atlantic Islands Electricity (Madei</td><td>78.0%</td><td>1</td><td class="value">€161,000,000</td><td><span class="flag flag-warning">78%</span></td></tr>
+<tr><td>4</td><td>Instituto Nacional de Emergência Médica,</td><td>GULF MED AVIATION SERVICES LIMITED,</td><td>85.4%</td><td>2</td><td class="value">€81,486,660</td><td><span class="flag flag-critical">85%</span></td></tr>
+<tr><td>5</td><td>EDA - Electricidade dos Açores, S. A.</td><td>Bencom- Armazenamento e Comércio de</td><td>48.6%</td><td>1</td><td class="value">€64,529,435</td><td><span class="flag flag-warning">49%</span></td></tr>
+<tr><td>6</td><td>Município de Vila Real de Santo António</td><td>Rui Vilaça Pinheiro, Lda</td><td>54.9%</td><td>3</td><td class="value">€51,517,338</td><td><span class="flag flag-warning">55%</span></td></tr>
+<tr><td>7</td><td>Instituto do Turismo de Portugal, I. P.</td><td>DENTSU CREATIVE - Agência de Public</td><td>77.7%</td><td>2</td><td class="value">€50,000,000</td><td><span class="flag flag-warning">78%</span></td></tr>
+<tr><td>8</td><td>Secretaria Regional do Turismo, Mobilida</td><td>SATA - Gestão de Aeródromos, S. A.</td><td>99.8%</td><td>1</td><td class="value">€45,563,594</td><td><span class="flag flag-critical">100%</span></td></tr>
+<tr><td>9</td><td>PORTOS DOS AÇORES, S.A.</td><td>MOTA-ENGIL, ENGENHARIA E CONSTRUÇÃO</td><td>67.6%</td><td>1</td><td class="value">€42,988,000</td><td><span class="flag flag-warning">68%</span></td></tr>
+<tr><td>10</td><td>Instituto dos Registos e do Notariado, I</td><td>\tIMPRENSA NACIONAL - CASA DA MOEDA</td><td>67.3%</td><td>1</td><td class="value">€42,000,000</td><td><span class="flag flag-warning">67%</span></td></tr>
+<tr><td>11</td><td>Águas do Centro Litoral, S. A.</td><td>Oliveiras SA</td><td>50.0%</td><td>2</td><td class="value">€35,882,462</td><td><span class="flag flag-warning">50%</span></td></tr>
+<tr><td>12</td><td>Serviços Municipalizados de Água e Sanea</td><td>Águas do Centro Litoral, SA</td><td>80.8%</td><td>2</td><td class="value">€30,154,500</td><td><span class="flag flag-critical">81%</span></td></tr>
+<tr><td>13</td><td>Companhia Carris de Ferro de Lisboa, E.M</td><td>BP</td><td>52.7%</td><td>1</td><td class="value">€29,462,012</td><td><span class="flag flag-warning">53%</span></td></tr>
+<tr><td>14</td><td>Instituto da Mobilidade e dos Transporte</td><td>INCM - Imprensa Nacional-Casa da Mo</td><td>72.1%</td><td>1</td><td class="value">€27,782,973</td><td><span class="flag flag-warning">72%</span></td></tr>
+<tr><td>15</td><td>Comunidade Intermunicipal das Terras de </td><td>Rodonorte-Transportes Portugueses S</td><td>93.7%</td><td>4</td><td class="value">€27,737,302</td><td><span class="flag flag-critical">94%</span></td></tr>
+<tr><td>16</td><td>Município de Lagos</td><td>TPS - Teixeira Pinto &amp; Soares, </td><td>43.8%</td><td>2</td><td class="value">€26,730,384</td><td><span class="flag flag-warning">44%</span></td></tr>
+<tr><td>17</td><td>Comunidade Intermunicipal da Região de A</td><td>Alexandre Barbosa Borges, S.A.</td><td>95.5%</td><td>1</td><td class="value">€24,500,000</td><td><span class="flag flag-critical">95%</span></td></tr>
+<tr><td>18</td><td>Município de Setúbal</td><td>WIKIBUILD, S.A.</td><td>41.3%</td><td>3</td><td class="value">€22,252,149</td><td><span class="flag flag-warning">41%</span></td></tr>
+<tr><td>19</td><td>Município de Barcelos</td><td>Alexandre Barbosa Borges, S.A.</td><td>40.1%</td><td>2</td><td class="value">€21,890,000</td><td><span class="flag flag-warning">40%</span></td></tr>
+<tr><td>20</td><td>Flatlantic - Actividades Piscícolas, S. </td><td>ETERMAR - ENGENHARIA, S.A.</td><td>62.5%</td><td>1</td><td class="value">€19,993,000</td><td><span class="flag flag-warning">63%</span></td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🌐 Cross-Municipality Dominance</h2>
+<table>
+<tr><th>#</th><th>Company</th><th>NIF</th><th>Municipalities</th><th>Contracts</th><th class="value">Total Value</th></tr>
+<tr><td>1</td><td>PETROGAL, S.A.</td><td>500697370</td><td>490</td><td>951</td><td class="value">€296,378,948</td></tr>
+<tr><td>2</td><td>Janssen - Cilag Farmacêutica, Lda</td><td>500189412</td><td>45</td><td>720</td><td class="value">€256,618,617</td></tr>
+<tr><td>3</td><td>ROCHE FARMACÊUTICA E QUÍMICA, LDA.</td><td>500233810</td><td>42</td><td>686</td><td class="value">€205,439,425</td></tr>
+<tr><td>4</td><td>Alexandre Barbosa Borges, S.A.</td><td>500553408</td><td>24</td><td>73</td><td class="value">€185,128,560</td></tr>
+<tr><td>5</td><td>Iberdrola</td><td>502124083</td><td>137</td><td>174</td><td class="value">€163,882,909</td></tr>
+<tr><td>6</td><td>NOVARTIS FARMA-PROD.FARMACÊUTICOS,SA.</td><td>500063524</td><td>48</td><td>667</td><td class="value">€160,287,804</td></tr>
+<tr><td>7</td><td>MERCK SHARP DOHME</td><td>500191360</td><td>47</td><td>446</td><td class="value">€151,723,647</td></tr>
+<tr><td>8</td><td>Serviço de Utilização Comum dos Hospitais</td><td>500900469</td><td>44</td><td>407</td><td class="value">€134,605,199</td></tr>
+<tr><td>9</td><td>TECNORÉM, Engenharia e Construções, S.A</td><td>502519533</td><td>23</td><td>35</td><td class="value">€129,576,137</td></tr>
+<tr><td>10</td><td>LABORATORIOS PFIZER, S.A.</td><td>500162166</td><td>50</td><td>1225</td><td class="value">€122,233,954</td></tr>
+<tr><td>11</td><td>SANOFI- PRODUTOS FARMACÊUTICOS,LDA.</td><td>500134960</td><td>49</td><td>795</td><td class="value">€122,023,588</td></tr>
+<tr><td>12</td><td>GILEAD SCIENCES LDA.</td><td>503604704</td><td>42</td><td>339</td><td class="value">€118,837,178</td></tr>
+<tr><td>13</td><td>UNISELF - Sociedade de Restaurantes Públicos </td><td>501323325</td><td>74</td><td>120</td><td class="value">€114,419,075</td></tr>
+<tr><td>14</td><td>VIIVHIV HEALTHCARE, UNIPESSOAL, LDA</td><td>509117961</td><td>33</td><td>166</td><td class="value">€114,333,189</td></tr>
+<tr><td>15</td><td>MEDTRONIC PORTUGAL, UNIPESSOAL, LDA.</td><td>504223933</td><td>41</td><td>1693</td><td class="value">€113,905,585</td></tr>
+<tr><td>16</td><td>EDP, SA</td><td>503504564</td><td>164</td><td>215</td><td class="value">€113,079,434</td></tr>
+<tr><td>17</td><td>Endesa Energia, S.A. - Sucursal Portugal</td><td>980245974</td><td>181</td><td>214</td><td class="value">€110,151,691</td></tr>
+<tr><td>18</td><td>MEO - Serviços de Comunicações e Multimédia,S</td><td>504615947</td><td>503</td><td>784</td><td class="value">€107,955,175</td></tr>
+<tr><td>19</td><td>Alnypt, Sociedade Unipessoal, Lda.</td><td>514799633</td><td>3</td><td>21</td><td class="value">€107,684,770</td></tr>
+<tr><td>20</td><td>ASTRAZENECA-PRODUTOS FARMACÊUTICOS,LDA.</td><td>502942240</td><td>48</td><td>570</td><td class="value">€104,919,470</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>🎯 Risk Scoring</h2>
+<table>
+<tr><th>#</th><th>Score</th><th>Company</th><th>NIF</th><th>Municipalities</th><th class="value">Value</th><th>Flags</th></tr>
+<tr><td>1</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>PETROGAL, S.A.</td><td>500697370</td><td>490</td><td class="value">€296,378,948</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>2</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Nautilus, S.A.</td><td>503653179</td><td>253</td><td class="value">€12,795,081</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>3</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Beltrão Coelho, Lda</td><td>504654748</td><td>93</td><td class="value">€18,562,859</td><td><span class="flag flag-warning">85%</span></td></tr>
+<tr><td>4</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>INETUM ESPAÑA, S.A. - SUCURSAL EM PORTUG</td><td>980079659</td><td>102</td><td class="value">€69,428,864</td><td><span class="flag flag-warning">85%</span></td></tr>
+<tr><td>5</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>AXIANSEU DIGITAL SOLUTIONS, S.A</td><td>500074372</td><td>40</td><td class="value">€10,567,903</td><td><span class="flag flag-warning">80%</span></td></tr>
+<tr><td>6</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Sogenave</td><td>500271518</td><td>161</td><td class="value">€33,280,654</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>7</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>NOS - Comunicações S.A.</td><td>502604751</td><td>171</td><td class="value">€46,844,211</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>8</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Leaseplan Portugal, Lda.</td><td>502167610</td><td>125</td><td class="value">€30,024,535</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>9</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Fine Facility Services, Lda</td><td>509418627</td><td>67</td><td class="value">€53,719,009</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>10</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Vodafone Portugal Comunicações Pessoais,</td><td>502544180</td><td>241</td><td class="value">€30,810,777</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>11</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>BASE2, LDA</td><td>501333401</td><td>120</td><td class="value">€14,288,190</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>12</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>MEO - Serviços de Comunicações e Multimé</td><td>504615947</td><td>503</td><td class="value">€107,955,175</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>13</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>SAMSIC PORTUGAL - FACILITY SERVICES, S.A</td><td>504839748</td><td>69</td><td class="value">€16,205,727</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>14</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>LUBRIFUEL - Combustíveis e Lubrificantes</td><td>508306000</td><td>106</td><td class="value">€30,089,890</td><td><span class="flag flag-warning">86%</span></td></tr>
+<tr><td>15</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Irmãos Almeida Cabral, Lda.</td><td>503335096</td><td>40</td><td class="value">€35,726,085</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>16</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Eurest Portugal Lda</td><td>500347506</td><td>55</td><td class="value">€85,491,068</td><td><span class="flag flag-warning">85%</span></td></tr>
+<tr><td>17</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>BRICANTEL - COMÉRCIO DE MATERIAL ELÉCTRI</td><td>502888539</td><td>170</td><td class="value">€12,178,981</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>18</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Fidelidade – Companhia de Seguros, S.A</td><td>500918880</td><td>197</td><td class="value">€52,344,697</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>19</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>Porto Editora S.A.</td><td>500221103</td><td>100</td><td class="value">€18,110,951</td><td><span class="flag flag-warning">100%</span></td></tr>
+<tr><td>20</td><td><div class="risk-bar"><div class="risk-fill" style="width:75.0%;background:#dc2626"></div></div> 75</td><td>UNISELF - Sociedade de Restaurantes Públ</td><td>501323325</td><td>74</td><td class="value">€114,419,075</td><td><span class="flag flag-warning">100%</span></td></tr>
+</table>
+</div>
+
+<div class="footer">
+  Generated by contract_winner_analyzer.py — Analisa.pt Corruption Detection<br>
+  Data: contratos2025.xlsx (245,225 contracts)
+</div>
+</body>
+</html>

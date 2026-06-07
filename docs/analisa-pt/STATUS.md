@@ -91,10 +91,28 @@
 - [ ] Extract publication dates (blocked: DRE site is JS-rendered)
 - [ ] Extract individual documents within each issue
 
-### Parliament Law RAG
-- [ ] Chunk law projects into searchable text
-- [ ] Index into LanceDB with embeddings
-- [ ] Semantic search over Portuguese legislation
+### Parliament Law RAG (`law_rag.py`) — ✅ WORKING (50 projects)
+- [x] Chunk law projects + lifecycle events into searchable text
+- [x] LanceDB with pre-computed embeddings (same model as BEP RAG)
+- [x] 50 L17 projects indexed in ~7.4s
+- [x] Semantic search with strong relevance:
+  - "educação" → Lei reposicionamento docentes (score 0.54)
+  - "saúde pública hospitais" → Hospital requalification (score 0.64)
+  - "orçamento fiscalidade" + tipo J → Tax reform projects (score 0.62)
+- [x] Metadata filtering (--legislatura, --tipo, --fase, --vote-result, --since, --until)
+- [x] CLI: `index`, `search`, `stats`, `reset`
+- [x] Auto-detect EMBED_DIM from model
+- [x] Code reviewed and approved
+
+---
+
+## 🔄 Next Steps
+
+### Expand Law RAG Coverage
+- [ ] Fetch more legislatures (L16, L15) via `law_tracker.py fetch --legislatura L16 --with-events`
+- [ ] Re-index to include all legislatures
+- [ ] Add `autor_gp` as a search filter (filter by proposing party)
+- [ ] Add MCP tool for semantic search (currently only search_law_projects keyword search exists)
 
 ---
 

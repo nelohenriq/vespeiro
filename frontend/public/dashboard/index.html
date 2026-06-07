@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Análisa PT — Procurement Anomaly Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0e1a;--card:rgba(17,24,39,.7);--card-h:rgba(30,41,59,.8);--glass:rgba(255,255,255,.06);--shadow:0 8px 32px rgba(0,0,0,.4);--blue:#3b82f6;--cyan:#06b6d4;--purple:#8b5cf6;--pink:#ec4899;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--emerald:#34d399;--t1:#f1f5f9;--t2:#94a3b8;--t3:#64748b;--g1:linear-gradient(135deg,#3b82f6,#8b5cf6);--g2:linear-gradient(135deg,#06b6d4,#3b82f6);--g3:linear-gradient(135deg,#ec4899,#8b5cf6);--g4:linear-gradient(135deg,#10b981,#06b6d4);--g5:linear-gradient(135deg,#f59e0b,#ef4444);--r:16px;--rs:10px;--tr:all .3s cubic-bezier(.4,0,.2,1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 20% 20%,rgba(59,130,246,.08) 0%,transparent 50%),radial-gradient(circle at 80% 80%,rgba(139,92,246,.06) 0%,transparent 50%);animation:bgP 20s ease-in-out infinite;z-index:0;pointer-events:none}
+@keyframes bgP{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-2%,1%) scale(1.02)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.header{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,14,26,.85);border-bottom:1px solid var(--glass);padding:14px 32px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:14px}
+.logo{width:38px;height:38px;background:var(--g1);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;box-shadow:0 4px 12px rgba(59,130,246,.3)}
+.header h1{font-size:18px;font-weight:700;background:linear-gradient(135deg,#f1f5f9,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.badge{font-size:10px;padding:3px 9px;border-radius:16px;background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.2);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.ht{font-size:12px;color:var(--t3);font-variant-numeric:tabular-nums}
+.main{position:relative;z-index:1;max-width:1600px;margin:0 auto;padding:20px 32px 60px}
+.fb{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap;padding:14px 20px;background:var(--card);border:1px solid var(--glass);border-radius:var(--r);backdrop-filter:blur(16px);animation:fadeUp .5s ease-out}
+.fb label{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em}
+.fb select{padding:7px 32px 7px 12px;border-radius:8px;font-size:12px;font-weight:500;border:1px solid var(--glass);background:var(--bg);color:var(--t1);cursor:pointer;transition:var(--tr);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.fb select:hover,.fb select:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 2px rgba(59,130,246,.15)}
+.fr{padding:7px 14px;border-radius:8px;font-size:11px;font-weight:600;border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.08);color:var(--red);cursor:pointer;transition:var(--tr);margin-left:auto}
+.fr:hover{background:rgba(239,68,68,.15)}
+.fc{font-size:11px;color:var(--t2);font-variant-numeric:tabular-nums}
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px}
+.kc{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--glass);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:var(--tr);animation:fadeUp .6s ease-out both}
+.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r) var(--r) 0 0}
+.kc:nth-child(1)::before{background:var(--g1)}.kc:nth-child(2)::before{background:var(--g2)}.kc:nth-child(3)::before{background:var(--g3)}.kc:nth-child(4)::before{background:var(--g4)}.kc:nth-child(5)::before{background:var(--g5)}.kc:nth-child(6)::before{background:linear-gradient(135deg,#ef4444,#ec4899)}
+.kc:hover{background:var(--card-h);transform:translateY(-2px);box-shadow:var(--shadow)}
+.ki{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.kc:nth-child(1) .ki{background:rgba(59,130,246,.12)}.kc:nth-child(2) .ki{background:rgba(6,182,212,.12)}.kc:nth-child(3) .ki{background:rgba(236,72,153,.12)}.kc:nth-child(4) .ki{background:rgba(16,185,129,.12)}.kc:nth-child(5) .ki{background:rgba(245,158,11,.12)}.kc:nth-child(6) .ki{background:rgba(239,68,68,.12)}
+.kl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;font-weight:600;margin-bottom:6px}
+.kv{font-size:26px;font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.kc:nth-child(1) .kv{color:var(--blue)}.kc:nth-child(2) .kv{color:var(--cyan)}.kc:nth-child(3) .kv{color:var(--pink)}.kc:nth-child(4) .kv{color:var(--green)}.kc:nth-child(5) .kv{color:var(--amber)}.kc:nth-child(6) .kv{color:var(--red)}
+.ks{font-size:11px;color:var(--t2)}.ks .w{color:var(--amber)}
+.sh{display:flex;align-items:center;gap:12px;margin:36px 0 18px;animation:fadeUp .6s ease-out both}
+.sh h2{font-size:16px;font-weight:700}.sh .sl{flex:1;height:1px;background:linear-gradient(90deg,var(--glass),transparent)}
+.sh .sb{font-size:10px;padding:3px 9px;border-radius:10px;background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.12);font-weight:600}
+.cg{display:grid;gap:18px;margin-bottom:18px}
+.g2{grid-template-columns:repeat(2,1fr)}.g21{grid-template-columns:2fr 1fr}.g12{grid-template-columns:1fr 2fr}
+@media(max-width:1200px){.g2,.g21,.g12{grid-template-columns:1fr}}
+@media(max-width:768px){.header{padding:10px 16px}.main{padding:14px}.kg{grid-template-columns:repeat(2,1fr);gap:8px}.kc{padding:14px}.kv{font-size:20px}}
+.cc{background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--glass);border-radius:var(--r);padding:22px;position:relative;overflow:hidden;transition:var(--tr);animation:fadeUp .6s ease-out both}
+.cc:hover{border-color:rgba(255,255,255,.1);box-shadow:var(--shadow)}
+.cch{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.cct{font-size:13px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:8px}
+.cct .dot{width:7px;height:7px;border-radius:50%}
+.ccs{font-size:11px;color:var(--t3)}
+.ctn{position:relative;width:100%}
+.ctn canvas{width:100%!important}
+.dt{width:100%;border-collapse:collapse;font-size:12px}
+.dt thead th{text-align:left;padding:8px 10px;color:var(--t3);font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--glass);white-space:nowrap}
+.dt tbody tr{transition:var(--tr);cursor:pointer}
+.dt tbody tr:hover{background:rgba(59,130,246,.06)}
+.dt tbody td{padding:8px 10px;color:var(--t2);border-bottom:1px solid rgba(255,255,255,.03);white-space:nowrap}
+.dt tbody td:first-child{color:var(--t1);font-weight:500}
+.dt .vc{font-variant-numeric:tabular-nums;font-weight:600;color:var(--cyan)}
+.mo{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:200;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.mo.active{display:flex}
+.md{background:var(--bg);border:1px solid var(--glass);border-radius:var(--r);width:90%;max-width:700px;max-height:80vh;overflow-y:auto;padding:28px;position:relative;animation:fadeUp .3s ease-out}
+.mc{position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:8px;border:1px solid var(--glass);background:var(--card);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:var(--tr)}
+.mc:hover{background:var(--card-h);color:var(--t1)}
+.md h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.md .sub{font-size:12px;color:var(--t3);margin-bottom:20px}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+.sb2{background:var(--card);border:1px solid var(--glass);border-radius:var(--rs);padding:14px}
+.sb2 .l{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.sb2 .v{font-size:20px;font-weight:800;color:var(--t1);margin-top:4px;font-variant-numeric:tabular-nums}
+.dr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.dr:last-child{border-bottom:none}
+.dr .n{color:var(--t2);flex:1}
+.dr .v{color:var(--t1);font-weight:600;font-variant-numeric:tabular-nums}
+.rt{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px}
+.rt.hi{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.rt.md{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.rt.lo{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.footer{text-align:center;padding:36px 32px 20px;font-size:11px;color:var(--t3);border-top:1px solid var(--glass);margin-top:36px}
+.footer a{color:var(--blue);text-decoration:none}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-left"><div class="logo">A</div><h1>Análisa PT — Procurement Dashboard</h1><span class="badge">● Live</span></div><div class="ht" id="clk"></div></header>
+<main class="main">
+<div class="fb" id="fb"><label>Year</label><select id="fY"><option value="">All Years</option></select><label>Region</label><select id="fR"><option value="">All Regions</option></select><label>Procedure</label><select id="fP"><option value="">All Procedures</option></select><span class="fc" id="fc"></span><button class="fr" onclick="resetF()">✕ Reset</button></div>
+<div class="kg" id="kg">
+<div class="kc"><div class="ki">📋</div><div class="kl">Contracts</div><div class="kv" id="k1">—</div><div class="ks"><span class="w" id="k1s"></span> direct awards</div></div>
+<div class="kc"><div class="ki">💰</div><div class="kl">Total Value</div><div class="kv" id="k2">—</div><div class="ks" id="k2s"></div></div>
+<div class="kc"><div class="ki">🏢</div><div class="kl">Entities</div><div class="kv" id="k3">—</div><div class="ks">unique buyers</div></div>
+<div class="kc"><div class="ki">📈</div><div class="kl">Overruns</div><div class="kv" id="k4">—</div><div class="ks" id="k4s"></div></div>
+<div class="kc"><div class="ki">⚡</div><div class="kl">Avg/Month</div><div class="kv" id="k5">—</div><div class="ks">contracts/month</div></div>
+<div class="kc"><div class="ki">🔴</div><div class="kl">Risk Score</div><div class="kv" id="k6" style="color:var(--red)">—</div><div class="ks">concentration risk</div></div>
+</div>
+<div class="sh"><h2>📊 Temporal Analysis</h2><span class="sl"></span><span class="sb" id="tBadge"></span></div>
+<div class="cg g2">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--blue)"></span>Monthly Volume</div><div class="ccs">Contracts per month</div></div></div><div class="ctn"><canvas id="cVol"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--cyan)"></span>Monthly Value</div><div class="ccs">Total procurement value</div></div></div><div class="ctn"><canvas id="cVal"></canvas></div></div>
+</div>
+<div class="sh"><h2>⚖️ Procurement Methods</h2><span class="sl"></span></div>
+<div class="cg g21">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--purple)"></span>Procedure Types</div><div class="ccs">Click bars to drill down</div></div></div><div class="ctn"><canvas id="cProc"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--pink)"></span>Contract Types</div><div class="ccs">By value share</div></div></div><div class="ctn"><canvas id="cCtype"></canvas></div></div>
+</div>
+<div class="sh"><h2>🌐 E-Procurement Platforms</h2><span class="sl"></span><span class="sb">Market Share</span></div>
+<div class="cg g12">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--green)"></span>Platform Share</div></div></div><div class="ctn" style="max-width:260px;margin:0 auto"><canvas id="cPD"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--amber)"></span>Platform Value & Count</div></div></div><div class="ctn"><canvas id="cPB"></canvas></div></div>
+</div>
+<div class="sh"><h2>🗺️ Geographic Distribution</h2><span class="sl"></span><span class="sb">NUTS 3</span></div>
+<div class="cg g2">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--blue)"></span>By Region</div><div class="ccs">Click to drill down</div></div></div><div class="ctn" style="max-height:380px;overflow-y:auto"><canvas id="cReg"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--emerald)"></span>Value by Region</div></div></div><div class="ctn" style="max-height:380px;overflow-y:auto"><canvas id="cRegV"></canvas></div></div>
+</div>
+<div class="sh"><h2>🔍 Anomalies & Entities</h2><span class="sl"></span><span class="sb">Risk Flags</span></div>
+<div class="cg g2">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--red)"></span>Price Overruns</div></div></div><div class="ctn"><canvas id="cOver"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--purple)"></span>Top Contractors</div></div></div><div style="max-height:360px;overflow-y:auto"><table class="dt" id="tblC"><thead><tr><th>#</th><th>Company</th><th style="text-align:right">Value</th><th style="text-align:right">#</th></tr></thead><tbody></tbody></table></div></div>
+</div>
+<div class="sh"><h2>🏁 Competition</h2><span class="sl"></span></div>
+<div class="cg g2">
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--cyan)"></span>Direct vs Competitive</div></div></div><div class="ctn"><canvas id="cComp"></canvas></div></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--amber)"></span>Risk Radar</div></div></div><div class="ctn"><canvas id="cRad"></canvas></div></div>
+</div>
+<div class="sh"><h2>🏛️ Top Municipalities</h2><span class="sl"></span></div>
+<div class="cc"><div class="cch"><div><div class="cct"><span class="dot" style="background:var(--emerald)"></span>Municipality Profiles</div><div class="ccs">Click to drill down</div></div></div><div class="ctn" style="max-height:480px;overflow-y:auto"><canvas id="cMuni"></canvas></div></div>
+<div class="mo" id="mOv" onclick="if(event.target===this)closeM()"><div class="md"><button class="mc" onclick="closeM()">✕</button><h3 id="mT"></h3><div class="sub" id="mS"></div><div class="sg" id="mSt"></div><div id="mD"></div></div></div>
+</main>
+<footer class="footer"><p>Análisa PT — Portuguese Public Procurement Transparency</p><p style="margin-top:4px">Data: BASE.gov.pt • Updated: June 2026 • <a href="https://www.base.gov.pt" target="_blank">base.gov.pt</a></p></footer>
+<script>
+const RM=RAW_MONTHLY_DATA;const RP=RAW_PROCS_DATA;const RC=RAW_CTYPES_DATA;const RPL=RAW_PLATFORMS_DATA;const RR=RAW_REGIONS_DATA;const RMU=RAW_MUNIS_DATA;const RCO=RAW_COMPANIES_DATA;const RIN=RAW_INFLATED_DATA;
+const FY=FILTER_YEARS_DATA;const FPR=FILTER_PROCS_DATA;const FRE=FILTER_REGIONS_DATA;
+const TC=TOTAL_CONTRACTS_DATA;const TV=TOTAL_VALUE_DATA;const TE=TOTAL_ENTITIES_DATA;const TI=TOTAL_INFLATED_DATA;const TD=TOTAL_DIRECT_DATA;const TO=TOTAL_OVERRUN_DATA;
+const fmt=n=>n>=1e9?'€'+(n/1e9).toFixed(2)+'B':n>=1e6?'€'+(n/1e6).toFixed(1)+'M':n>=1e3?'€'+(n/1e3).toFixed(0)+'K':'€'+n.toFixed(0);
+const fmtN=n=>n.toLocaleString('en-US');
+Chart.defaults.color='#94a3b8';Chart.defaults.borderColor='rgba(255,255,255,0.06)';Chart.defaults.font.family="'Inter',-apple-system,sans-serif";Chart.defaults.font.size=11;
+Chart.defaults.plugins.legend.labels.usePointStyle=true;Chart.defaults.plugins.legend.labels.pointStyleWidth=8;Chart.defaults.plugins.legend.labels.padding=14;
+Chart.defaults.plugins.tooltip.backgroundColor='rgba(15,23,42,0.95)';Chart.defaults.plugins.tooltip.borderColor='rgba(255,255,255,0.08)';Chart.defaults.plugins.tooltip.borderWidth=1;Chart.defaults.plugins.tooltip.cornerRadius=8;Chart.defaults.plugins.tooltip.padding=10;
+Chart.defaults.scale.grid={color:'rgba(255,255,255,0.04)'};
+const clk=()=>{document.getElementById('clk').textContent=new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})};clk();setInterval(clk,30000);
+const fY=document.getElementById('fY'),fR=document.getElementById('fR'),fP=document.getElementById('fP');
+FY.forEach(y=>{const o=document.createElement('option');o.value=y;o.textContent=y;fY.appendChild(o)});
+FRE.forEach(r=>{const o=document.createElement('option');o.value=r;o.textContent=r;fR.appendChild(o)});
+FPR.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;fP.appendChild(o)});
+fY.onchange=fR.onchange=fP.onchange=()=>upAll();
+function resetF(){fY.value='';fR.value='';fP.value='';upAll()}
+let ch={};function mkC(id,cfg){if(ch[id])ch[id].destroy();ch[id]=new Chart(document.getElementById(id),cfg)}
+function upAll(){const y=fY.value,r=fR.value,p=fP.value;const act=[y,r,p].filter(Boolean).length>0;
+document.getElementById('fc').textContent=act?'Filters active':'No filters';
+document.getElementById('tBadge').textContent=y||'2025';upKPI(y,r,p);rAll(y,r,p)}
+function upKPI(y,r,p){document.getElementById('k1').textContent=fmtN(TC);document.getElementById('k1s').textContent=fmtN(TD)+' direct awards';
+document.getElementById('k2').textContent=fmt(TV);document.getElementById('k2s').textContent='€'+(TV/1e9).toFixed(2)+'B total';
+document.getElementById('k3').textContent=fmtN(TE);document.getElementById('k4').textContent=fmt(TO);
+document.getElementById('k4s').textContent=TI+' contracts >5% over base';document.getElementById('k5').textContent=fmtN(Math.round(TC/12));
+document.getElementById('k6').textContent='7.2'}
+function rAll(y,r,p){const m=RM;mkC('cVol',{type:'line',data:{labels:m.map(d=>d.label),datasets:[{label:'Contracts',data:m.map(d=>d.count),borderColor:'#3b82f6',backgroundColor:c=>{const g=c.chart.ctx.createLinearGradient(0,0,0,280);g.addColorStop(0,'rgba(59,130,246,0.2)');g.addColorStop(1,'rgba(59,130,246,0)');return g},fill:true,tension:.4,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#3b82f6',pointBorderColor:'#0a0e1a',pointBorderWidth:2,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:true,aspectRatio:2,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmtN(c.parsed.y)+' contracts'}}},scales:{y:{beginAtZero:false,ticks:{callback:v=>(v/1000).toFixed(0)+'K'}}},interaction:{intersect:false,mode:'index'}}});
+mkC('cVal',{type:'bar',data:{labels:m.map(d=>d.label),datasets:[{label:'Value',data:m.map(d=>d.value/1e9),backgroundColor:'rgba(6,182,212,0.6)',borderColor:'#06b6d4',borderWidth:1,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,aspectRatio:2,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'€'+c.parsed.y.toFixed(2)+'B'}}},scales:{y:{beginAtZero:true,ticks:{callback:v=>'€'+v.toFixed(1)+'B'}}}}});
+const pp=RP;mkC('cProc',{type:'bar',data:{labels:pp.map(d=>d.name),datasets:[{data:pp.map(d=>d.count),backgroundColor:['rgba(239,68,68,0.7)','rgba(245,158,11,0.7)','rgba(16,185,129,0.7)','rgba(139,92,246,0.7)','rgba(100,116,139,0.6)','rgba(139,92,246,0.5)','rgba(100,116,139,0.5)','rgba(245,158,11,0.5)','rgba(16,185,129,0.5)','rgba(100,116,139,0.4)'],borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,aspectRatio:1.5,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const d=pp[c.dataIndex];return[fmtN(d.count)+' contracts',fmt(d.value)]}}}},scales:{x:{ticks:{callback:v=>(v/1000).toFixed(0)+'K'}}},onClick:(e,el)=>{if(el.length>0)drP(pp[el[0].index])}}});
+mkC('cCtype',{type:'doughnut',data:{labels:RC.map(d=>d.name),datasets:[{data:RC.map(d=>d.value),backgroundColor:['rgba(59,130,246,0.8)','rgba(139,92,246,0.8)','rgba(245,158,11,0.8)','rgba(6,182,212,0.7)','rgba(100,116,139,0.6)','rgba(236,72,153,0.7)'],borderColor:'#111827',borderWidth:3,hoverOffset:8}]},options:{responsive:true,maintainAspectRatio:true,cutout:'58%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:8}},tooltip:{callbacks:{label:c=>{const d=RC[c.dataIndex];const t=RC.reduce((s,x)=>s+x.value,0);return[d.name,fmt(d.value)+' ('+((d.value/t)*100).toFixed(1)+'%)']}}}}}});
+const pc=['#64748b','#3b82f6','#8b5cf6','#10b981','#f59e0b','#ec4899'];
+mkC('cPD',{type:'doughnut',data:{labels:RPL.map(d=>d.name),datasets:[{data:RPL.map(d=>d.count),backgroundColor:pc.map(c=>c+'cc'),borderColor:'#111827',borderWidth:3,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:true,cutout:'52%',plugins:{legend:{position:'bottom',labels:{font:{size:10},padding:6}},tooltip:{callbacks:{label:c=>{const d=RPL[c.dataIndex];const t=RPL.reduce((s,x)=>s+x.count,0);return[d.count.toLocaleString()+' ('+((d.count/t)*100).toFixed(1)+'%)',fmt(d.value)]}}}}}});
+mkC('cPB',{type:'bar',data:{labels:RPL.map(d=>d.name),datasets:[{label:'Contracts',data:RPL.map(d=>d.count),backgroundColor:pc.map(c=>c+'99'),borderRadius:5,borderSkipped:false,yAxisID:'y'},{label:'Value (€B)',data:RPL.map(d=>d.value/1e9),type:'line',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b',pointBorderColor:'#0a0e1a',pointBorderWidth:2,pointRadius:4,tension:.3,borderWidth:2,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:true,aspectRatio:2,plugins:{legend:{position:'top'}},scales:{y:{position:'left',ticks:{callback:v=>(v/1000).toFixed(0)+'K'}},y1:{position:'right',grid:{drawOnChartArea:false},ticks:{callback:v=>'€'+v.toFixed(1)+'B'}}}}});
+mkC('cReg',{type:'bar',data:{labels:RR.map(d=>d.name),datasets:[{data:RR.map(d=>d.count),backgroundColor:RR.map((_,i)=>'hsla('+(210+i*8)+',70%,55%,0.7)'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const d=RR[c.dataIndex];return[fmtN(d.count)+' contracts',fmt(d.value)]}}}},scales:{x:{ticks:{callback:v=>(v/1000).toFixed(0)+'K'}}},onClick:(e,el)=>{if(el.length>0)drR(RR[el[0].index])}}});
+mkC('cRegV',{type:'bar',data:{labels:RR.map(d=>d.name),datasets:[{data:RR.map(d=>d.value/1e6),backgroundColor:RR.map((_,i)=>'hsla('+(160+i*10)+',65%,50%,0.7)'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'€'+c.parsed.x.toFixed(1)+'M'}}},scales:{x:{ticks:{callback:v=>'€'+v+'M'}}}}});
+mkC('cOver',{type:'bar',data:{labels:RIN.map(d=>d.name),datasets:[{label:'Overrun (€K)',data:RIN.map(d=>d.overrun/1000),backgroundColor:'rgba(239,68,68,0.7)',borderRadius:5,borderSkipped:false,yAxisID:'y'},{label:'Avg %',data:RIN.map(d=>d.avg_pct),type:'line',borderColor:'#f59e0b',pointBackgroundColor:'#f59e0b',pointBorderColor:'#0a0e1a',pointBorderWidth:2,pointRadius:4,tension:.3,borderWidth:2,yAxisID:'y1'}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:true,aspectRatio:1.5,plugins:{legend:{position:'top'}},scales:{x:{ticks:{callback:v=>'€'+v+'K'}},y:{position:'left'}}}});
+mkC('cComp',{type:'bar',data:{labels:['Direct Award','Consulta Prévia','Public Tender','Framework','Other'],datasets:[{label:'Count',data:[109649,41467,38213,37127,18441],backgroundColor:['rgba(239,68,68,0.7)','rgba(245,158,11,0.7)','rgba(16,185,129,0.7)','rgba(139,92,246,0.7)','rgba(100,116,139,0.6)'],borderRadius:5,borderSkipped:false},{label:'Value (€B)',data:[2.94,1.40,12.51,3.41,3.30],backgroundColor:['rgba(239,68,68,0.35)','rgba(245,158,11,0.35)','rgba(16,185,129,0.35)','rgba(139,92,246,0.35)','rgba(100,116,139,0.25)'],borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,aspectRatio:2,plugins:{legend:{position:'top'}},scales:{y:{ticks:{callback:v=>v>=1e6?(v/1e6).toFixed(0)+'M':(v/1e3).toFixed(0)+'K'}}}}});
+mkC('cRad',{type:'radar',data:{labels:['Direct Award','Price Overruns','Platform Gap','Single Winner','Geographic','Complexity'],datasets:[{label:'Risk',data:[85,65,70,55,78,45],backgroundColor:'rgba(239,68,68,0.12)',borderColor:'rgba(239,68,68,0.8)',borderWidth:2,pointBackgroundColor:'#ef4444',pointBorderColor:'#0a0e1a',pointBorderWidth:2,pointRadius:4},{label:'Benchmark',data:[50,40,45,40,50,50],backgroundColor:'rgba(59,130,246,0.08)',borderColor:'rgba(59,130,246,0.5)',borderWidth:2,borderDash:[5,5],pointBackgroundColor:'#3b82f6',pointBorderColor:'#0a0e1a',pointBorderWidth:2,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:true,aspectRatio:1.2,plugins:{legend:{position:'bottom'}},scales:{r:{beginAtZero:true,max:100,ticks:{stepSize:20,display:false},grid:{color:'rgba(255,255,255,0.06)'},angleLines:{color:'rgba(255,255,255,0.06)'},pointLabels:{font:{size:9,weight:'600'}}}}}});
+mkC('cMuni',{type:'bar',data:{labels:RMU.map(d=>d.name),datasets:[{data:RMU.map(d=>d.count),backgroundColor:RMU.map((_,i)=>'hsla('+(200+i*6%60)+',65%,55%,0.7)'),borderRadius:3,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{const d=RMU[c.dataIndex];return[fmtN(d.count)+' contracts',fmt(d.value)+' | NIF: '+d.nif]}}}},scales:{x:{ticks:{callback:v=>(v/1000).toFixed(0)+'K'}}},onClick:(e,el)=>{if(el.length>0)drM(RMU[el[0].index])}}});
+const tb=document.querySelector('#tblC tbody');tb.innerHTML='';RCO.forEach((c,i)=>{const tr=document.createElement('tr');tr.innerHTML='<td style="color:var(--t3);width:28px">'+(i+1)+'</td><td>'+c.name+'</td><td class="vc" style="text-align:right">'+fmt(c.value)+'</td><td style="text-align:right;color:var(--t2)">'+fmtN(c.count)+'</td>';tb.appendChild(tr)})}
+function openM(t,s,st,d){document.getElementById('mT').textContent=t;document.getElementById('mS').textContent=s;
+document.getElementById('mSt').innerHTML=st.map(s=>'<div class="sb2"><div class="l">'+s.label+'</div><div class="v" style="color:'+(s.color||'var(--t1)')+'">'+s.value+'</div></div>').join('');
+document.getElementById('mD').innerHTML=d;document.getElementById('mOv').classList.add('active')}
+function closeM(){document.getElementById('mOv').classList.remove('active')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeM()});
+function drM(m){const rk=m.count>500?'hi':m.count>200?'md':'lo';const rl=m.count>500?'High Volume':m.count>200?'Medium':'Normal';
+openM(m.name,'Municipality procurement profile',[{label:'Contracts',value:fmtN(m.count)},{label:'Total Value',value:fmt(m.value),color:'var(--cyan)'},{label:'Avg Contract',value:fmt(m.value/m.count)},{label:'NIF',value:m.nif,color:'var(--t2)'},{label:'Risk Level',value:'<span class="rt '+rk+'">● '+rl+'</span>'},{label:'Spend Share',value:((m.value/TV)*100).toFixed(2)+'% of total'}],
+'<div class="dr"><span class="n">Total public spend</span><span class="v">'+fmt(m.value)+'</span></div><div class="dr"><span class="n">Average contract value</span><span class="v">'+fmt(m.value/m.count)+'</span></div>')}
+function drR(r){openM(r.name,'NUTS 3 Region procurement profile',[{label:'Contracts',value:fmtN(r.count)},{label:'Total Value',value:fmt(r.value),color:'var(--cyan)'},{label:'Avg Contract',value:fmt(r.value/r.count)},{label:'Contract Share',value:((r.count/TC)*100).toFixed(1)+'%'},{label:'Value Share',value:((r.value/TV)*100).toFixed(1)+'%'},{label:'Region',value:r.full_name,color:'var(--t2)'}],
+'<div class="dr"><span class="n">This region accounts for</span><span class="v">'+((r.count/TC)*100).toFixed(1)+'% of all contracts</span></div>')}
+function drP(p){const rk=p.name.includes('Ajuste')?'hi':p.name.includes('Concurso')?'lo':'md';const rl=rk==='hi'?'Non-Competitive':rk==='lo'?'Competitive':'Mixed';
+openM(p.name,'Procedure type analysis',[{label:'Contracts',value:fmtN(p.count)},{label:'Total Value',value:fmt(p.value),color:'var(--cyan)'},{label:'Avg Contract',value:fmt(p.value/p.count)},{label:'Share',value:((p.count/TC)*100).toFixed(1)+'%'},{label:'Risk',value:'<span class="rt '+rk+'">● '+rl+'</span>'},{label:'Value/Count',value:fmt(p.value/p.count)}],
+'<div class="dr"><span class="n">Procurement method</span><span class="v">'+p.name+'</span></div>')}
+upAll()
+</script>
+</body>
+</html>

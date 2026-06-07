@@ -9,9 +9,11 @@ Usage:
     python dre_crawler.py fetch --year 2026 --serie 1       # Fetch serie 1 publications
     python dre_crawler.py fetch --year 2026 --serie 2       # Fetch serie 2 publications
     python dre_crawler.py fetch --year 2026 --all           # Fetch both series
-    python dre_crawler.py search "educação"                # Search titles
-    python dre_crawler.py stats                             # Index statistics
-    python dre_crawler.py crossref                          # Cross-ref with BEP + Laws
+    python dre_crawler.py enrich                             # Fetch titles for publications missing them
+    python dre_crawler.py apply-titles titles.json           # Apply enriched titles from JSON file
+    python dre_crawler.py search "contrato"                 # Search publications by keyword
+    python dre_crawler.py stats                              # Index statistics
+    python dre_crawler.py crossref                           # Cross-ref with BEP + Laws
 """
 
 import sys
@@ -79,6 +81,73 @@ class DRECrawler:
         except Exception as e:
             logger.error(f"Error for {eli_url}: {e}")
             return None
+
+    def enrich_titles(self, limit: int = 50) -> list[dict]:
+        """Generate enrichment tasks for publications with missing titles.
+
+        The DRE website requires JS rendering to extract titles. This command
+        generates a JSON file with detail URLs that can be enriched via
+        browser-use or manual inspection.
+        """
+        from dre_db import init_db
+
+        conn = init_db()
+        conn.row_factory = lambda cursor, row: dict(zip(
+            [d[0] for d in cursor.description], row))
+
+        # Find publications without titles
+        rows = conn.execute("""
+            SELECT pub_id, serie, numero, year, unique_id, redirect_url
+            FROM dre_publications
+            WHERE (title IS NULL OR title = '')
+            AND unique_id IS NOT NULL AND unique_id != ''
+            ORDER BY year DESC, serie, numero
+            LIMIT ?
+        """, (limit,)).fetchall()
+        conn.close()
+
+        tasks = []
+        for r in rows:
+            detail_url = f"{DRE_DETAIL_BASE}/{r['numero']}-{r['year']}-{r['unique_id']}"
+            tasks.append({
+                "pub_id": r["pub_id"],
+                "serie": r["serie"],
+                "numero": r["numero"],
+                "year": r["year"],
+                "unique_id": r["unique_id"],
+                "detail_url": detail_url,
+                "title": "",
+                "publication_date": "",
+            })
+
+        return tasks
+
+    def apply_enriched_titles(self, enriched: list[dict]) -> int:
+        """Apply enriched title data to the database."""
+        from dre_db import init_db
+
+        conn = init_db()
+        updated = 0
+
+        for item in enriched:
+            title = item.get("title", "")
+            pub_date = item.get("publication_date", "")
+            pub_id = item.get("pub_id", "")
+
+            if not title and not pub_date:
+                continue
+
+            conn.execute("""
+                UPDATE dre_publications
+                SET title = COALESCE(NULLIF(?, ''), title),
+                    publication_date = COALESCE(NULLIF(?, ''), publication_date)
+                WHERE pub_id = ?
+            """, (title, pub_date, pub_id))
+            updated += 1
+
+        conn.commit()
+        conn.close()
+        return updated
 
     def fetch_series(self, serie: int, year: int, max_number: int = 300) -> list[dict]:
         """Fetch all publications for a series and year.
@@ -249,6 +318,75 @@ def _cmd_crossref(args):
     print()
 
 
+def _cmd_enrich(args):
+    """Generate enrichment tasks for publications with missing titles.
+
+    The DRE website requires JS rendering. This generates a JSON file
+    with detail URLs that can be enriched via browser-use or manual work.
+    """
+    client = DRECrawler(delay=args.delay)
+    tasks = client.enrich_titles(limit=args.limit)
+
+    if not tasks:
+        print("\n  All publications already have titles. Nothing to enrich.")
+        return
+
+    output = args.output or "data/dre_enrichment_tasks.json"
+    output_path = Path(output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(tasks, f, ensure_ascii=False, indent=2)
+
+    print(f"\n{'='*70}")
+    print(f"  DRE ENRICHMENT TASKS")
+    print(f"{'='*70}")
+    print(f"  Publications needing titles: {len(tasks)}")
+    print(f"  Output file: {output_path}")
+    print(f"\n  Next steps:")
+    print(f"    1. Use browser-use agent to visit each detail_url")
+    print(f"    2. Extract page title and publication date")
+    print(f"    3. Save results as JSON with pub_id, title, publication_date")
+    print(f"    4. Run: python dre_crawler.py apply-titles <file.json>")
+    print(f"\n  Sample URLs:")
+    for t in tasks[:5]:
+        print(f"    {t['detail_url']}")
+    print(f"{'='*70}\n")
+
+
+def _cmd_apply_titles(args):
+    """Apply enriched titles from a JSON file to the database."""
+    input_path = Path(args.file)
+    if not input_path.exists():
+        print(f"  Error: File not found: {input_path}")
+        return
+
+    with open(input_path) as f:
+        enriched = json.load(f)
+
+    if not isinstance(enriched, list):
+        print("  Error: Expected a JSON array of enrichment records")
+        return
+
+    client = DRECrawler()
+    updated = client.apply_enriched_titles(enriched)
+
+    print(f"\n  Applied {len(enriched)} enriched records")
+    print(f"  Database updated: {updated} rows")
+
+    # Show updated stats
+    from dre_db import init_db
+    conn = init_db()
+    total = conn.execute("SELECT COUNT(*) FROM dre_publications").fetchone()[0]
+    with_title = conn.execute(
+        "SELECT COUNT(*) FROM dre_publications WHERE title IS NOT NULL AND title != ''"
+    ).fetchone()[0]
+    conn.close()
+    print(f"  Total publications: {total}")
+    print(f"  With titles: {with_title} ({with_title*100/total:.1f}%)")
+    print()
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="DRE Publication Crawler — Diário da República via ELI URIs",
@@ -285,6 +423,14 @@ Examples:
     p_crossref = sub.add_parser("crossref", help="Cross-reference with BEP and Laws")
     p_crossref.add_argument("--db", default=None, help="DB path")
 
+    p_enrich = sub.add_parser("enrich", help="Generate enrichment tasks for missing titles")
+    p_enrich.add_argument("--limit", type=int, default=50, help="Max publications to enrich")
+    p_enrich.add_argument("--output", "-o", default=None, help="Output JSON file path")
+    p_enrich.add_argument("--delay", type=float, default=0.3, help="Delay between requests")
+
+    p_apply = sub.add_parser("apply-titles", help="Apply enriched titles from JSON file")
+    p_apply.add_argument("file", help="JSON file with enriched titles")
+
     args = parser.parse_args()
 
     if args.verbose:
@@ -301,6 +447,10 @@ Examples:
         _cmd_stats(args)
     elif args.command == "crossref":
         _cmd_crossref(args)
+    elif args.command == "enrich":
+        _cmd_enrich(args)
+    elif args.command == "apply-titles":
+        _cmd_apply_titles(args)
     else:
         parser.print_help()
 

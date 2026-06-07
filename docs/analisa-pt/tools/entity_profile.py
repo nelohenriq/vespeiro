@@ -15,6 +15,7 @@ Usage:
 
 import sys
 import json
+import re
 import sqlite3
 import argparse
 from pathlib import Path
@@ -27,7 +28,42 @@ DRE_DB = SCRIPT_DIR / "dre_index.db"
 LAW_DB = SCRIPT_DIR / "law_index.db"
 CONTRACT_CACHE = SCRIPT_DIR / "data" / "contract_index.json"
 
+NIF_MAPPING_FILE = SCRIPT_DIR / "data" / "nif_mapping.json"
 BASE_DETAIL_URL = "https://www.base.gov.pt/Base4/pt/detalhe/?type=contratos&id="
+
+
+# =============================================================================
+# NIF MAPPING (Câmara → Município bridge)
+# =============================================================================
+
+def _load_nif_mapping() -> dict:
+    """Load the Câmara↔Município NIF mapping.
+
+    Returns two dicts:
+    - camara_to_municipio: maps Câmara NIF → Município NIF
+    - municipio_to_camara: maps Município NIF → Câmara NIF
+    """
+    if not NIF_MAPPING_FILE.exists():
+        return {}, {}
+    try:
+        with open(NIF_MAPPING_FILE, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        mappings = data.get("mappings", []) if isinstance(data, dict) else data
+        camara_to_muni = {}
+        muni_to_camara = {}
+        for m in mappings:
+            cn = m.get("camara_nif", "")
+            mn = m.get("municipio_nif", "")
+            if cn and mn:
+                camara_to_muni[cn] = mn
+                muni_to_camara[mn] = cn
+        return camara_to_muni, muni_to_camara
+    except (json.JSONDecodeError, KeyError):
+        return {}, {}
+
+
+# Load once at module import
+camara_to_municipio, municipio_to_camara = _load_nif_mapping()
 
 
 def search_entities(query: str = "", nif: str = "", limit: int = 20) -> list[dict]:
@@ -80,13 +116,31 @@ def get_entity_listings(entity_id: str) -> list[dict]:
     ]
 
 
-def get_entity_contracts(nif: str) -> list[dict]:
-    """Get BASE.gov.pt contracts for an entity by NIF."""
-    if not nif or not CONTRACT_CACHE.exists():
+def get_entity_contracts(nif: str, entity_name: str = "", entidade: str = "") -> list[dict]:
+    """Get BASE.gov.pt contracts for an entity by NIF.
+
+    Uses the Câmara↔Município NIF mapping to bridge the data gap when the
+    BEP NIF (Câmara) differs from the BASE NIF (Município). Falls back to
+    name-based matching only as a last resort.
+    """
+    if not CONTRACT_CACHE.exists():
         return []
     with open(CONTRACT_CACHE, "r", encoding="utf-8") as f:
         index = json.load(f)
-    contracts = index.get(nif, [])
+
+    # Strategy 1: Direct NIF lookup
+    contracts = index.get(nif, []) if nif else []
+
+    # Strategy 2: NIF mapping (Câmara → Município or vice versa)
+    if not contracts and nif:
+        mapped_nif = camara_to_municipio.get(nif) or municipio_to_camara.get(nif)
+        if mapped_nif:
+            contracts = index.get(mapped_nif, [])
+
+    # Strategy 3: Name-based fallback (last resort)
+    if not contracts and entity_name:
+        contracts = _find_contracts_by_name(index, entity_name, nif)
+
     # Add detail page URLs
     for c in contracts:
         cid = c.get("contract_id")
@@ -94,6 +148,46 @@ def get_entity_contracts(nif: str) -> list[dict]:
     # Sort by date descending
     contracts.sort(key=lambda c: c.get("data", ""), reverse=True)
     return contracts
+
+
+from utils import extract_location as _extract_location
+
+
+def _find_contracts_by_name(index: dict, entity_name: str,
+                           skip_nif: str = "") -> list[dict]:
+    """Find contracts by fuzzy name matching against the contract index.
+
+    Builds a temporary name→NIF lookup and matches on location names.
+    """
+    location = _extract_location(entity_name)
+    if len(location) < 4:  # too short to match reliably
+        return []
+
+    from unidecode import unidecode
+
+    candidates = []
+    for nif_key, contracts in index.items():
+        if nif_key == skip_nif:
+            continue
+        if not contracts:
+            continue
+        # Get the entity name from the first contract
+        first_name = contracts[0].get("entity_name", "")
+        if not first_name:
+            continue
+        normalized = unidecode(first_name.lower().strip())
+        # Match if location name appears in the contract entity name
+        if location in normalized or normalized.endswith(location):
+            candidates.append((nif_key, first_name, len(contracts)))
+
+    # Deduplicate and sort by contract count (most contracts = most likely match)
+    seen = set()
+    matched_contracts = []
+    for nif_key, name, count in sorted(candidates, key=lambda x: -x[2]):
+        if nif_key not in seen:
+            seen.add(nif_key)
+            matched_contracts.extend(index[nif_key])
+    return matched_contracts
 
 
 def get_entity_dre(entity_name: str) -> list[dict]:
@@ -202,15 +296,22 @@ def print_entity_profile(entity: dict, listings: list, contracts: list,
     print(f"\n{'='*80}")
     print(f"  🔍 TRANSPARENCY PROFILE: {entity['display_name']}")
     print(f"{'='*80}")
-    print(f"  NIF:        {nif or 'N/A'}")
+    # Show paired NIF if available
+    paired_nif = camara_to_municipio.get(nif) or municipio_to_camara.get(nif)
+    paired_label = "Município NIF" if nif in camara_to_municipio else "Câmara NIF"
+    if paired_nif:
+        print(f"  NIF:        {nif or 'N/A'} → {paired_label}: {paired_nif}")
+        print(f"  BASE.gov:   https://www.base.gov.pt/Base4/pt/detalhe/?type=entidades&id={paired_nif}")
+    else:
+        print(f"  NIF:        {nif or 'N/A'}")
+        if nif:
+            print(f"  BASE.gov:   https://www.base.gov.pt/Base4/pt/detalhe/?type=entidades&id={nif}")
     print(f"  Department: {entity['entidade'][:70]}")
     print(f"  Org:        {entity['organismo'][:70]}")
     print(f"  BEP Jobs:   {entity['listing_count']} listings")
     print(f"  Contracts:  {len(contracts)} | Value: €{total_value:,.2f}")
     print(f"  DRE:        {len(dre)} publications")
     print(f"  Laws:       {len(laws)} projects")
-    if nif:
-        print(f"  BASE.gov:   https://www.base.gov.pt/Base4/pt/detalhe/?type=entidades&id={nif}")
     print(f"{'='*80}\n")
 
     # --- BEP Job Listings ---
@@ -393,7 +494,11 @@ def main():
     listings = get_entity_listings(entity["id"])
     print(f"  BEP listings: {len(listings)}")
 
-    contracts = get_entity_contracts(entity.get("nif", ""))
+    contracts = get_entity_contracts(
+        entity.get("nif", ""),
+        entity_name=entity.get("display_name", ""),
+        entidade=entity.get("entidade", ""),
+    )
     print(f"  BASE contracts: {len(contracts)}")
 
     dre = get_entity_dre(entity["display_name"])

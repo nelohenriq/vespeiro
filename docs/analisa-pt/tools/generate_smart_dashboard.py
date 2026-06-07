@@ -25,6 +25,12 @@ import sqlite3
 import argparse
 import webbrowser
 from pathlib import Path
+
+# Import shared contract lookup from entity_profile (includes name-based fallback)
+try:
+    from entity_profile import get_entity_contracts
+except ImportError:
+    pass  # fallback: use local definition if available
 from collections import defaultdict
 
 SCRIPT_DIR = Path(__file__).parent
@@ -689,7 +695,7 @@ def main():
         total_contracts = 0
         for e in entities:
             listings = get_entity_listings(e["id"])
-            contracts = get_entity_contracts(e.get("nif", ""))
+            contracts = get_entity_contracts(e.get("nif", ""), entity_name=e.get("display_name", ""), entidade=e.get("entidade", ""))
             p = profile_entity(e, listings, contracts)
             shapes[p["shape"]] += 1
             total_listings += p["n_listings"]
@@ -716,7 +722,7 @@ def main():
     print(f"Loading data for {entity['display_name']}...")
 
     listings = get_entity_listings(entity["id"])
-    contracts = get_entity_contracts(entity.get("nif", ""))
+    contracts = get_entity_contracts(entity.get("nif", ""), entity_name=entity.get("display_name", ""), entidade=entity.get("entidade", ""))
 
     print(f"  BEP listings: {len(listings)}")
     print(f"  BASE contracts: {len(contracts)}")

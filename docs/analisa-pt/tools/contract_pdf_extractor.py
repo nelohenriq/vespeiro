@@ -25,12 +25,6 @@ from urllib.parse import urlparse, urljoin
 from collections import defaultdict
 
 try:
-    import openpyxl
-except ImportError:
-    print("ERROR: openpyxl required. Install: pip install openpyxl")
-    sys.exit(1)
-
-try:
     import urllib.request
     import ssl
 except ImportError:
@@ -39,7 +33,7 @@ except ImportError:
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
-XLSX_PATH = SCRIPT_DIR / "data" / "contratos2025.xlsx"
+PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
 PDF_CACHE_DB = SCRIPT_DIR / "data" / "contract_pdfs.db"
 CONTRACT_INDEX = SCRIPT_DIR / "data" / "contract_index.json"
 
@@ -415,42 +409,30 @@ def main():
         return
 
     if args.command == "extract":
-        # Batch mode: load contracts and extract all
-        if not XLSX_PATH.exists():
-            print(f"ERROR: Contracts data not found at {XLSX_PATH}")
+        # Batch mode: load contracts from procurement.db
+        if not PROCUREMENT_DB.exists():
+            print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
             sys.exit(1)
 
-        from collections import defaultdict as dd
-
-        def extract_nif_from_adjudicante(text):
-            if not text:
-                return ("", "")
-            m = re.match(r'^(\d{9})\s*-\s*(.+)$', text.strip())
-            if m:
-                return (m.group(1), m.group(2).strip())
-            return ("", text.strip())
-
-        print(f"  Loading contracts from {XLSX_PATH.name}...")
-        wb = openpyxl.load_workbook(str(XLSX_PATH), read_only=True)
-        ws = wb[wb.sheetnames[0]]
-        headers = next(ws.iter_rows(max_row=1, values_only=True))
-        h = {str(x).lower().strip(): i for i, x in enumerate(headers) if x}
+        import sqlite3 as _sqlite3
+        print(f"  Loading contracts from procurement.db...")
+        _conn = _sqlite3.connect(str(PROCUREMENT_DB))
+        _rows = _conn.execute(
+            "SELECT idcontrato, linkPecasProc, adjudicante_nif, adjudicante_nome"
+            " FROM contratos WHERE linkPecasProc IS NOT NULL AND linkPecasProc != ''"
+        ).fetchall()
+        _conn.close()
 
         contracts = []
-        for row in ws.iter_rows(min_row=2, values_only=True):
-            link = row[h.get("linkpecasproc")] if h.get("linkpecasproc") is not None else None
+        for cid, link, nif, name in _rows:
             if not link or not str(link).strip():
                 continue
-            nif, name = extract_nif_from_adjudicante(str(row[h["adjudicante"]]) if row[h["adjudicante"]] else "")
-            if args.nif and nif != args.nif:
+            if args.nif and (nif or "") != args.nif:
                 continue
-            cid = row[h["idcontrato"]] if h.get("idcontrato") is not None and row[h["idcontrato"]] else None
-            if cid:
-                contracts.append({"contract_id": int(cid), "link_pecas_proc": str(link).strip(),
-                                  "nif": nif, "entity_name": name})
+            contracts.append({"contract_id": int(cid), "link_pecas_proc": str(link).strip(),
+                              "nif": nif or "", "entity_name": name or ""})
             if args.limit and len(contracts) >= args.limit:
                 break
-        wb.close()
 
         conn = init_pdf_cache()
         total = len(contracts)

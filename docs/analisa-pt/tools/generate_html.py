@@ -578,11 +578,11 @@ def main():
 
         print(f"Generating comparison: {ea['display_name']} vs {eb['display_name']}...")
         la = get_entity_listings(ea["id"])
-        ca = get_entity_contracts(ea.get("nif", ""))
+        ca = get_entity_contracts(ea.get("nif", ""), entity_name=ea.get("display_name", ""), entidade=ea.get("entidade", ""))
         da = get_entity_dre(ea["display_name"])
         laa = get_entity_laws(ea["display_name"])
         lb = get_entity_listings(eb["id"])
-        cb = get_entity_contracts(eb.get("nif", ""))
+        cb = get_entity_contracts(eb.get("nif", ""), entity_name=eb.get("display_name", ""), entidade=eb.get("entidade", ""))
         db = get_entity_dre(eb["display_name"])
         lb2 = get_entity_laws(eb["display_name"])
         print(f"  A: {len(la)} listings, {len(ca)} contracts | B: {len(lb)} listings, {len(cb)} contracts")
@@ -591,7 +591,7 @@ def main():
     else:
         print(f"Generating dashboard for {ea['display_name']}...")
         la = get_entity_listings(ea["id"])
-        ca = get_entity_contracts(ea.get("nif", ""))
+        ca = get_entity_contracts(ea.get("nif", ""), entity_name=ea.get("display_name", ""), entidade=ea.get("entidade", ""))
         da = get_entity_dre(ea["display_name"])
         laa = get_entity_laws(ea["display_name"])
         print(f"  BEP: {len(la)} listings | BASE: {len(ca)} contracts | DRE: {len(da)} | Laws: {len(laa)}")

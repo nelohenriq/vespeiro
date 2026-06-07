@@ -7,7 +7,7 @@ patterns. Nodes represent entities and sectors; edges represent shared
 characteristics (same department, similar hiring profiles, contract overlap).
 
 Features:
-  - Louvain community detection for automatic clustering
+  - Leiden community detection for automatic clustering
   - Interactive cluster filtering and coloring
   - Temporal animation of network evolution
   - Search and type filtering
@@ -254,6 +254,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 #stats { position: fixed; top: 1rem; right: 1rem; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 0.8rem 1rem; z-index: 10; font-size: 0.8rem; }
 #stats .stat { margin: 0.2rem 0; color: #94a3b8; }
 #stats .stat strong { color: #f8fafc; }
+#stats .stat strong { color: #f8fafc; }
+#entity-panel { position: fixed; top: 4rem; left: 1rem; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 0; z-index: 15; width: 320px; max-height: calc(100vh - 6rem); overflow-y: auto; font-size: 0.8rem; display: none; box-shadow: 0 8px 25px rgba(0,0,0,0.4); }
+#entity-panel::-webkit-scrollbar { width: 4px; }
+#entity-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+#entity-panel .ep-header { background: #0f172a; border-bottom: 1px solid #334155; padding: 0.8rem 1rem; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: flex-start; }
+#entity-panel .ep-header h3 { color: #f8fafc; font-size: 0.95rem; margin: 0; line-height: 1.3; }
+#entity-panel .ep-close { background: none; border: none; color: #64748b; cursor: pointer; font-size: 1.1rem; padding: 0.2rem; line-height: 1; }
+#entity-panel .ep-close:hover { color: #e2e8f0; }
+#entity-panel .ep-body { padding: 0.8rem 1rem; }
+#entity-panel .ep-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.6rem; }
+#entity-panel .ep-badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 9999px; font-size: 0.65rem; font-weight: 600; }
+#entity-panel .ep-badge.sector { background: #3b82f6; color: white; }
+#entity-panel .ep-badge.cluster { background: #8b5cf6; color: white; }
+#entity-panel .ep-stat-row { display: flex; justify-content: space-between; padding: 0.3rem 0; border-bottom: 1px solid rgba(51,65,85,0.5); }
+#entity-panel .ep-stat-label { color: #64748b; font-size: 0.75rem; }
+#entity-panel .ep-stat-value { color: #f8fafc; font-weight: 600; font-size: 0.8rem; }
+#entity-panel .ep-stat-value.money { color: #10b981; }
+#entity-panel .ep-actions { margin-top: 0.6rem; padding-top: 0.5rem; border-top: 1px solid #334155; }
+#entity-panel .ep-actions a { display: block; padding: 0.35rem 0.6rem; background: #0f172a; border: 1px solid #334155; border-radius: 6px; color: #60a5fa; text-decoration: none; font-size: 0.75rem; margin-bottom: 0.3rem; transition: background 0.15s; }
+#entity-panel .ep-actions a:hover { background: #334155; }
 #cluster-panel { position: fixed; top: 4rem; right: 1rem; background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 0.8rem 1rem; z-index: 10; width: 240px; max-height: 40vh; overflow-y: auto; font-size: 0.75rem; display: none; }
 #cluster-panel::-webkit-scrollbar { width: 4px; }
 #cluster-panel::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
@@ -282,32 +302,23 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 </div>
 """
 
-    # Louvain community detection algorithm
+    # Leiden community detection algorithm
     louvain_js = """
-// Louvain Community Detection Algorithm
+// Leiden Community Detection Algorithm
+// Improvement over Louvain: adds refinement phase guaranteeing well-connected communities
 function detectCommunities(nodeList, edgeList) {
-    // Build adjacency structure
-    var nodeIds = {};
-    var communities = {};
-    var nodeWeights = {};
-    var adjacency = {};
-    var edgeWeights = {};
+    var nodeIds = {}, nodeWeights = {}, adjacency = {};
     var totalWeight = 0;
-    var nodeCount = 0;
-
     nodeList.forEach(function(n) {
-        nodeIds[n.id] = nodeCount;
-        communities[n.id] = n.id;
+        nodeIds[n.id] = true;
         nodeWeights[n.id] = 0;
         adjacency[n.id] = {};
-        nodeCount++;
     });
-
     edgeList.forEach(function(e) {
         var src = typeof e.source === 'object' ? e.source.id : e.source;
         var tgt = typeof e.target === 'object' ? e.target.id : e.target;
         var w = e.strength || 1;
-        if (nodeIds[src] !== undefined && nodeIds[tgt] !== undefined) {
+        if (nodeIds[src] && nodeIds[tgt]) {
             adjacency[src][tgt] = (adjacency[src][tgt] || 0) + w;
             adjacency[tgt][src] = (adjacency[tgt][src] || 0) + w;
             nodeWeights[src] += w;
@@ -315,84 +326,116 @@ function detectCommunities(nodeList, edgeList) {
             totalWeight += w;
         }
     });
-
     if (totalWeight === 0) totalWeight = 1;
 
-    // Phase 1: Local optimization
-    var improved = true;
-    var iterations = 0;
-    while (improved && iterations < 20) {
+    // Each node starts in its own community
+    var community = {};
+    var communityDegreeSum = {};
+    nodeList.forEach(function(n) {
+        community[n.id] = n.id;
+        communityDegreeSum[n.id] = nodeWeights[n.id] || 0;
+    });
+
+    var m2 = totalWeight * 2;
+    var improved = true, iter = 0;
+
+    while (improved && iter < 30) {
         improved = false;
-        iterations++;
-        // Random order for better convergence
-        var nodeIdsList = Object.keys(nodeIds);
-        for (var si = nodeIdsList.length - 1; si > 0; si--) {
-            var ri = Math.floor(Math.random() * (si + 1));
-            var tmp = nodeIdsList[si]; nodeIdsList[si] = nodeIdsList[ri]; nodeIdsList[ri] = tmp;
+        iter++;
+
+        // === Phase 1: Local Moving ===
+        var ids = Object.keys(nodeIds);
+        for (var i = ids.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
+            var t = ids[i]; ids[i] = ids[j]; ids[j] = t;
         }
-
-        nodeIdsList.forEach(function(nid) {
-            var comm = communities[nid];
-            var bestComm = comm;
-            var bestGain = 0;
-
-            // Compute weights to neighboring communities
+        ids.forEach(function(nid) {
+            var cur = community[nid];
+            var best = cur, bestGain = 0, ki = nodeWeights[nid];
             var neighborComms = {};
-            (adjacency[nid] || {}).forEach(function(w, neighbor) {
-                if (neighbor !== nid) {
-                    var nc = communities[neighbor];
-                    neighborComms[nc] = (neighborComms[nc] || 0) + w;
-                }
+            Object.keys(adjacency[nid]).forEach(function(nb) {
+                var nc = community[nb];
+                if (nc !== cur) neighborComms[nc] = (neighborComms[nc] || 0) + adjacency[nid][nb];
             });
-
-            // Remove from current community
-            var sigmaIn = adjacency[nid][nid] || 0;
-            var ki = nodeWeights[nid] || 0;
-
-            neighborComms.forEach(function(wToComm, candidateComm) {
-                // Weight of edges from nid to nodes in candidateComm
-                var ki_in = wToComm;
-                // Sum of weights of all edges in candidateComm
-                var sumComm = 0;
-                Object.keys(communities).forEach(function(other) {
-                    if (communities[other] === candidateComm && adjacency[nid] && adjacency[nid][other]) {
-                        sumComm += adjacency[nid][other];
-                    }
-                });
-                // Gain from moving to candidateComm
-                var gain = ki_in / totalWeight - (sumComm * ki) / (totalWeight * totalWeight);
-                if (gain > bestGain) {
-                    bestGain = gain;
-                    bestComm = candidateComm;
-                }
+            Object.keys(neighborComms).forEach(function(cand) {
+                var gain = neighborComms[cand] / totalWeight;
+                var sumDeg = communityDegreeSum[cand] || 0;
+                gain -= (sumDeg * ki) / (m2 * totalWeight);
+                if (gain > bestGain) { bestGain = gain; best = cand; }
             });
-
-            if (bestComm !== comm) {
-                communities[nid] = bestComm;
+            if (best !== cur) {
+                communityDegreeSum[cur] = (communityDegreeSum[cur] || 0) - ki;
+                communityDegreeSum[best] = (communityDegreeSum[best] || 0) + ki;
+                community[nid] = best;
                 improved = true;
+            }
+        });
+
+        // === Phase 2: Refinement (Leiden-specific) ===
+        // For each community, try splitting into better-connected sub-parts
+        var commGroups = {};
+        Object.keys(nodeIds).forEach(function(nid) {
+            var c = community[nid];
+            if (!commGroups[c]) commGroups[c] = [];
+            commGroups[c].push(nid);
+        });
+
+        Object.keys(commGroups).forEach(function(cid) {
+            var members = commGroups[cid];
+            if (members.length <= 2) return;
+
+            // Sub-community assignment
+            var sub = {};
+            members.forEach(function(nid) { sub[nid] = nid; });
+            var subImproved = true, subIter = 0;
+
+            while (subImproved && subIter < 8) {
+                subImproved = false;
+                subIter++;
+                members.forEach(function(nid) {
+                    var cur = sub[nid];
+                    var bestSub = cur, bestGain = 0;
+                    var subNeighbors = {};
+                    Object.keys(adjacency[nid]).forEach(function(nb) {
+                        if (community[nb] === cid && sub[nb] !== cur) {
+                            subNeighbors[sub[nb]] = (subNeighbors[sub[nb]] || 0) + adjacency[nid][nb];
+                        }
+                    });
+                    Object.keys(subNeighbors).forEach(function(sc) {
+                        var subDeg = 0;
+                        members.forEach(function(m) { if (sub[m] === sc) subDeg += nodeWeights[m] || 0; });
+                        var gain = subNeighbors[sc] / totalWeight - (subDeg * ki) / (m2 * totalWeight);
+                        if (gain > bestGain) { bestGain = gain; bestSub = sc; }
+                    });
+                    if (bestSub !== cur) { sub[nid] = bestSub; subImproved = true; }
+                });
+            }
+
+            // Apply refinement: if multiple sub-communities exist, split
+            var uniqueSubs = {};
+            members.forEach(function(nid) { uniqueSubs[sub[nid]] = true; });
+            if (Object.keys(uniqueSubs).length > 1) {
+                Object.keys(uniqueSubs).forEach(function(sid) {
+                    members.forEach(function(nid) {
+                        if (sub[nid] === sid) community[nid] = cid + '_' + sid;
+                    });
+                });
             }
         });
     }
 
-    // Phase 2: Compact communities to sequential IDs
-    var commMap = {};
-    var nextId = 0;
-    Object.keys(communities).forEach(function(nid) {
-        var c = communities[nid];
-        if (commMap[c] === undefined) {
-            commMap[c] = nextId++;
-        }
+    // Compact to sequential IDs
+    var map = {}, nextId = 0;
+    Object.keys(nodeIds).forEach(function(nid) {
+        var c = community[nid];
+        if (map[c] === undefined) map[c] = nextId++;
     });
-
     var result = {};
-    Object.keys(communities).forEach(function(nid) {
-        result[nid] = commMap[communities[nid]];
-    });
-
+    Object.keys(nodeIds).forEach(function(nid) { result[nid] = map[community[nid]]; });
     return { assignments: result, count: nextId };
 }
 
-// Run community detection
+// Run Leiden community detection
 var communityResult = detectCommunities(nodes, links);
 var communityAssignments = communityResult.assignments;
 var communityCount = communityResult.count;
@@ -561,19 +604,8 @@ node.on('mousedown', function(event, d) { dragStartPos = [event.pageX, event.pag
         if (!dragStartPos) return;
         var dx = event.pageX - dragStartPos[0];
         var dy = event.pageY - dragStartPos[1];
-        if (Math.abs(dx) < 4 && Math.abs(dy) < 4 && d.cmd) {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(d.cmd).then(function() {
-                    var badge = document.createElement('div');
-                    badge.textContent = 'Copied!';
-                    badge.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#10b981;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;z-index:200;pointer-events:none;transition:opacity 0.5s';
-                    document.body.appendChild(badge);
-                    setTimeout(function() { badge.style.opacity = '0'; }, 800);
-                    setTimeout(function() { badge.remove(); }, 1300);
-                }).catch(function() { window.prompt('Copy this command:', d.cmd); });
-            } else {
-                window.prompt('Copy this command:', d.cmd);
-            }
+        if (Math.abs(dx) < 4 && Math.abs(dy) < 4) {
+            showEntityPanel(d);
         }
         dragStartPos = null;
     });
@@ -876,6 +908,69 @@ window.addEventListener('resize', function() {
 });
 
 
+// --- Entity Profile Panel ---
+var selectedEntityId = null;
+function showEntityPanel(d) {
+    selectedEntityId = d.id;
+    var panel = document.getElementById('entity-panel');
+    document.getElementById('epTitle').textContent = d.label;
+    // Meta badges
+    var meta = '';
+    if (d.type === 'entity' && d.nif) meta += '<span class="ep-badge sector">NIF: ' + d.nif + '</span>';
+    if (d.type === 'entity' && d.entidade) meta += '<span class="ep-badge sector" title="' + d.entidade + '">' + (d.entidade.length > 30 ? d.entidade.substring(0,30) + '...' : d.entidade) + '</span>';
+    meta += '<span class="ep-badge cluster">Cluster ' + (d.community || 0) + '</span>';
+    document.getElementById('epMeta').innerHTML = meta;
+    // Stats
+    var stats = '';
+    if (d.type === 'entity') {
+        stats += '<div class="ep-stat-row"><span class="ep-stat-label">BEP Listings</span><span class="ep-stat-value">' + (d.listings || 0) + '</span></div>';
+        stats += '<div class="ep-stat-row"><span class="ep-stat-label">BASE Contracts</span><span class="ep-stat-value">' + (d.contracts || 0) + '</span></div>';
+        if (d.contract_value > 0) stats += '<div class="ep-stat-row"><span class="ep-stat-label">Contract Value</span><span class="ep-stat-value money">€' + d.contract_value.toLocaleString() + '</span></div>';
+        if (d.first_date) stats += '<div class="ep-stat-row"><span class="ep-stat-label">First Listing</span><span class="ep-stat-value">' + d.first_date + '</span></div>';
+        if (d.last_date) stats += '<div class="ep-stat-row"><span class="ep-stat-label">Last Listing</span><span class="ep-stat-value">' + d.last_date + '</span></div>';
+    } else {
+        stats += '<div class="ep-stat-row"><span class="ep-stat-label">Entities</span><span class="ep-stat-value">' + (d.entities || 0) + '</span></div>';
+        stats += '<div class="ep-stat-row"><span class="ep-stat-label">Total Listings</span><span class="ep-stat-value">' + (d.total_listings || 0) + '</span></div>';
+    }
+    var conns = links.filter(function(l) { return (l.source.id || l.source) === d.id || (l.target.id || l.target) === d.id; });
+    stats += '<div class="ep-stat-row"><span class="ep-stat-label">Connections</span><span class="ep-stat-value">' + conns.length + '</span></div>';
+    document.getElementById('epStats').innerHTML = stats;
+    // Actions
+    var actions = '';
+    if (d.cmd) actions += '<a href="#" onclick="copyCmd('' + d.cmd.replace(/'/g, "\'") + ''); return false;">📜 Copy CLI Command</a>';
+    if (d.type === 'entity' && d.nif) {
+        actions += '<a href="https://www.base.gov.pt/Base4/pt/detalhe/?type=entidades&id=' + d.nif + '" target="_blank">🔗 View on BASE.gov.pt</a>';
+        actions += '<a href="#" onclick="window.open('dashboard_' + d.nif + '.html', '_blank'); return false;">📊 Open Full Dashboard</a>';
+    }
+    document.getElementById('epActions').innerHTML = actions;
+    panel.style.display = 'block';
+    var legend = document.getElementById('legend');
+    if (legend) legend.style.display = 'none';
+    // Highlight selected node
+    node.select('circle').attr('stroke-width', function(n) { return n.id === d.id ? 4 : 2; });
+}
+function closeEntityPanel() {
+    document.getElementById('entity-panel').style.display = 'none';
+    var legend = document.getElementById('legend');
+    if (legend) legend.style.display = '';
+    selectedEntityId = null;
+    node.select('circle').attr('stroke-width', 2);
+}
+function copyCmd(cmd) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(function() {
+            var badge = document.createElement('div');
+            badge.textContent = 'Copied!';
+            badge.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#10b981;color:white;padding:0.5rem 1rem;border-radius:8px;font-size:0.85rem;z-index:200;pointer-events:none;transition:opacity 0.5s';
+            document.body.appendChild(badge);
+            setTimeout(function() { badge.style.opacity = '0'; }, 800);
+            setTimeout(function() { badge.remove(); }, 1300);
+        }).catch(function() { window.prompt('Copy this command:', cmd); });
+    } else {
+        window.prompt('Copy this command:', cmd);
+    }
+}
+
 // --- Minimap ---
 var mmWidth = 180, mmHeight = 130;
 var mmSvg = d3.select('#minimapSvg').attr('width', mmWidth).attr('height', mmHeight);
@@ -1028,6 +1123,14 @@ setInterval(updateMinimap, 500);
     if enable_clusters:
         parts.append("<div id=\"clusterLegend\"></div>\n")
     parts.append("</div>\n")
+    parts.append("<div id=\"entity-panel\">\n")
+    parts.append("<div class=\"ep-header\"><h3 id=\"epTitle\"></h3><button class=\"ep-close\" onclick=\"closeEntityPanel()\">✕</button></div>\n")
+    parts.append("<div class=\"ep-body\">\n")
+    parts.append("<div class=\"ep-meta\" id=\"epMeta\"></div>\n")
+    parts.append("<div id=\"epStats\"></div>\n")
+    parts.append("<div class=\"ep-actions\" id=\"epActions\"></div>\n")
+    parts.append("</div>\n")
+    parts.append("</div>\n")
 
     # Stats panel
     parts.append("<div id=\"stats\">\n")
@@ -1041,7 +1144,7 @@ setInterval(updateMinimap, 500);
     # Cluster panel (collapsible)
     if enable_clusters:
         parts.append("<div id=\"cluster-panel\">\n")
-        parts.append("<h4>Community Clusters</h4>\n")
+        parts.append("<h4>Leiden Clusters</h4>\n")
         parts.append("<div id=\"clusterList\"></div>\n")
         parts.append("</div>\n")
 

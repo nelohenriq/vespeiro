@@ -16,20 +16,15 @@ Usage:
 import sys
 import json
 import re
+import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict
 
-try:
-    import openpyxl
-except ImportError:
-    print("ERROR: openpyxl required. Install: pip install openpyxl")
-    sys.exit(1)
-
 # Paths
 SCRIPT_DIR = Path(__file__).parent
 DB_PATH = SCRIPT_DIR / "bep_index.db"
-XLSX_PATH = SCRIPT_DIR / "data" / "contratos2025.xlsx"
+PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
 BASE_DETAIL_URL = "https://www.base.gov.pt/Base4/pt/detalhe/?type=contratos&id="
 
 
@@ -63,88 +58,57 @@ def load_bep_entities_with_nif(db_path: Path) -> list[dict]:
     ]
 
 
-CACHE_PATH = SCRIPT_DIR / "data" / "contract_index.json"
-
-
-def build_contract_index(xlsx_path: Path) -> dict[str, list[dict]]:
-    """Parse contratos XLSX and build NIF → contracts index. Caches as JSON."""
-    if CACHE_PATH.exists():
-        print(f"  Loading cached index from {CACHE_PATH.name}...")
-        with open(CACHE_PATH, "r", encoding="utf-8") as f:
+def build_contract_index() -> dict[str, list[dict]]:
+    """Query procurement.db and build NIF → contracts index. Caches as JSON."""
+    cache_path = SCRIPT_DIR / "data" / "contract_index.json"
+    if cache_path.exists():
+        print(f"  Loading cached index from {cache_path.name}...")
+        with open(cache_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    print(f"  Parsing {xlsx_path.name} (this takes a while for 67MB)...\n")
-    wb = openpyxl.load_workbook(str(xlsx_path), read_only=True)
-    ws = wb[wb.sheetnames[0]]
-
-    headers = next(ws.iter_rows(max_row=1, values_only=True))
-    header_map = {str(h).lower().strip(): i for i, h in enumerate(headers) if h}
-
-    adj_idx = header_map.get("adjudicante")
-    id_idx = header_map.get("idcontrato")
-    link_idx = header_map.get("linkpecasproc")
-    valor_idx = header_map.get("precocontratual") or header_map.get("precobaseprocedimento") or header_map.get("valor") or header_map.get("valorcontrato")
-    data_idx = header_map.get("datacelebracaocontrato") or header_map.get("datapublicacao") or header_map.get("data") or header_map.get("datacontrato")
-    tipo_idx = header_map.get("tipocontrato") or header_map.get("tipoprocedimento") or header_map.get("tipo")
-    desc_idx = header_map.get("objectocontrato") or header_map.get("desccontrato") or header_map.get("objeto")
-
-    if adj_idx is None:
-        print("  ERROR: 'adjudicante' column not found in XLSX")
-        print(f"  Available columns: {list(header_map.keys())}")
-        wb.close()
+    if not PROCUREMENT_DB.exists():
+        print(f"  ERROR: procurement.db not found at {PROCUREMENT_DB}")
+        print("  Run: python procurement_db.py build")
         return {}
 
+    print(f"  Querying procurement.db...")
+    conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn.row_factory = sqlite3.Row
+    rows = conn.execute(
+        "SELECT adjudicante_nif, adjudicante_nome, idcontrato, objectoContrato, "
+        "precoContratual, tipoContrato, linkPecasProc, dataPublicacao, "
+        "nAnuncio, CPV, adjudicatarios FROM contratos WHERE adjudicante_nif != ''"
+    ).fetchall()
+    conn.close()
+
     nif_contracts: dict[str, list[dict]] = defaultdict(list)
-    total = 0
+    for r in rows:
+        nif = r["adjudicante_nif"]
+        # Parse adjudicatario from the raw field
+        adjt = r["adjudicatarios"] or ""
+        adjt_nif, adjt_name = extract_nif_from_adjudicante(adjt)
 
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        total += 1
-        adj_text = str(row[adj_idx]) if row[adj_idx] else ""
-        nif, name = extract_nif_from_adjudicante(adj_text)
+        nif_contracts[nif].append({
+            "nif": nif,
+            "entity_name": r["adjudicante_nome"],
+            "contract_id": r["idcontrato"],
+            "objeto": (r["objectoContrato"] or "")[:200],
+            "valor": r["precoContratual"] or 0,
+            "tipo": r["tipoContrato"] or "",
+            "link_pecas_proc": r["linkPecasProc"] or "",
+            "data": (r["dataPublicacao"] or "")[:10],
+            "nAnuncio": r["nAnuncio"] or "",
+            "cpv": r["CPV"] or "",
+            "adjudicatario": adjt_name,
+            "adjudicatario_nif": adjt_nif,
+        })
 
-        if not nif:
-            continue
-
-        contract = {"nif": nif, "entity_name": name}
-        if valor_idx is not None and row[valor_idx]:
-            try:
-                contract["valor"] = float(row[valor_idx])
-            except (ValueError, TypeError):
-                contract["valor"] = 0
-        else:
-            contract["valor"] = 0
-        if data_idx is not None and row[data_idx]:
-            contract["data"] = str(row[data_idx])[:10]
-        else:
-            contract["data"] = ""
-        if tipo_idx is not None and row[tipo_idx]:
-            contract["tipo"] = str(row[tipo_idx])
-        else:
-            contract["tipo"] = ""
-        if desc_idx is not None and row[desc_idx]:
-            contract["objeto"] = str(row[desc_idx])[:200]
-        else:
-            contract["objeto"] = ""
-        if id_idx is not None and row[id_idx]:
-            contract["contract_id"] = int(row[id_idx])
-        else:
-            contract["contract_id"] = None
-        if link_idx is not None and row[link_idx]:
-            contract["link_pecas_proc"] = str(row[link_idx]).strip()
-        else:
-            contract["link_pecas_proc"] = ""
-
-        nif_contracts[nif].append(contract)
-
-    wb.close()
     result = dict(nif_contracts)
-
-    # Cache for future runs
-    CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with open(CACHE_PATH, "w", encoding="utf-8") as f:
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(cache_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False)
-    print(f"  Cached index to {CACHE_PATH.name}")
-    print(f"  Parsed {total} rows → {len(result)} entities with contracts")
+    print(f"  Cached index to {cache_path.name}")
+    print(f"  {len(rows):,} contracts → {len(result):,} entities with contracts")
     return result
 
 
@@ -271,17 +235,17 @@ def main():
         print("Run `bep_scraper.py collect` first.")
         sys.exit(1)
 
-    if not XLSX_PATH.exists():
-        print(f"ERROR: Contracts data not found at {XLSX_PATH}")
-        print("Run `merge_nifs.py` first to download the dataset.")
+    if not PROCUREMENT_DB.exists():
+        print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
+        print("Run: python procurement_db.py build")
         sys.exit(1)
 
     print("Loading BEP entities with NIFs...")
     bep_entities = load_bep_entities_with_nif(DB_PATH)
     print(f"  Found {len(bep_entities)} entities with NIFs")
 
-    print("Building contract index from BASE.gov.pt data...")
-    contract_index = build_contract_index(XLSX_PATH)
+    print("Building contract index from procurement.db...")
+    contract_index = build_contract_index()
 
     print("Cross-referencing...")
     results = cross_reference(

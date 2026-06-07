@@ -262,8 +262,8 @@ def main():
 
     listings_a = get_entity_listings(ea["id"])
     listings_b = get_entity_listings(eb["id"])
-    contracts_a = get_entity_contracts(ea.get("nif", ""))
-    contracts_b = get_entity_contracts(eb.get("nif", ""))
+    contracts_a = get_entity_contracts(ea.get("nif", ""), entity_name=ea.get("display_name", ""), entidade=ea.get("entidade", ""))
+    contracts_b = get_entity_contracts(eb.get("nif", ""), entity_name=eb.get("display_name", ""), entidade=eb.get("entidade", ""))
     dre_a = get_entity_dre(ea["display_name"])
     dre_b = get_entity_dre(eb["display_name"])
     laws_a = get_entity_laws(ea["display_name"])
