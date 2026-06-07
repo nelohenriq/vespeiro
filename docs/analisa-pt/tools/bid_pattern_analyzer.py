@@ -24,6 +24,8 @@ from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime
 
+from utils import fmt, parse_entity_field
+
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
 
@@ -31,36 +33,6 @@ PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
 # =============================================================================
 # PARSING
 # =============================================================================
-
-def parse_entity_field(text):
-    """Parse 'NIF - Name' or 'NIF1 - Name1; NIF2 - Name2' format."""
-    if not text:
-        return []
-    text = str(text).strip()
-    if text in ("-", "- -", "", "None"):
-        return []
-    entities = []
-    for part in text.split(";"):
-        part = part.strip()
-        match = re.match(r"(\d{9})\s*-\s*(.+)", part)
-        if match:
-            entities.append({"nif": match.group(1), "name": match.group(2).strip()})
-        elif part and part != "-":
-            entities.append({"nif": "", "name": part.strip()})
-    return entities
-
-
-def fmt(val):
-    """Format currency value."""
-    if val is None or val == 0:
-        return "€0"
-    if val >= 1_000_000_000:
-        return f"€{val / 1_000_000_000:.1f}B"
-    if val >= 1_000_000:
-        return f"€{val / 1_000_000:.1f}M"
-    if val >= 1_000:
-        return f"€{val / 1_000:.0f}K"
-    return f"€{val:.0f}"
 
 
 def parse_competitor_count(text):

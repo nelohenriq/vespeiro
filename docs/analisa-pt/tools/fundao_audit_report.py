@@ -16,6 +16,8 @@ import argparse
 from pathlib import Path
 from collections import defaultdict
 
+from utils import fmt
+
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
 PROCUREMENT_DB = DATA_DIR / "procurement.db"
@@ -151,18 +153,6 @@ def query_all_data() -> dict:
             "fundao_rate": fundao_prr * 100 / fundao_prr_total if fundao_prr_total else 0,
         },
     }
-
-
-def fmt(val):
-    if val is None or val == 0:
-        return "€0"
-    if val >= 1_000_000_000:
-        return f"€{val / 1_000_000_000:.1f}B"
-    if val >= 1_000_000:
-        return f"€{val / 1_000_000:.1f}M"
-    if val >= 1_000:
-        return f"€{val / 1_000:.0f}K"
-    return f"€{val:.0f}"
 
 
 def generate_html(data: dict) -> str:

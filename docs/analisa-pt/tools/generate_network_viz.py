@@ -17,7 +17,7 @@ import argparse
 from pathlib import Path
 from collections import defaultdict
 
-from entity_network import parse_entity_field
+from utils import fmt, parse_entity_field
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -115,15 +115,6 @@ def generate_html(data: dict) -> str:
     nodes_json = json.dumps(data["nodes"], ensure_ascii=False)
     edges_json = json.dumps(data["edges"], ensure_ascii=False)
     stats = data["stats"]
-
-    def fmt(val):
-        if val >= 1_000_000_000:
-            return f"€{val / 1_000_000_000:.1f}B"
-        if val >= 1_000_000:
-            return f"€{val / 1_000_000:.1f}M"
-        if val >= 1_000:
-            return f"€{val / 1_000:.0f}K"
-        return f"€{val:.0f}"
 
     return f"""<!DOCTYPE html>
 <html lang="en">

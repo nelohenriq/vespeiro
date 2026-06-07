@@ -7,7 +7,7 @@ nif_mapper.py, and municipality_spending.py.
 """
 
 import re
-from typing import Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from unidecode import unidecode
 
@@ -145,3 +145,64 @@ def extract_location_typed(entity_name: str) -> Optional[Tuple[str, str]]:
                 etype = "municipio" if prefix in _MUNI_PREFIXES else "sub_municipio"
                 return location, etype
     return None
+
+
+# =============================================================================
+# ENTITY FIELD PARSING
+# =============================================================================
+
+
+def parse_entity_field(text: str) -> List[Dict[str, str]]:
+    """Parse 'NIF - Name' or 'NIF1 - Name1; NIF2 - Name2' format.
+
+    Returns a list of dicts with 'nif' and 'name' keys.
+
+    Examples:
+        '501089233 - CÂMARA MUNICIPAL DE LISBOA'
+            -> [{'nif': '501089233', 'name': 'CÂMARA MUNICIPAL DE LISBOA'}]
+        '501089233 - CML; 502345678 - JUNTA DE FREGUESIA'
+            -> [{'nif': '501089233', 'name': 'CML'}, {'nif': '502345678', 'name': 'JUNTA DE FREGUESIA'}]
+    """
+    if not text:
+        return []
+    text = str(text).strip()
+    if text in ("-", "- -", "", "None"):
+        return []
+    entities = []
+    for part in text.split(";"):
+        part = part.strip()
+        match = re.match(r"(\d{9})\s*-\s*(.+)", part)
+        if match:
+            entities.append({"nif": match.group(1), "name": match.group(2).strip()})
+        elif part and part != "-":
+            entities.append({"nif": "", "name": part.strip()})
+    return entities
+
+
+# =============================================================================
+# CURRENCY FORMATTING (short form — handles None/zero)
+# =============================================================================
+
+
+def fmt(val) -> str:
+    """Format a monetary value with € prefix and human-readable suffix.
+
+    Handles None/zero values and large number abbreviations.
+
+    Examples:
+        23_590_000_000 → '\u20ac23.6B'
+        1_234_000      → '\u20ac1.2M'
+        56_000         → '\u20ac56K'
+        42             → '\u20ac42'
+        None           → '\u20ac0'
+        0              → '\u20ac0'
+    """
+    if val is None or val == 0:
+        return "\u20ac0"
+    if val >= 1_000_000_000:
+        return f"\u20ac{val / 1_000_000_000:.1f}B"
+    if val >= 1_000_000:
+        return f"\u20ac{val / 1_000_000:.1f}M"
+    if val >= 1_000:
+        return f"\u20ac{val / 1_000:.0f}K"
+    return f"\u20ac{val:.0f}"

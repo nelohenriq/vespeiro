@@ -30,10 +30,11 @@ from entity_profile import (
     compute_contract_trends,
     compute_hiring_trends,
     render_ascii_chart,
-    parse_entity_field,
     camara_to_municipio,
     municipio_to_camara,
 )
+
+from utils import fmt, parse_entity_field
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -134,19 +135,6 @@ def get_entity_contracts_from_db(nif):
          "data": r[9], "data_publicacao": r[10], "cpv": r[11]}
         for r in rows
     ]
-
-
-def fmt(val):
-    """Format currency value."""
-    if val is None or val == 0:
-        return "€0"
-    if val >= 1_000_000_000:
-        return f"€{val / 1_000_000_000:.1f}B"
-    if val >= 1_000_000:
-        return f"€{val / 1_000_000:.1f}M"
-    if val >= 1_000:
-        return f"€{val / 1_000:.0f}K"
-    return f"€{val:.0f}"
 
 
 # =============================================================================

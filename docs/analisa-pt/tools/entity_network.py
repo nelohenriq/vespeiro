@@ -31,32 +31,11 @@ from collections import defaultdict, Counter
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
+from utils import parse_entity_field
+
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
 CONTRACT_INDEX = SCRIPT_DIR / "data" / "contract_index.json"
-
-
-# =============================================================================
-# PARSING
-# =============================================================================
-
-def parse_entity_field(text: str) -> List[Dict]:
-    """Parse 'NIF - Name' or 'NIF1 - Name1; NIF2 - Name2' format."""
-    if not text:
-        return []
-    text = str(text).strip()
-    if text in ("-", "- -", "", "None"):
-        return []
-
-    entities = []
-    for part in text.split(";"):
-        part = part.strip()
-        match = re.match(r"(\d{9})\s*-\s*(.+)", part)
-        if match:
-            entities.append({"nif": match.group(1), "name": match.group(2).strip()})
-        elif part and part != "-":
-            entities.append({"nif": "", "name": part.strip()})
-    return entities
 
 
 def load_db_relationships() -> Tuple[Dict, List]:

@@ -394,6 +394,8 @@ def cmd_check(args) -> int:
             # Send notification if requested
             if args.notify:
                 try:
+                    # Telegram notification via vespeiro's backend — optional dependency.
+                    # Requires running from the vespeiro project root with backend/ on sys.path.
                     from src.alerts.telegram import TelegramBot
                     from src.config.settings import settings
 
@@ -417,7 +419,8 @@ def cmd_check(args) -> int:
                     else:
                         print(f"  ⚠️ Telegram credentials not configured")
                 except ImportError:
-                    print(f"  ⚠️ Telegram module not available (run from backend/)")
+                    print(f"  ⚠️ Telegram notifications unavailable — requires vespeiro backend (src.alerts.telegram). "
+                          f"Run from vespeiro project root or disable --notify.")
         else:
             print(f"  ✓ {watch.get('label')}: no new contracts")
 

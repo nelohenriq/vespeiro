@@ -73,7 +73,7 @@
 ## Priority 1: Code Quality & Infrastructure
 
 ### P1.1 — Consolidate shared code
-- [ ] Create `vespeiro/docs/analisa-pt/tools/utils.py` with `parse_entity_field`, `fmt`, `parse_date`, `days_between`
+- [ ] Create `docs/analisa-pt/tools/utils.py` with `parse_entity_field`, `fmt`, `parse_date`, `days_between`
 - [ ] Refactor all tools to import from `utils.py` instead of duplicating
 - [ ] Files to update: `anomaly_scanner.py`, `entity_network.py`, `entity_profile.py`, `supplier_cross_profiler.py`, `temporal_clustering.py`, `bid_pattern_analyzer.py`, `municipality_risk_report.py`, `bep_procurement_crossref.py`
 - **Impact:** Bug fixes propagate to all tools, reduced maintenance burden

@@ -21,6 +21,8 @@ import sqlite3
 from collections import defaultdict
 from pathlib import Path
 
+from utils import fmt
+
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
 PROCUREMENT_DB = DATA_DIR / "procurement.db"
@@ -230,18 +232,6 @@ def esc(text):
     if not text:
         return ""
     return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
-
-
-def fmt(val):
-    if val is None:
-        return "€0"
-    if val >= 1_000_000_000:
-        return f"€{val / 1_000_000_000:.1f}B"
-    if val >= 1_000_000:
-        return f"€{val / 1_000_000:.1f}M"
-    if val >= 1_000:
-        return f"€{val / 1_000:.0f}K"
-    return f"€{val:.0f}"
 
 
 def risk_color(score):
