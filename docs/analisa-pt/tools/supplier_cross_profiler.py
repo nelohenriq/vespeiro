@@ -147,6 +147,9 @@ class SupplierProfiler:
         total_value = sum(c["value"] for c in contracts)
         total_contracts = len(contracts)
 
+        # Cache for buyer totals to avoid N+1 queries
+        buyer_total_cache = {}
+
         # Group by buyer
         by_buyer = defaultdict(lambda: {
             "name": "", "contracts": 0, "value": 0,
@@ -205,7 +208,7 @@ class SupplierProfiler:
 
         # Signal: Dominant supplier (>30% of any buyer's total)
         for buyer_nif, data in by_buyer.items():
-            buyer_total = self._get_buyer_total(buyer_nif)
+            buyer_total = self._get_buyer_total(buyer_nif, cache=buyer_total_cache)
             if buyer_total > 0:
                 share = data["value"] * 100 / buyer_total
                 if share >= 50:
@@ -245,7 +248,7 @@ class SupplierProfiler:
         # Signal: Multi-municipality dominance
         dominant_buyers = []
         for bn, bd in by_buyer.items():
-            bt = self._get_buyer_total(bn)
+            bt = self._get_buyer_total(bn, cache=buyer_total_cache)
             if bt > 0 and bd["value"] * 100 / bt >= 30:
                 dominant_buyers.append(bd)
         if len(dominant_buyers) >= 3:
@@ -295,36 +298,55 @@ class SupplierProfiler:
         return total
 
     def top_suppliers(self, top_n=20, min_contracts=5):
-        """List top suppliers by number of distinct buyers."""
+        """List top suppliers by number of distinct buyers.
+
+        Groups by parsed winner NIF (not raw adjudicatarios text) so that
+        the same supplier appearing with different co-winners is counted
+        as a single entity.
+        """
         rows = self.conn.execute("""
-            SELECT adjudicatarios, COUNT(DISTINCT adjudicante_nif) as buyer_count,
-                   COUNT(*) as contract_count, SUM(precoContratual) as total_value
+            SELECT adjudicatarios, adjudicante_nif,
+                   COALESCE(precoContratual, 0) as preco
             FROM contratos
             WHERE adjudicatarios IS NOT NULL AND adjudicatarios != ''
             AND adjudicatarios != '-'
-            GROUP BY adjudicatarios
-            HAVING buyer_count >= ? AND contract_count >= ?
-            ORDER BY buyer_count DESC, total_value DESC
-            LIMIT ?
-        """, (3, min_contracts, top_n)).fetchall()
+        """).fetchall()
 
-        results = []
+        # Group by parsed winner NIF
+        by_nif = defaultdict(lambda: {
+            "name": "", "buyers": set(), "contracts": 0, "value": 0.0,
+        })
+
         for r in rows:
             winners = parse_entity_field(r["adjudicatarios"])
-            if winners:
-                nif = winners[0]["nif"]
-                name = winners[0]["name"]
-            else:
-                nif = ""
-                name = r["adjudicatarios"][:50]
-            results.append({
-                "nif": nif,
-                "name": name,
-                "buyer_count": r["buyer_count"],
-                "contracts": r["contract_count"],
-                "value": r["total_value"] or 0,
-            })
-        return results
+            # Use the first (winner) NIF from the parsed field
+            winner_nif = winners[0]["nif"] if winners else ""
+            winner_name = winners[0]["name"] if winners else ""
+            if not winner_nif:
+                continue
+
+            g = by_nif[winner_nif]
+            if winner_name and not g["name"]:
+                g["name"] = winner_name
+            g["buyers"].add(r["adjudicante_nif"])
+            g["contracts"] += 1
+            g["value"] += r["preco"]
+
+        # Filter and sort
+        results = []
+        for nif, g in by_nif.items():
+            buyer_count = len(g["buyers"])
+            if buyer_count >= 3 and g["contracts"] >= min_contracts:
+                results.append({
+                    "nif": nif,
+                    "name": g["name"],
+                    "buyer_count": buyer_count,
+                    "contracts": g["contracts"],
+                    "value": g["value"],
+                })
+
+        results.sort(key=lambda x: (-x["buyer_count"], -x["value"]))
+        return results[:top_n]
 
 
 # =============================================================================

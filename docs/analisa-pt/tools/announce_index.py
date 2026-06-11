@@ -334,6 +334,32 @@ def cmd_index(args):
 # Statistics
 # ---------------------------------------------------------------------------
 
+def cmd_status(args):
+    """Quick one-glance status overview."""
+    if not DB_PATH.exists():
+        print(f"  anuncios_index.db: NOT FOUND")
+        print(f"  Run 'python announce_index.py download' then 'index'")
+        return
+
+    db_size = DB_PATH.stat().st_size / (1024 * 1024)
+    mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
+    age_days = (datetime.now() - mtime).days
+
+    conn = init_db()
+    total = conn.execute("SELECT COUNT(*) FROM anuncios").fetchone()[0]
+    years = conn.execute("SELECT MIN(Ano), MAX(Ano) FROM anuncios").fetchone()
+    entities = conn.execute(
+        "SELECT COUNT(DISTINCT nifEntidade) FROM anuncios WHERE nifEntidade != ''"
+    ).fetchone()[0]
+    conn.close()
+
+    yr_range = f"{years[0]}-{years[1]}" if years[0] else "empty"
+    print(f"  anuncios_index.db  {db_size:.1f} MB  ({age_days}d old)")
+    print(f"    announcements:    {total:>10,}  ({yr_range})")
+    print(f"    entities:         {entities:>10,}")
+    print()
+
+
 def cmd_stats(args):
     """Show summary statistics."""
     conn = init_db()
@@ -849,6 +875,9 @@ def main():
     idx.add_argument("--force", action="store_true", help="Re-index from scratch")
     idx.add_argument("-v", "--verbose", action="store_true")
 
+    # Status
+    sub.add_parser("status", help="Quick one-glance status overview")
+
     # Stats
     sub.add_parser("stats", help="Summary statistics")
 
@@ -888,6 +917,7 @@ def main():
     commands = {
         "download": cmd_download,
         "index": cmd_index,
+        "status": cmd_status,
         "stats": cmd_stats,
         "trends": cmd_trends,
         "sectors": cmd_sectors,

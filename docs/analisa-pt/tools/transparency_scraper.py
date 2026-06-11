@@ -544,21 +544,20 @@ def _parse_prr_entity_contracts(xlsx_path: Path) -> list[tuple]:
     return rows
 
 
-def _parse_prr_entities(xlsx_path: Path) -> list[tuple]:
-    """Parse a PRR entities XLSX file.
+def _stream_prr_entities(xlsx_path: Path, conn: sqlite3.Connection, batch_size: int = 50000):
+    """Stream-parse PRR entities XLSX directly into SQLite in batches.
 
-    Columns: cd_entidade, dt_referencia, nif_entidade, ds_entidade,
-             papel_entidade, atividade_economica, localizacao_sede,
-             valor_contratado, valor_pago, cd_projeto
+    Avoids loading the entire file into memory. Returns total row count.
     """
     wb, ws = _safe_workbook(xlsx_path)
     if ws is None:
-        return []
+        return 0
 
     headers = [cell.value for cell in ws[1]]
     h = {name: i for i, name in enumerate(headers) if name}
 
-    rows = []
+    total_rows = 0
+    batch = []
     try:
         for row in ws.iter_rows(min_row=2, values_only=True):
             if not row:
@@ -567,7 +566,7 @@ def _parse_prr_entities(xlsx_path: Path) -> list[tuple]:
             if not cd:
                 continue
 
-            rows.append((
+            batch.append((
                 str(cd).strip(),
                 _fmt_date(_cell(row, h.get("dt_referencia"))),
                 str(_cell(row, h.get("nif_entidade"))).strip(),
@@ -579,10 +578,35 @@ def _parse_prr_entities(xlsx_path: Path) -> list[tuple]:
                 _cell_num(row, h.get("valor_pago")),
                 str(_cell(row, h.get("cd_projeto"))).strip(),
             ))
+
+            if len(batch) >= batch_size:
+                changes_before = conn.total_changes
+                conn.executemany(
+                    "INSERT OR IGNORE INTO prr_entities "
+                    "(cd_entidade, dt_referencia, nif, ds_entidade, papel, "
+                    "atividade_economica, localizacao, valor_contratado, valor_pago, cd_projeto) "
+                    "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                    batch,
+                )
+                total_rows += conn.total_changes - changes_before
+                conn.commit()
+                batch.clear()
     finally:
+        # Flush remaining rows
+        if batch:
+            changes_before = conn.total_changes
+            conn.executemany(
+                "INSERT OR IGNORE INTO prr_entities "
+                "(cd_entidade, dt_referencia, nif, ds_entidade, papel, "
+                "atividade_economica, localizacao, valor_contratado, valor_pago, cd_projeto) "
+                "VALUES (?,?,?,?,?,?,?,?,?,?)",
+                batch,
+            )
+            total_rows += conn.total_changes - changes_before
+            conn.commit()
         wb.close()
 
-    return rows
+    return total_rows
 
 
 def _parse_prr_projects(xlsx_path: Path) -> list[tuple]:
@@ -842,25 +866,13 @@ def cmd_index(args):
         print(f"{len(rows):,} rows ({new_count:,} new)")
         conn.commit()
 
-    # --- Index PRR entities ---
+    # --- Index PRR entities (streaming to avoid MemoryError) ---
     print("\nIndexing PRR entities...")
     for f in sorted(XLSX_DIR.glob("prr_entities_*.xlsx")):
-        print(f"  {f.name}: parsing...", end=" ", flush=True)
-        rows = _parse_prr_entities(f)
-        if not rows:
-            print("0 rows")
-            continue
-        changes_before = conn.total_changes
-        conn.executemany(
-            "INSERT OR IGNORE INTO prr_entities "
-            "(cd_entidade, dt_referencia, nif, ds_entidade, papel, "
-            "atividade_economica, localizacao, valor_contratado, valor_pago, cd_projeto) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?)",
-            rows,
-        )
-        new_count = conn.total_changes - changes_before
+        print(f"  {f.name}: streaming to DB in batches...", end=" ", flush=True)
+        new_count = _stream_prr_entities(f, conn)
         total_new += new_count
-        print(f"{len(rows):,} rows ({new_count:,} new)")
+        print(f"{new_count:,} new rows")
         conn.commit()
 
     # --- Index PRR projects ---
@@ -972,6 +984,34 @@ def cmd_index(args):
 # ---------------------------------------------------------------------------
 # Statistics
 # ---------------------------------------------------------------------------
+
+def cmd_status(args):
+    """Quick one-glance status overview."""
+    if not DB_PATH.exists():
+        print(f"  transparency.db: NOT FOUND")
+        print(f"  Run 'python transparency_scraper.py download' then 'index'")
+        return
+
+    db_size = DB_PATH.stat().st_size / (1024 * 1024)
+    mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
+    age_days = (datetime.now() - mtime).days
+
+    conn = init_db()
+    tables = ["prr_contracts", "prr_entities", "prr_projects", "prr_locations", "budget"]
+    counts = {}
+    for t in tables:
+        try:
+            counts[t] = conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+        except Exception:
+            counts[t] = 0
+    conn.close()
+
+    print(f"  transparency.db  {db_size:.1f} MB  ({age_days}d old)")
+    for t, c in counts.items():
+        label = t.replace("prr_", "prr ").replace("_", " ")
+        print(f"    {label:<20} {c:>10,}")
+    print()
+
 
 def cmd_stats(args):
     """Show summary statistics."""
@@ -1608,6 +1648,9 @@ def main():
     idx = sub.add_parser("index", help="Parse XLSX files into SQLite")
     idx.add_argument("--force", action="store_true", help="Re-index from scratch")
 
+    # Status
+    sub.add_parser("status", help="Quick one-glance status overview")
+
     # Stats
     sub.add_parser("stats", help="Summary statistics")
 
@@ -1643,6 +1686,7 @@ def main():
     commands = {
         "download": cmd_download,
         "index": cmd_index,
+        "status": cmd_status,
         "stats": cmd_stats,
         "prr": cmd_prr,
         "budget": cmd_budget,

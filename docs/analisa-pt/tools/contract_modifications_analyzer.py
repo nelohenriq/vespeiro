@@ -313,6 +313,30 @@ def cmd_index(args):
 # Statistics
 # ---------------------------------------------------------------------------
 
+def cmd_status(args):
+    """Quick one-glance status overview."""
+    if not DB_PATH.exists():
+        print(f"  modificacoes_index.db: NOT FOUND")
+        print(f"  Run 'python contract_modifications_analyzer.py download' then 'index'")
+        return
+
+    db_size = DB_PATH.stat().st_size / (1024 * 1024)
+    mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
+    age_days = (datetime.now() - mtime).days
+
+    conn = init_db()
+    total = conn.execute("SELECT COUNT(*) FROM modificacoes").fetchone()[0]
+    years = conn.execute("SELECT MIN(ano), MAX(ano) FROM modificacoes").fetchone()
+    contracts = conn.execute("SELECT COUNT(DISTINCT idcontrato) FROM modificacoes").fetchone()[0]
+    conn.close()
+
+    yr_range = f"{years[0]}-{years[1]}" if years[0] else "empty"
+    print(f"  modificacoes_index.db  {db_size:.1f} MB  ({age_days}d old)")
+    print(f"    modifications:  {total:>10,}  ({yr_range})")
+    print(f"    contracts:      {contracts:>10,}")
+    print()
+
+
 def cmd_stats(args):
     """Show summary statistics."""
     conn = init_db()
@@ -802,6 +826,7 @@ def main():
     idx = sub.add_parser("index", help="Parse XLSX files into SQLite index")
     idx.add_argument("--force", action="store_true", help="Re-index from scratch")
 
+    sub.add_parser("status", help="Quick one-glance status overview")
     sub.add_parser("stats", help="Summary statistics")
     sub.add_parser("suspicious", help="Flag suspicious modification patterns")
     sub.add_parser("inflation", help="Price inflation analysis")
@@ -826,6 +851,7 @@ def main():
     commands = {
         "download": cmd_download,
         "index": cmd_index,
+        "status": cmd_status,
         "stats": cmd_stats,
         "suspicious": cmd_suspicious,
         "inflation": cmd_inflation,

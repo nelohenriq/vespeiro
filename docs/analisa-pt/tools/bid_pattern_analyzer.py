@@ -40,24 +40,21 @@ def parse_competitor_count(text):
     if not text or text in ("-", ""):
         return None
     text = str(text).strip()
-    # Try to extract a number
-    match = re.search(r"(\d+)", text)
-    if match:
-        return int(match.group(1))
-    # Count NIF patterns (NIF - Name)
-    nifs = re.findall(r"\d{9}\s*-", text)
-    if nifs:
-        return len(nifs)
-    return None
+    # Use parse_entity_field for consistent NIF extraction
+    entities = parse_entity_field(text)
+    if entities:
+        return len(entities)
+    # Fallback: count comma/semicolon-separated items
+    parts = [p.strip() for p in text.replace(";", ",").split(",") if p.strip() and p.strip() != "-"]
+    return len(parts) if parts else None
 
 
 def parse_competitor_nifs(text):
     """Extract competitor NIFs from concorrentes field."""
     if not text or text in ("-", ""):
         return []
-    text = str(text).strip()
-    nifs = re.findall(r"(\d{9})\s*-", text)
-    return nifs
+    entities = parse_entity_field(text)
+    return [e["nif"] for e in entities if e["nif"]]
 
 
 # =============================================================================
@@ -227,13 +224,26 @@ class BidPatternAnalyzer:
             frequent_bidders = {nif for nif, count in bidder_freq.items() if count >= total * 0.5}
 
             if len(frequent_bidders) >= min_bidder_set:
-                # Get names for frequent bidders
+                # Resolve NIF → name for every frequent bidder, looking at BOTH
+                # winners and competitors. Previously this only consulted the
+                # winner list, which left competitor-only bidders displayed as
+                # raw NIFs. The concorrentes field uses the same "NIF - Name"
+                # format as adjudicatarios, so parse_entity_field works.
                 bidder_names = {}
                 for c in buyer_contracts:
                     winner_map = {w["nif"]: w["name"] for w in c["winners"]}
+                    competitor_map = {
+                        e["nif"]: e["name"]
+                        for e in parse_entity_field(c.get("competitor_text", ""))
+                        if e["nif"]
+                    }
                     for nif in frequent_bidders:
-                        if nif not in bidder_names and nif in winner_map:
+                        if nif in bidder_names:
+                            continue
+                        if nif in winner_map:
                             bidder_names[nif] = winner_map[nif]
+                        elif nif in competitor_map:
+                            bidder_names[nif] = competitor_map[nif]
 
                 # Calculate how often this exact group appears together
                 group_cooccurrence = 0
@@ -294,8 +304,9 @@ class BidPatternAnalyzer:
                 # Find the decoy bidders (always bid, never win)
                 loser_counts = Counter()
                 for c in buyer_contracts:
+                    winner_nifs = set(w["nif"] for w in c["winners"])
                     for nif in c["competitor_nifs"]:
-                        if nif != top_winner and nif not in c["winner_nifs"]:
+                        if nif != top_winner and nif not in winner_nifs:
                             loser_counts[nif] += 1
 
                 # Decoys: appeared in ≥50% of contracts but never won

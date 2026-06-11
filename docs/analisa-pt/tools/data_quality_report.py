@@ -5,6 +5,8 @@ from collections import defaultdict
 from pathlib import Path
 from unidecode import unidecode
 
+from utils import fmt
+
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
 CONTRACT_INDEX = SCRIPT_DIR / "data" / "contract_index.json"
@@ -79,12 +81,6 @@ def generate_gaps(ca, ma):
     gaps.sort(key=lambda x: -x["priority"])
     return gaps
 
-def fv(v):
-    if v >= 1e9: return f"€{v/1e9:.2f}B"
-    elif v >= 1e6: return f"€{v/1e6:.1f}M"
-    elif v >= 1e3: return f"€{v/1e3:.0f}K"
-    return f"€{v:.0f}"
-
 def print_report(ca, ma, ba, da, xa, gaps):
     nm, nc, nmap = len(ca["municipio_nifs"]), len(ca["camara_nifs"]), ma["total"]
     print(f"\n{'='*100}\nDATA QUALITY REPORT — Analisa.pt\n{'='*100}")
@@ -100,7 +96,7 @@ def print_report(ca, ma, ba, da, xa, gaps):
     print(f"\n📋 ENTITY TYPE DISTRIBUTION\n{'─'*80}")
     print(f"  {'Type':<25}{'Contracts':>12}{'Value':>18}{'NIFs':>10}")
     for et, d in sorted(ca["entity_types"].items(), key=lambda x: -x[1]["value"]):
-        print(f"  {et:<25}{d['count']:>12,}{fv(d['value']):>18}{d['unique_nifs']:>10}")
+        print(f"  {et:<25}{d['count']:>12,}{fmt(d['value']):>18}{d['unique_nifs']:>10}")
     print(f"\n🔗 NIF COVERAGE\n{'─'*80}")
     print(f"  Município NIFs in index:   {nm}")
     print(f"  Câmara NIFs in index:      {nc}")
@@ -110,12 +106,12 @@ def print_report(ca, ma, ba, da, xa, gaps):
     print(f"\n⚠️  SCRAPING PRIORITIES (Top 20)\n{'─'*100}")
     print(f"  {'#':<4}{'Name':<40}{'Type':<12}{'Contracts':>10}{'Value':>14}{'Gap'}")
     for i, g in enumerate(gaps[:20], 1):
-        print(f"  {i:<4}{g['name'][:40]:<40}{g['type']:<12}{g['contracts']:>10}{fv(g['value']):>14}{g['gap']}")
+        print(f"  {i:<4}{g['name'][:40]:<40}{g['type']:<12}{g['contracts']:>10}{fmt(g['value']):>14}{g['gap']}")
     print(f"\n{'='*100}\nSUMMARY\n{'='*100}")
     print(f"  Municipalities with data:     {nm + nc}")
     print(f"  Needing NIF mapping:          {len(gaps)}")
     print(f"  Needing population data:      {308 - da.get('total', 0)}")
-    print(f"  Total contract value:         {fv(ca['total_value'])}")
+    print(f"  Total contract value:         {fmt(ca['total_value'])}")
 
 def main():
     p = argparse.ArgumentParser(description="Data Quality Report")
@@ -130,11 +126,11 @@ def main():
         return
     if a.priorities:
         print(f"\nSCRAPING PRIORITIES (by contract value)")
-        for i, g in enumerate(gaps[:30], 1): print(f"  {i:>3}. {g['name'][:40]:<40} {g['type']:<12} {g['contracts']:>6} contracts  {fv(g['value']):>12}")
+        for i, g in enumerate(gaps[:30], 1): print(f"  {i:>3}. {g['name'][:40]:<40} {g['type']:<12} {g['contracts']:>6} contracts  {fmt(g['value']):>12}")
         return
     if a.gaps:
         print(f"\nGAP ANALYSIS — {len(gaps)} municipalities need NIF mapping")
-        for g in gaps[:30]: print(f"  [{g['nif']}] {g['name'][:45]:<45} {g['contracts']:>5} contracts  {fv(g['value']):>12}")
+        for g in gaps[:30]: print(f"  [{g['nif']}] {g['name'][:45]:<45} {g['contracts']:>5} contracts  {fmt(g['value']):>12}")
         return
     print_report(ca, ma, ba, da, xa, gaps)
 

@@ -1,23 +1,36 @@
 #!/usr/bin/env python3
 """Unified Procurement Database — Single SQLite for all procurement data.
 
-Consolidates contratos2025.xlsx and entidades.xlsx into procurement.db,
-eliminating the need to re-parse XLSX files on every tool invocation.
+Consolidates contratos (signed contracts) and entidades (entities) into
+procurement.db, eliminating the need to re-parse XLSX files on every
+tool invocation.
 
 Usage:
-    python procurement_db.py build              # Build/refresh the database
-    python procurement_db.py build --force       # Clear and rebuild
-    python procurement_db.py stats               # Show database statistics
+    python procurement_db.py download            # Download XLSX from dados.gov.pt
+    python procurement_db.py download --years 2024 2025  # Download specific years
+    python procurement_db.py build               # Build/refresh the database
+    python procurement_db.py build --force        # Clear and rebuild
+    python procurement_db.py build --auto-download # Download if missing, then build
+    python procurement_db.py stats                # Show database statistics
     python procurement_db.py query \"SELECT ...\"  # Run arbitrary SQL
-    python procurement_db.py export --table contratos --out contracts.json
 """
 
 import sys
 import json
+import re
 import sqlite3
 import argparse
+import subprocess
 import time
 from pathlib import Path
+from datetime import datetime, timezone
+
+try:
+    import urllib.request
+    import ssl
+except ImportError:
+    print("ERROR: urllib required (built-in)")
+    sys.exit(1)
 
 try:
     import openpyxl
@@ -29,8 +42,23 @@ except ImportError:
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
 DB_PATH = DATA_DIR / "procurement.db"
-CONTRATOS_XLSX = DATA_DIR / "contratos2025.xlsx"
 ENTIDADES_XLSX = DATA_DIR / "entidades.xlsx"
+XLSX_DIR = DATA_DIR
+
+# dados.gov.pt dataset IDs (CKAN API)
+API_BASE = "https://dados.gov.pt/api/1/datasets/"
+CONTRATOS_DATASET_ID = "66d72d488ca4b7cb2de28712"  # Contratos 2012-2026
+ENTIDADES_DATASET_ID = "67d80b2c4750b888116940fb"  # Entidades
+
+# SSL context
+SSL_CTX = ssl.create_default_context()
+SSL_CTX.check_hostname = False
+SSL_CTX.verify_mode = ssl.CERT_NONE
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "application/octet-stream,*/*",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -137,19 +165,150 @@ def init_db(force: bool = False) -> sqlite3.Connection:
 
 
 # ---------------------------------------------------------------------------
+# Download from dados.gov.pt
+# ---------------------------------------------------------------------------
+
+def api_get(dataset_id: str) -> dict:
+    """Fetch dataset metadata from dados.gov.pt CKAN API."""
+    url = f"{API_BASE}{dataset_id}"
+    req = urllib.request.Request(url, headers=HEADERS)
+    resp = urllib.request.urlopen(req, timeout=15, context=SSL_CTX)
+    return json.loads(resp.read())
+
+
+def get_resource_urls(dataset_id: str, fmt: str = "xlsx") -> dict[str, str]:
+    """Get download URLs for a dataset's XLSX resources.
+
+    Returns: {filename: url} mapping.
+    """
+    data = api_get(dataset_id)
+    ds = data.get("data", data)
+    urls = {}
+    for r in ds.get("resources", []):
+        r_fmt = str(r.get("format", "")).lower()
+        if r_fmt == fmt.lower():
+            name = r.get("title", r.get("name", ""))
+            dl_url = r.get("url", "")
+            if name and dl_url:
+                urls[name] = dl_url
+    return urls
+
+
+def download_file(url: str, local_path: Path, label: str = "") -> bool:
+    """Download a file from URL to local path. Returns True on success."""
+    if local_path.exists() and local_path.stat().st_size > 1000:
+        size = local_path.stat().st_size
+        print(f"    {label}: already exists ({size:,} bytes)")
+        return True
+
+    print(f"    {label}: downloading...", end=" ", flush=True)
+    try:
+        req = urllib.request.Request(url, headers=HEADERS)
+        resp = urllib.request.urlopen(req, timeout=120, context=SSL_CTX)
+        data = resp.read()
+        local_path.write_bytes(data)
+        print(f"done ({len(data):,} bytes)")
+        return True
+    except Exception as e:
+        print(f"FAILED: {e}")
+        return False
+
+
+def cmd_download(args):
+    """Download contratos and entidades XLSX files from dados.gov.pt."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Determine which years to download
+    years = getattr(args, "years", None)
+    entidades_only = getattr(args, "entidades_only", False)
+    contratos_only = getattr(args, "contratos_only", False)
+
+    total_files = 0
+    total_size = 0
+
+    # --- Download contratos ---
+    if not entidades_only:
+        print(f"\n  Downloading contratos from dados.gov.pt...")
+        try:
+            urls = get_resource_urls(CONTRATOS_DATASET_ID)
+        except Exception as e:
+            print(f"    ERROR fetching metadata: {e}")
+            urls = {}
+
+        if urls:
+            # Filter by year if specified
+            target_files = {}
+            for name, url in urls.items():
+                m = re.search(r"contratos(\d{4})", name)
+                if m:
+                    year = int(m.group(1))
+                    if years and year not in years:
+                        continue
+                    target_files[name] = url
+
+            print(f"    Found {len(target_files)} XLSX file(s)")
+            for name, url in sorted(target_files.items()):
+                local_path = XLSX_DIR / name
+                if download_file(url, local_path, name):
+                    total_files += 1
+                    total_size += local_path.stat().st_size
+                time.sleep(0.5)
+
+    # --- Download entidades ---
+    if not contratos_only:
+        print(f"\n  Downloading entidades from dados.gov.pt...")
+        try:
+            urls = get_resource_urls(ENTIDADES_DATASET_ID)
+        except Exception as e:
+            print(f"    ERROR fetching metadata: {e}")
+            urls = {}
+
+        if urls:
+            for name, url in urls.items():
+                local_path = XLSX_DIR / name
+                if download_file(url, local_path, name):
+                    total_files += 1
+                    total_size += local_path.stat().st_size
+                time.sleep(0.5)
+
+    print(f"\n  Total: {total_files} files, {total_size:,} bytes")
+    if total_size > 0:
+        print(f"  Run 'python procurement_db.py build' to build the database")
+    print()
+
+
+def has_any_contratos_xlsx() -> bool:
+    """Check if any contratos*.xlsx file exists in the data directory."""
+    return any(DATA_DIR.glob("contratos*.xlsx"))
+
+
+def ensure_xlsx_files() -> bool:
+    """Check if required XLSX files exist. Returns True if ready to build."""
+    missing = []
+    if not has_any_contratos_xlsx():
+        missing.append("contratos*.xlsx")
+    if not ENTIDADES_XLSX.exists():
+        missing.append("entidades.xlsx")
+
+    if not missing:
+        return True
+
+    print(f"  Missing XLSX files: {', '.join(missing)}")
+    print(f"  Run 'python procurement_db.py download' first, or")
+    print(f"  use 'build --auto-download' to download automatically")
+    return False
+
+
+# ---------------------------------------------------------------------------
 # XLSX Parsers
 # ---------------------------------------------------------------------------
 
-def parse_contratos_xlsx(conn: sqlite3.Connection) -> int:
-    """Parse contratos2025.xlsx into the contratos table."""
-    if not CONTRATOS_XLSX.exists():
-        print(f"  ERROR: {CONTRATOS_XLSX} not found")
-        return 0
-
-    print(f"  Parsing contratos2025.xlsx...", end=" ", flush=True)
+def _parse_one_contratos_xlsx(conn: sqlite3.Connection, xlsx_path: Path, file_year: int) -> int:
+    """Parse a single contratos XLSX file into the contratos table."""
+    print(f"  {xlsx_path.name}: parsing...", end=" ", flush=True)
     t0 = time.time()
 
-    wb = openpyxl.load_workbook(str(CONTRATOS_XLSX), read_only=True)
+    wb = openpyxl.load_workbook(str(xlsx_path), read_only=True)
     ws = wb.active
 
     headers = [cell.value for cell in ws[1]]
@@ -221,7 +380,7 @@ def parse_contratos_xlsx(conn: sqlite3.Connection) -> int:
             fmt_date(get(row, "dataCelebracaoContrato")),
             get_num(row, "precoContratual"),
             str(get(row, "CPV")).strip(),
-            None,  # prazoExecucao — not in all rows
+            None,  # prazoExecucao -- not in all rows
             str(get(row, "LocalExecucao")).strip()[:200],
             str(get(row, "fundamentacao")).strip()[:500],
             str(get(row, "ProcedimentoCentralizado")).strip(),
@@ -240,7 +399,7 @@ def parse_contratos_xlsx(conn: sqlite3.Connection) -> int:
             str(get(row, "Observacoes")).strip()[:500],
             str(get(row, "ContratEcologico")).strip(),
             str(get(row, "fundamentAjusteDireto")).strip()[:500],
-            None,  # Ano
+            file_year,
             str(get(row, "adjudicatarioPMEs")).strip(),
             str(get(row, "NUTs")).strip(),
             str(get(row, "Lotes")).strip(),
@@ -258,6 +417,30 @@ def parse_contratos_xlsx(conn: sqlite3.Connection) -> int:
     elapsed = time.time() - t0
     print(f"{len(rows):,} rows in {elapsed:.1f}s")
     return len(rows)
+
+
+def parse_contratos_xlsx(conn: sqlite3.Connection) -> int:
+    """Parse all contratos*.xlsx files into the contratos table."""
+    xlsx_files = sorted(DATA_DIR.glob("contratos*.xlsx"))
+    if not xlsx_files:
+        print("  No contratos*.xlsx files found")
+        return 0
+
+    print(f"  Found {len(xlsx_files)} contratos XLSX file(s)")
+    total = 0
+    for xlsx_path in xlsx_files:
+        m = re.search(r"contratos(\d{4})", xlsx_path.name)
+        file_year = int(m.group(1)) if m else 0
+        total += _parse_one_contratos_xlsx(conn, xlsx_path, file_year)
+
+    # Add year index if missing
+    try:
+        conn.execute("CREATE INDEX IF NOT EXISTS idx_c_ano ON contratos(Ano)")
+        conn.commit()
+    except Exception:
+        pass
+
+    return total
 
 
 def parse_entidades_xlsx(conn: sqlite3.Connection) -> int:
@@ -331,6 +514,22 @@ def parse_entidades_xlsx(conn: sqlite3.Connection) -> int:
 
 def cmd_build(args):
     """Build/refresh the unified procurement database."""
+    # Auto-download if requested and files are missing
+    auto_dl = getattr(args, "auto_download", False)
+    if auto_dl:
+        missing = []
+        if not has_any_contratos_xlsx():
+            missing.append("contratos*.xlsx")
+        if not ENTIDADES_XLSX.exists():
+            missing.append("entidades.xlsx")
+        if missing:
+            print(f"  Auto-downloading missing files: {', '.join(missing)}")
+            dl_args = argparse.Namespace(years=None, entidades_only=False, contratos_only=False)
+            cmd_download(dl_args)
+
+    if not ensure_xlsx_files():
+        return
+
     print(f"\n  Building procurement.db...\n")
     conn = init_db(force=args.force)
 
@@ -339,7 +538,6 @@ def cmd_build(args):
     n_entidades = parse_entidades_xlsx(conn)
 
     # Store metadata
-    from datetime import datetime, timezone
     conn.execute(
         "INSERT OR REPLACE INTO meta (key, value, updated_at) VALUES (?, ?, ?)",
         ("last_build", f"{n_contratos} contratos, {n_entidades} entidades",
@@ -352,6 +550,62 @@ def cmd_build(args):
     db_size = DB_PATH.stat().st_size / (1024 * 1024)
     print(f"\n  Done in {elapsed:.1f}s — {db_size:.1f} MB")
     print(f"  Database: {DB_PATH}\n")
+
+    # Auto-build the procurement cache so the dashboard loads fast on next request
+    cache_script = SCRIPT_DIR / "procurement_cache.py"
+    if cache_script.exists():
+        print(f"\n  Building procurement cache for fast dashboard loading...")
+        try:
+            result = subprocess.run(
+                [sys.executable, str(cache_script), "build"],
+                cwd=str(SCRIPT_DIR),
+                check=False,
+            )
+            if result.returncode != 0:
+                print(f"  ⚠️  Cache build exited with code {result.returncode}.")
+                print(f"  Run manually: python procurement_cache.py build")
+        except Exception as e:
+            print(f"  Cache build skipped: {e}")
+            print(f"  Run manually: python procurement_cache.py build")
+    else:
+        print(f"\n  (procurement_cache.py not found — skipping cache build)")
+
+
+def cmd_status(args):
+    """Quick one-glance status overview."""
+    if not DB_PATH.exists():
+        print(f"  procurement.db: NOT FOUND")
+        print(f"  Run 'python procurement_db.py build' to create")
+        return
+
+    db_size = DB_PATH.stat().st_size / (1024 * 1024)
+    mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
+    age_days = (datetime.now() - mtime).days
+
+    conn = sqlite3.connect(str(DB_PATH))
+    tables = [r[0] for r in conn.execute(
+        "SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
+
+    counts = {}
+    for t in tables:
+        if t != "meta":
+            counts[t] = conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]
+
+    last_build = None
+    try:
+        row = conn.execute("SELECT value, updated_at FROM meta WHERE key='last_build'").fetchone()
+        if row:
+            last_build = row[1]
+    except Exception:
+        pass
+    conn.close()
+
+    print(f"  procurement.db  {db_size:.1f} MB  ({age_days}d old)")
+    for t, c in counts.items():
+        print(f"    {t:<20} {c:>10,}")
+    if last_build:
+        print(f"    last build: {last_build}")
+    print()
 
 
 def cmd_stats(args):
@@ -448,9 +702,20 @@ def main():
     )
     sub = parser.add_subparsers(dest="command")
 
+    dl = sub.add_parser("download", help="Download XLSX from dados.gov.pt")
+    dl.add_argument("--years", type=int, nargs="+",
+                    help="Specific years to download (default: all available)")
+    dl.add_argument("--contratos-only", action="store_true",
+                    help="Download only contracts XLSX")
+    dl.add_argument("--entidades-only", action="store_true",
+                    help="Download only entities XLSX")
+
     build = sub.add_parser("build", help="Build/refresh the database")
     build.add_argument("--force", action="store_true", help="Clear and rebuild")
+    build.add_argument("--auto-download", action="store_true",
+                       help="Download XLSX files if missing")
 
+    sub.add_parser("status", help="Quick one-glance status overview")
     sub.add_parser("stats", help="Show database statistics")
 
     query = sub.add_parser("query", help="Run arbitrary SQL")
@@ -463,7 +728,9 @@ def main():
         sys.exit(1)
 
     commands = {
+        "download": cmd_download,
         "build": cmd_build,
+        "status": cmd_status,
         "stats": cmd_stats,
         "query": cmd_query,
     }

@@ -3,13 +3,89 @@
 
 Consolidates duplicated functions across entity_profile.py,
 municipality_demographics.py, municipality_directory.py,
-nif_mapper.py, and municipality_spending.py.
+nif_mapper.py, municipality_spending.py, anomaly_scanner.py,
+entity_network.py, entity_profile.py, supplier_cross_profiler.py,
+temporal_clustering.py, bid_pattern_analyzer.py,
+municipality_risk_report.py, and bep_procurement_crossref.py.
+
+Public helpers:
+    fmt, format_currency      — currency formatting
+    normalize_name            — accent-strip + lowercase + collapse
+    extract_location          — location string from entity name
+    extract_location_typed    — (location, entity_type) tuple
+    parse_entity_field        — "NIF - Name; NIF - Name" → list[dict]
+    parse_date                — accept 4 common date formats → datetime
+    days_between              — days between two dates/datetimes
 """
 
 import re
-from typing import Dict, List, Optional, Tuple
+from datetime import datetime, date
+from typing import Dict, List, Optional, Tuple, Union
 
 from unidecode import unidecode
+
+
+# =============================================================================
+# DATE PARSING & ARITHMETIC
+# =============================================================================
+
+# Common Portuguese procurement / parliamentary date formats.
+_DATE_FORMATS = (
+    "%Y-%m-%d",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%dT%H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S",
+    "%d/%m/%Y",
+    "%d-%m-%Y",
+    "%d.%m.%Y",
+)
+
+
+def parse_date(value: Union[str, datetime, date, None]) -> Optional[datetime]:
+    """Parse a date string in any of several common formats.
+
+    Returns a ``datetime`` on success, or ``None`` for empty/invalid input.
+    Already-parsed ``datetime`` / ``date`` values are returned as-is.
+
+    Examples:
+        '2025-03-15'              -> datetime(2025, 3, 15)
+        '15/03/2025'              -> datetime(2025, 3, 15)
+        '2025-03-15T10:30:00'     -> datetime(2025, 3, 15, 10, 30)
+        '' or None                -> None
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, date):
+        return datetime(value.year, value.month, value.day)
+    s = str(value).strip()
+    if not s or s in ("-", "None", "nan"):
+        return None
+    for fmt in _DATE_FORMATS:
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            continue
+    return None
+
+
+def days_between(start: Union[str, datetime, date, None],
+                 end: Union[str, datetime, date, None]) -> Optional[int]:
+    """Return the number of whole days between two dates.
+
+    Returns ``None`` if either side is unparseable, so callers can use the
+    result as ``if days_between(a, b) is not None and days_between(a, b) < 30:``.
+
+    Examples:
+        days_between('2025-01-01', '2025-01-15') -> 14
+        days_between(None, '2025-01-15')         -> None
+    """
+    s = parse_date(start)
+    e = parse_date(end)
+    if s is None or e is None:
+        return None
+    return (e - s).days
 
 
 # =============================================================================

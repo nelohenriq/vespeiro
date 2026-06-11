@@ -36,26 +36,12 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from utils import fmt
+
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
 TRANSPARENCY_DB = DATA_DIR / "transparency.db"
 PROCUREMENT_DB = DATA_DIR / "procurement.db"
-
-
-def fmt(v):
-    """Short currency formatter."""
-    if v is None or v == 0:
-        return "€0"
-    if v >= 1_000_000_000:
-        return f"€{v / 1_000_000_000:.1f}B"
-    if v >= 1_000_000:
-        return f"€{v / 1_000_000:.1f}M"
-    if v >= 1_000:
-        return f"€{v / 1_000:.0f}K"
-    return f"€{v:.0f}"
-
-
-
 
 
 def check_dbs():

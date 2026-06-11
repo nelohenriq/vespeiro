@@ -29,6 +29,8 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from utils import fmt
+
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
 
@@ -53,19 +55,6 @@ def esc(text):
     if not text:
         return ""
     return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
-
-
-def fmt(v):
-    if v is None or v == 0:
-        return "€0"
-    v = float(v)
-    if v >= 1_000_000_000:
-        return f"€{v / 1_000_000_000:.1f}B"
-    if v >= 1_000_000:
-        return f"€{v / 1_000_000:.1f}M"
-    if v >= 1_000:
-        return f"€{v / 1_000:.0f}K"
-    return f"€{v:.0f}"
 
 
 def fmt_num(v):
