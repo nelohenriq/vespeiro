@@ -14,8 +14,8 @@ Public helpers:
     extract_location          — location string from entity name
     extract_location_typed    — (location, entity_type) tuple
     parse_entity_field        — "NIF - Name; NIF - Name" → list[dict]
-    parse_date                — accept 4 common date formats → datetime
-    days_between              — days between two dates/datetimes
+    parse_date                — 7+ common date formats incl. timezone-aware ISO (Z, +HH:MM) → datetime
+    days_between              — abs() days between two dates/datetimes
 """
 
 import re
@@ -30,28 +30,70 @@ from unidecode import unidecode
 # =============================================================================
 
 # Common Portuguese procurement / parliamentary date formats.
+# Order matters: longer/more-specific formats first so e.g. "2025-03-15T10:30:00"
+# is caught by the datetime form before the bare date form.
 _DATE_FORMATS = (
-    "%Y-%m-%d",
-    "%Y-%m-%dT%H:%M:%S",
-    "%Y-%m-%dT%H:%M:%S.%f",
-    "%Y-%m-%d %H:%M:%S",
-    "%d/%m/%Y",
+    "%Y-%m-%dT%H:%M:%S.%f%z",  # ISO with microseconds + tz offset (e.g. 2025-03-15T10:30:00.123456+0000)
+    "%Y-%m-%dT%H:%M:%S%z",     # ISO datetime + tz offset (e.g. 2025-03-15T10:30:00+0000)
+    "%Y-%m-%dT%H:%M:%S.%f",    # ISO datetime with microseconds
+    "%Y-%m-%dT%H:%M:%S",       # ISO datetime
+    "%Y-%m-%d %H:%M:%S",       # space-separated datetime
+    "%Y-%m-%d",                # bare ISO date
+    "%d/%m/%Y",                # Portuguese style
     "%d-%m-%Y",
     "%d.%m.%Y",
 )
 
 
+# Timezone-offset suffixes that strptime cannot match directly. We normalize
+# them up-front so a single %z format works for all common wire formats.
+_TZ_SUFFIX_RE = re.compile(
+    r"(Z|\+|-)(\d{2}):?(\d{2})$"   # Z, +HH:MM, +HHMM, -HH:MM, -HHMM
+)
+
+
+def _normalize_iso_tz(s: str) -> str:
+    """Normalize timezone suffixes to the ``+HHMM`` form strptime expects.
+
+    Handles three common wire formats:
+        'Z'         -> '+0000'   (Zulu / UTC shorthand)
+        '+00:00'    -> '+0000'   (ISO 8601 with colon)
+        '+0000'     -> '+0000'   (already normalized)
+
+    If the string has no recognizable suffix, it is returned unchanged.
+    """
+    match = _TZ_SUFFIX_RE.search(s)
+    if not match:
+        return s
+    sign, hh, mm = match.group(1), match.group(2), match.group(3)
+    if sign == "Z":
+        sign = "+"
+    return s[: match.start()] + f"{sign}{hh}{mm}"
+
+
 def parse_date(value: Union[str, datetime, date, None]) -> Optional[datetime]:
     """Parse a date string in any of several common formats.
 
+    Supports timezone-aware ISO 8601 strings (the ``Z`` suffix and ``+HH:MM``
+    offsets) by normalizing them to the ``+HHMM`` form before strptime.
+
     Returns a ``datetime`` on success, or ``None`` for empty/invalid input.
     Already-parsed ``datetime`` / ``date`` values are returned as-is.
+    Naive datetimes are returned as-is when input is a ``datetime``.
+
+    Note: TZ-aware inputs (e.g. ``...Z``, ``...+00:00``) return timezone-aware
+    datetimes; naive inputs return naive datetimes. Python raises ``TypeError``
+    when comparing aware vs naive results, so callers that mix them should
+    normalize with ``.replace(tzinfo=None)`` first.
 
     Examples:
-        '2025-03-15'              -> datetime(2025, 3, 15)
-        '15/03/2025'              -> datetime(2025, 3, 15)
-        '2025-03-15T10:30:00'     -> datetime(2025, 3, 15, 10, 30)
-        '' or None                -> None
+        '2025-03-15'                     -> datetime(2025, 3, 15)
+        '15/03/2025'                     -> datetime(2025, 3, 15)
+        '2025-03-15T10:30:00'            -> datetime(2025, 3, 15, 10, 30)
+        '2025-03-15T10:30:00Z'           -> datetime(2025, 3, 15, 10, 30, tz=UTC)
+        '2025-03-15T10:30:00+00:00'      -> datetime(2025, 3, 15, 10, 30, tz=UTC)
+        '2025-03-15T10:30:00-05:00'      -> datetime(2025, 3, 15, 10, 30, tz=UTC-5)
+        '' or None                       -> None
     """
     if value is None:
         return None
@@ -62,6 +104,7 @@ def parse_date(value: Union[str, datetime, date, None]) -> Optional[datetime]:
     s = str(value).strip()
     if not s or s in ("-", "None", "nan"):
         return None
+    s = _normalize_iso_tz(s)
     for fmt in _DATE_FORMATS:
         try:
             return datetime.strptime(s, fmt)
@@ -72,20 +115,23 @@ def parse_date(value: Union[str, datetime, date, None]) -> Optional[datetime]:
 
 def days_between(start: Union[str, datetime, date, None],
                  end: Union[str, datetime, date, None]) -> Optional[int]:
-    """Return the number of whole days between two dates.
+    """Return the absolute number of whole days between two dates.
 
-    Returns ``None`` if either side is unparseable, so callers can use the
-    result as ``if days_between(a, b) is not None and days_between(a, b) < 30:``.
+    Returns the non-negative integer day count, or ``None`` if either side
+    is unparseable. ``abs()`` is applied so callers don't have to think
+    about argument order — this matches the legacy local helper that
+    previously lived in ``temporal_clustering.py``.
 
     Examples:
-        days_between('2025-01-01', '2025-01-15') -> 14
-        days_between(None, '2025-01-15')         -> None
+        days_between('2025-01-01', '2025-01-15')  -> 14
+        days_between('2025-01-15', '2025-01-01')  -> 14  (same — abs)
+        days_between(None, '2025-01-15')          -> None
     """
     s = parse_date(start)
     e = parse_date(end)
     if s is None or e is None:
         return None
-    return (e - s).days
+    return abs((e - s).days)
 
 
 # =============================================================================
