@@ -325,7 +325,7 @@ _PROCUREMENT_CACHE_FIELDS = [
     "stats", "by_year", "by_procedure", "direct_awards",
     "price_inflation", "self_referencing", "top_buyers",
     "top_sellers", "top_sellers_hint", "by_municipality",
-    "by_cpv", "monthly_trend",
+    "by_cpv", "monthly_trend", "single_bidder_timeline",
 ]
 
 
@@ -367,6 +367,31 @@ def handle_procurement() -> dict:
             SELECT Ano as year, COUNT(*) as contracts, SUM(precoContratual) as value
             FROM contratos WHERE Ano IS NOT NULL
             GROUP BY Ano ORDER BY Ano
+        """)
+
+        # Single-bidder (non-competitive) timeline. The contratos table has
+        # no `numConcorrentes` column, so the closest corruption-risk proxy
+        # is the share of contracts awarded via procedures that bypass or
+        # limit competition: Ajuste Direto (direct award, no competition)
+        # + Consulta Prvia (prior consultation, typically 3 invited firms).
+        result["single_bidder_timeline"] = _safe_query(conn, """
+            SELECT
+                Ano AS year,
+                COUNT(*) AS total,
+                SUM(CASE
+                    WHEN tipoprocedimento LIKE '%ajuste direto%'
+                      OR tipoprocedimento LIKE '%consulta pr%'
+                    THEN 1 ELSE 0
+                END) AS single_bidder,
+                ROUND(100.0 * SUM(CASE
+                    WHEN tipoprocedimento LIKE '%ajuste direto%'
+                      OR tipoprocedimento LIKE '%consulta pr%'
+                    THEN 1 ELSE 0
+                END) / COUNT(*), 1) AS single_bidder_pct
+            FROM contratos
+            WHERE Ano IS NOT NULL
+            GROUP BY Ano
+            ORDER BY Ano
         """)
 
         # By procedure type

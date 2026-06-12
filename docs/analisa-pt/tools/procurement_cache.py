@@ -41,7 +41,7 @@ CACHE_DIR = DATA_DIR / "cache"
 # Cache metadata
 # ---------------------------------------------------------------------------
 
-CACHE_VERSION = 1  # bump when query shape changes to invalidate all caches
+CACHE_VERSION = 2  # bump when query shape changes to invalidate all caches
 
 
 def _meta_path() -> Path:
@@ -388,23 +388,56 @@ def query_monthly_trend(conn: sqlite3.Connection) -> list:
     return [dict(r) for r in rows]
 
 
+def query_single_bidder_timeline(conn: sqlite3.Connection) -> list:
+    """Single-bidder (non-competitive) share by year — the most actionable
+    corruption-risk indicator.
+
+    The contratos table has no `numConcorrentes` column, so the proxy is the
+    share of contracts awarded via procedures that bypass or limit
+    competition: Ajuste Direto (direct award, no competition) + Consulta
+    Prvia (prior consultation, typically 3 invited firms). Both procedure
+    types are catalogued in the `tipoprocedimento` field.
+    """
+    rows = conn.execute("""
+        SELECT
+            Ano AS year,
+            COUNT(*) AS total,
+            SUM(CASE
+                WHEN tipoprocedimento LIKE '%ajuste direto%'
+                  OR tipoprocedimento LIKE '%consulta pr%'
+                THEN 1 ELSE 0
+            END) AS single_bidder,
+            ROUND(100.0 * SUM(CASE
+                WHEN tipoprocedimento LIKE '%ajuste direto%'
+                  OR tipoprocedimento LIKE '%consulta pr%'
+                THEN 1 ELSE 0
+            END) / COUNT(*), 1) AS single_bidder_pct
+        FROM contratos
+        WHERE Ano IS NOT NULL
+        GROUP BY Ano
+        ORDER BY Ano
+    """).fetchall()
+    return [dict(r) for r in rows]
+
+
 # ---------------------------------------------------------------------------
 # Build orchestration
 # ---------------------------------------------------------------------------
 
 QUERIES = [
-    ("stats",            query_stats,            False),
-    ("by_year",          query_by_year,          False),
-    ("by_procedure",     query_by_procedure,     False),
-    ("direct_awards",    query_direct_awards,    False),
-    ("price_inflation",  query_price_inflation,  False),
-    ("self_referencing", query_self_referencing, True),  # slow — sampled
-    ("top_buyers",       query_top_buyers,       True),  # slow — full table scan
-    ("top_sellers",      query_top_sellers,      True),  # slow — NIF aggregation
-    ("top_sellers_hint", query_top_sellers_hint, True),  # slow — raw grouping
-    ("by_municipality",  query_by_municipality,  True),  # slow — only if resolved
-    ("by_cpv",           query_by_cpv,           True),  # slow — full scan
-    ("monthly_trend",    query_monthly_trend,    True),  # slow — recent only
+    ("stats",                  query_stats,                  False),
+    ("by_year",                query_by_year,                False),
+    ("by_procedure",           query_by_procedure,           False),
+    ("direct_awards",          query_direct_awards,          False),
+    ("price_inflation",        query_price_inflation,        False),
+    ("self_referencing",       query_self_referencing,       True),  # slow — sampled
+    ("top_buyers",             query_top_buyers,             True),  # slow — full table scan
+    ("top_sellers",            query_top_sellers,            True),  # slow — NIF aggregation
+    ("top_sellers_hint",       query_top_sellers_hint,       True),  # slow — raw grouping
+    ("by_municipality",        query_by_municipality,        True),  # slow — only if resolved
+    ("by_cpv",                 query_by_cpv,                 True),  # slow — full scan
+    ("monthly_trend",          query_monthly_trend,          True),  # slow — recent only
+    ("single_bidder_timeline", query_single_bidder_timeline, False),  # fast — group by Ano
 ]
 
 

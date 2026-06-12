@@ -134,6 +134,13 @@ export interface MunicipalityRow {
   value: number | null;
 }
 
+export interface SingleBidderTimelineRow {
+  year: number;
+  total: number;
+  single_bidder: number;
+  single_bidder_pct: number;
+}
+
 export interface ProcurementResponse {
   stats: ProcurementStats;
   by_year: ProcurementYear[];
@@ -144,6 +151,7 @@ export interface ProcurementResponse {
   top_buyers: TopBuyer[];
   top_sellers_hint: TopSellerHint[];
   by_municipality: MunicipalityRow[];
+  single_bidder_timeline: SingleBidderTimelineRow[];
   _server_ms?: number;
 }
 
