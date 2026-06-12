@@ -28,6 +28,18 @@ def main() -> int:
     cols = [r[0] for r in conn.execute(
         'SELECT name FROM pragma_table_info("contratos")'
     ).fetchall()]
+
+    # Ensure the index on ine_municipality exists so the GROUP BY is
+    # sub-second. Idempotent: the migration runs every time the script
+    # is invoked, but only creates the index once. Without this index
+    # the full scan against the 1.9GB procurement.db times out.
+    if "ine_municipality" in cols:
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_contratos_ine_municipality "
+            "ON contratos(ine_municipality)"
+        )
+        conn.commit()
+
     if "ine_municipality" not in cols:
         print(f"  WARN: ine_municipality column not in contratos ({len(cols)} cols).")
         OUT.parent.mkdir(parents=True, exist_ok=True)
