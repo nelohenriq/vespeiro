@@ -125,8 +125,14 @@ export default function App() {
         </div>
       )}
 
-      {/* Hero metrics */}
-      {overview.data && <OverviewTab data={overview.data} loading={overview.loading} />}
+      {/* Hero metrics + headline finding tiles (donut + sparkline) */}
+      {overview.data && (
+        <OverviewTab
+          data={overview.data}
+          loading={overview.loading}
+          procurement={procurement.data}
+        />
+      )}
 
       {/* Tab navigation */}
       <nav className="tab-nav">
