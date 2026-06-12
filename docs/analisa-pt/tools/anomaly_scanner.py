@@ -13,8 +13,8 @@ Signals detected:
   6. Direct Award Rate (excessive Ajuste Direto)
   7. No Competitors Recorded
   8. Municipality-Exclusive Companies
-  9. Framework Agreement Abuse
- 10. PRR Construction Inflation
+  9. Rotating Winners (group takes turns, no single dominant winner) — folded from bid_pattern_analyzer
+ 10. Bid Suppression (one dominant winner with persistent decoy bidders) — folded from bid_pattern_analyzer
 
 Usage:
     python anomaly_scanner.py                  # Full scan, top 30 anomalies
@@ -30,7 +30,7 @@ import json
 import sqlite3
 import argparse
 from pathlib import Path
-from collections import defaultdict
+from collections import defaultdict, Counter
 
 from utils import fmt, parse_entity_field
 
@@ -466,6 +466,201 @@ class AnomalyScanner:
                 })
 
     # -------------------------------------------------------------------------
+    # Signal 9: Rotating Winners (folded from bid_pattern_analyzer.detect_rotating_winners)
+    # -------------------------------------------------------------------------
+    def detect_rotating_winners(self, nif_filter=None, min_contracts=5, min_winners=3):
+        """Find buyers where a small group of companies take turns winning.
+
+        Rotation pattern: N winners each with >= 2 wins, and the least-winning
+        company still takes >= 30% as many contracts as the most-winning one
+        (i.e. no single dominant winner).
+
+        Folded from ``bid_pattern_analyzer.detect_rotating_winners`` so the
+        composite risk score in this scanner picks up the same rotation signal.
+        """
+        where = ("WHERE adjudicatarios IS NOT NULL AND adjudicatarios != '' "
+                 "AND adjudicatarios != '-' AND adjudicante_nif IS NOT NULL")
+        params = []
+        if nif_filter:
+            where += " AND adjudicante_nif = ?"
+            params.append(nif_filter)
+
+        rows = self.conn.execute(f"""
+            SELECT adjudicante_nif, adjudicante_nome, adjudicatarios, precoContratual
+            FROM contratos {where}
+        """, params).fetchall()
+
+        by_buyer = defaultdict(lambda: {"name": "", "contracts": [], "winners": Counter()})
+        for r in rows:
+            b = by_buyer[r["adjudicante_nif"]]
+            b["name"] = r["adjudicante_nome"]
+            b["contracts"].append(r)
+            for entity in parse_entity_field(r["adjudicatarios"]):
+                if entity["nif"]:
+                    b["winners"][entity["nif"]] += 1
+
+        for buyer_nif, data in by_buyer.items():
+            if len(data["contracts"]) < min_contracts:
+                continue
+            if len(data["winners"]) < min_winners:
+                continue
+
+            counts = list(data["winners"].values())
+            avg_count = sum(counts) / len(counts)
+            if avg_count < 2:
+                continue
+
+            max_count = max(counts)
+            min_count = min(counts)
+            rotation_ratio = min_count / max_count if max_count > 0 else 0
+            if rotation_ratio < 0.3:
+                continue
+
+            # Build {nif: {name, wins, value}} in a single pass over contracts
+            winner_stats = {}
+            for r in data["contracts"]:
+                val = r["precoContratual"] or 0
+                for entity in parse_entity_field(r["adjudicatarios"]):
+                    nif = entity["nif"]
+                    if not nif:
+                        continue
+                    w = winner_stats.get(nif)
+                    if w is None:
+                        winner_stats[nif] = {"name": entity["name"], "wins": 1, "value": val}
+                    else:
+                        w["wins"] += 1
+                        w["value"] += val
+
+            winner_details = [
+                {"nif": nif, "name": w["name"], "wins": w["wins"], "value": w["value"]}
+                for nif, w in sorted(winner_stats.items(), key=lambda x: -x[1]["wins"])
+            ]
+
+            total_value = sum((r["precoContratual"] or 0) for r in data["contracts"])
+            score = min(100, 30 + rotation_ratio * 30 + min(total_value / 1_000_000, 20))
+            severity = "critical" if rotation_ratio >= 0.7 and total_value > 5_000_000 else "warning"
+
+            self.signals.append({
+                "type": "rotating_winners",
+                "severity": severity,
+                "nif": buyer_nif,
+                "name": data["name"],
+                "score": score,
+                "details": {
+                    "total_contracts": len(data["contracts"]),
+                    "total_value": total_value,
+                    "unique_winners": len(data["winners"]),
+                    "rotation_ratio": round(rotation_ratio, 2),
+                    "winners": winner_details,
+                },
+                "description": (
+                    f"Rotating winners: {len(data['winners'])} companies took turns "
+                    f"winning {len(data['contracts'])} contracts ({fmt(total_value)})"
+                ),
+            })
+
+    # -------------------------------------------------------------------------
+    # Signal 10: Bid Suppression (folded from bid_pattern_analyzer.detect_price_suppression)
+    # -------------------------------------------------------------------------
+    def detect_bid_suppression(self, nif_filter=None, min_contracts=3, suppression_ratio=0.7):
+        """Find buyers with one dominant winner and persistent decoy bidders.
+
+        Pattern: one company wins >= ``suppression_ratio`` of contracts while
+        other companies consistently appear in the ``concorrentes`` field
+        (>= 40% of contracts) but never win — classic decoy-bidder setup.
+
+        Folded from ``bid_pattern_analyzer.detect_price_suppression`` so the
+        composite risk score in this scanner picks up the same signal.
+        """
+        where = ("WHERE adjudicatarios IS NOT NULL AND adjudicatarios != '' "
+                 "AND adjudicatarios != '-' "
+                 "AND concorrentes IS NOT NULL AND concorrentes != '' "
+                 "AND concorrentes != '-' "
+                 "AND adjudicante_nif IS NOT NULL AND precoContratual > 0")
+        params = []
+        if nif_filter:
+            where += " AND adjudicante_nif = ?"
+            params.append(nif_filter)
+
+        rows = self.conn.execute(f"""
+            SELECT adjudicante_nif, adjudicante_nome, adjudicatarios,
+                   precoContratual, concorrentes
+            FROM contratos {where}
+        """, params).fetchall()
+
+        def _competitor_nifs(text):
+            if not text or text in ("-", ""):
+                return []
+            return [e["nif"] for e in parse_entity_field(text) if e["nif"]]
+
+        by_buyer = defaultdict(lambda: {"name": "", "contracts": []})
+        for r in rows:
+            b = by_buyer[r["adjudicante_nif"]]
+            b["name"] = r["adjudicante_nome"]
+            b["contracts"].append(r)
+
+        for buyer_nif, data in by_buyer.items():
+            if len(data["contracts"]) < min_contracts:
+                continue
+
+            winner_wins = Counter()
+            winner_names = {}
+            for r in data["contracts"]:
+                for entity in parse_entity_field(r["adjudicatarios"]):
+                    if entity["nif"]:
+                        winner_wins[entity["nif"]] += 1
+                        winner_names.setdefault(entity["nif"], entity["name"])
+
+            if not winner_wins:
+                continue
+
+            top_winner, top_wins = winner_wins.most_common(1)[0]
+            total = len(data["contracts"])
+            win_rate = top_wins / total
+            if win_rate < suppression_ratio:
+                continue
+
+            # Decoys: appear as competitors in >= 40% of contracts but never win
+            loser_counts = Counter()
+            for r in data["contracts"]:
+                winner_nifs = {e["nif"] for e in parse_entity_field(r["adjudicatarios"]) if e["nif"]}
+                for comp_nif in _competitor_nifs(r["concorrentes"]):
+                    if comp_nif != top_winner and comp_nif not in winner_nifs:
+                        loser_counts[comp_nif] += 1
+
+            decoys = [
+                {"nif": nif, "appearances": count, "appear_rate": round(count * 100 / total, 1)}
+                for nif, count in loser_counts.items()
+                if count >= total * 0.4 and nif not in winner_wins
+            ]
+            if not decoys:
+                continue
+
+            score = min(100, 40 + win_rate * 30 + min(len(decoys) * 2, 10))
+            severity = "critical" if win_rate >= 0.9 and len(decoys) >= 3 else "warning"
+            top_name = winner_names.get(top_winner, top_winner)
+
+            self.signals.append({
+                "type": "bid_suppression",
+                "severity": severity,
+                "nif": buyer_nif,
+                "name": data["name"],
+                "score": score,
+                "details": {
+                    "total_contracts": total,
+                    "dominant_winner_nif": top_winner,
+                    "dominant_winner_name": top_name,
+                    "win_rate": round(win_rate, 2),
+                    "wins": top_wins,
+                    "decoys": decoys,
+                },
+                "description": (
+                    f"Bid suppression: {top_name[:30]} won {top_wins}/{total} "
+                    f"({win_rate:.0%}) with {len(decoys)} decoy bidder(s)"
+                ),
+            })
+
+    # -------------------------------------------------------------------------
     # Composite Risk Score
     # -------------------------------------------------------------------------
     def compute_composite_scores(self):
@@ -509,10 +704,12 @@ class AnomalyScanner:
             "direct": self.detect_direct_award_excess,
             "competitors": self.detect_no_competitors,
             "exclusive": self.detect_exclusive_companies,
+            "rotating_winners": self.detect_rotating_winners,
+            "bid_suppression": self.detect_bid_suppression,
         }
 
         # Entity-level signals accept nif_filter; dataset-level signals don't
-        entity_level = {"price", "dominance", "self_ref"}
+        entity_level = {"price", "dominance", "self_ref", "rotating_winners", "bid_suppression"}
 
         if signals:
             for s in signals:
@@ -608,7 +805,7 @@ def main():
     )
     parser.add_argument("--top", "-t", type=int, default=30, help="Show top N anomalies (default 30)")
     parser.add_argument("--entity", help="Scan specific entity by NIF")
-    parser.add_argument("--signal", nargs="+", help="Only check specific signals: price, dominance, self_ref, ecosystem, bep, direct, competitors, exclusive")
+    parser.add_argument("--signal", nargs="+", help="Only check specific signals: price, dominance, self_ref, ecosystem, bep, direct, competitors, exclusive, rotating_winners, bid_suppression")
     parser.add_argument("--export", help="Export results to JSON")
 
     args = parser.parse_args()
