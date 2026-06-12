@@ -259,6 +259,17 @@ def handle_overview() -> dict:
         except (json.JSONDecodeError, OSError, UnicodeDecodeError):
             pass  # corrupt file — silently skip rather than 500
 
+    # Top Risk Municipalities (per-concelho composite risk score: 60% direct
+    # award share + 40% relative contract volume, normalised against the
+    # national baseline). Materialised by _build_top_risk_municipalities.py.
+    top_munis_path = DATA_DIR / "summary" / "top_risk_municipalities.json"
+    if top_munis_path.exists():
+        try:
+            with open(top_munis_path, encoding="utf-8") as _tm:
+                result["top_risk_municipalities"] = json.load(_tm)
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            pass  # corrupt file — silently skip rather than 500
+
     # Procurement summary — prefer the pre-computed cache
     cached_stats = _read_cache_json("stats")
     if cached_stats:

@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useRef } from "react";
 import { fmtNum, fmtEur, fmtPct, fmtYear } from "../api";
-import type { OverviewResponse, ProcurementResponse, Finding, FindingSeverity } from "../types";
+import type {
+  OverviewResponse,
+  ProcurementResponse,
+  Finding,
+  FindingSeverity,
+  TopRiskMunicipality,
+  MunicipalityRiskLevel,
+} from "../types";
 import SparkLine from "./SparkLine";
 
 // ── Severity palette ────────────────────────────────────────────────────────
@@ -122,6 +129,78 @@ function TopFindingsPanel({ findings, generatedAt }: { findings: Finding[]; gene
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// ── Top Risk Municipalities table ────────────────────────────────────────────
+// Mini-table of the 5 highest-risk concelhos. Composite risk score blends
+// direct-award share (60%) with relative contract volume (40%), normalised
+// against the national baseline. Each row has a coloured risk cell so the
+// reader can scan severity at a glance.
+const RISK_COLORS: Record<MunicipalityRiskLevel, string> = {
+  critical: "var(--danger)",
+  high: "#ff6b35",
+  medium: "var(--warning)",
+  low: "var(--info)",
+};
+
+function TopRiskMunicipalitiesTable({
+  rows,
+  generatedAt,
+}: {
+  rows: TopRiskMunicipality[];
+  generatedAt?: string;
+}) {
+  // Cap to top 5; the dashboard already has 2 hero charts + the donut + a
+  // sparkline, so we keep this table compact.
+  const top = useMemo(() => rows.slice(0, 5), [rows]);
+
+  if (top.length === 0) {
+    return (
+      <p className="section-empty">
+        No municipality data. Run <code>_build_top_risk_municipalities.py</code> to populate.
+      </p>
+    );
+  }
+
+  return (
+    <div className="risk-muni-wrap">
+      {generatedAt && (
+        <div className="findings-meta">
+          Last computed: {new Date(generatedAt).toLocaleString("pt-PT")}
+        </div>
+      )}
+      <table className="risk-muni-table" aria-label="Top 5 risk municipalities by composite score">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Municipality</th>
+            <th scope="col" className="num">Contracts</th>
+            <th scope="col" className="num">DA%</th>
+            <th scope="col" className="num">Risk</th>
+          </tr>
+        </thead>
+        <tbody>
+          {top.map((r, i) => (
+            <tr key={r.municipality} className={`risk-muni-row level-${r.risk_level}`}>
+              <td className="rank-cell">{i + 1}</td>
+              <td className="muni-name">{r.municipality}</td>
+              <td className="num">{fmtNum(r.total_contracts)}</td>
+              <td className="num">{r.direct_award_pct.toFixed(1)}%</td>
+              <td className="num">
+                <span
+                  className="risk-pill"
+                  style={{ background: RISK_COLORS[r.risk_level] ?? "var(--info)" }}
+                  aria-label={`Risk level ${r.risk_level}, score ${r.risk_score.toFixed(0)}`}
+                >
+                  {r.risk_level[0]?.toUpperCase()}{r.risk_score.toFixed(0)}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -250,6 +329,30 @@ export default function OverviewTab({ data, loading, procurement }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Top Risk Municipalities table — side-by-side with Top Findings so
+          the reader can immediately see which concelhos are driving the
+          national direct-award concentration. Conditional render: hidden
+          when the build script hasn't materialised the data yet. */}
+      {data.top_risk_municipalities && data.top_risk_municipalities.municipalities.length > 0 && (
+        <div className="section-card" style={{ marginTop: 16 }}>
+          <h3 className="section-title">
+            Top Risk Municipalities
+            <span style={{ marginLeft: 12, fontSize: 14, color: "var(--danger)" }}>
+              {data.top_risk_municipalities.by_risk_level.critical + data.top_risk_municipalities.by_risk_level.high} high-risk
+            </span>
+          </h3>
+          <p className="section-empty" style={{ fontSize: 12, margin: "4px 0 12px", lineHeight: 1.4 }}>
+            Top 5 concelhos by composite risk score (60% direct-award share + 40% relative contract
+            volume, normalised against the 65% national baseline). <strong>DA%</strong> = share of
+            contracts awarded via <em>ajuste direto</em>.
+          </p>
+          <TopRiskMunicipalitiesTable
+            rows={data.top_risk_municipalities.municipalities}
+            generatedAt={data.top_risk_municipalities.generated_at}
+          />
+        </div>
+      )}
 
       {/* Top Findings panel — the most actionable risk signals, sorted by
           severity. Reads from data/summary/top_findings.json (produced by

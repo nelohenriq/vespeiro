@@ -41,6 +41,7 @@ export interface OverviewResponse {
     total_value: number | null;
   };
   top_findings?: TopFindings;
+  top_risk_municipalities?: TopRiskMunicipalities;
 }
 
 // ── Justice ─────────────────────────────────────────────────────────────────
@@ -245,6 +246,28 @@ export interface TopFindings {
   total_findings: number;
   by_severity: Record<FindingSeverity, number>;
   findings: Finding[];
+}
+
+// ── Top Risk Municipalities (per-concelho composite risk) ────────────────
+
+export type MunicipalityRiskLevel = "critical" | "high" | "medium" | "low";
+
+export interface TopRiskMunicipality {
+  municipality: string;
+  total_contracts: number;
+  total_value: number;
+  direct_award_count: number;
+  direct_award_pct: number;
+  risk_score: number;   // 0–100, weighted blend
+  risk_level: MunicipalityRiskLevel;
+}
+
+export interface TopRiskMunicipalities {
+  generated_at: string;
+  total_municipalities: number;
+  by_risk_level: Record<MunicipalityRiskLevel, number>;
+  municipalities: TopRiskMunicipality[];
+  note?: string;  // human-readable message shown when municipalities is empty (e.g. "data not yet materialised — run build script")
 }
 
 // ── Health ──────────────────────────────────────────────────────────────────

@@ -402,6 +402,62 @@ body {
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
+
+/* ── Top Risk Municipalities table (Overview tab) ────────────────────── */
+.risk-muni-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.risk-muni-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.risk-muni-table thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.risk-muni-table thead th.num {
+  text-align: right;
+}
+.risk-muni-table tbody td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+.risk-muni-table tbody td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.risk-muni-row:hover td {
+  background: rgba(255, 255, 255, 0.03);
+}
+.rank-cell {
+  width: 28px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.muni-name {
+  font-weight: 500;
+  color: var(--text);
+}
+.risk-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #0e1320;
+  min-width: 44px;
+  text-align: center;
+}
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
