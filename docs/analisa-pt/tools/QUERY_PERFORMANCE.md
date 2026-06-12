@@ -190,3 +190,4 @@ Append new snapshots here. **Never overwrite the section above.**
 | Date | Commit | Q1 | Q2 | Q3 | Notes |
 |------|--------|----|----|----|----|
 | 2026-06-12 | `3994b2a` | 342 ms (stdev 36) | 266 ms (stdev 31) | < 1 ms | Initial baseline, n=10, Windows 10, mmap disabled |
+| 2026-06-12 | (this commit) | n/a | n/a | n/a | Fixed `_parse_budget` schema bug — was looking for `"Ano"` / `"Mês"` (short forms), now matches `"Ano Síntese"` / `"Mês Síntese"` via a new `_first_col` helper with case- and diacritic-insensitive fallback. Budget table: **35 rows -> 385 rows** (11x increase), 100% of rows now have non-zero month (was 0% for the affected datasets). Per-dataset: expense_economic 110, expense_functional 121, revenue 154, central_indicators 0 (different schema, separate parser needed). |

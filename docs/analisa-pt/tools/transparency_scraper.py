@@ -25,6 +25,7 @@ import re
 import sqlite3
 import argparse
 import time
+import unicodedata
 from pathlib import Path
 from datetime import datetime, timezone
 
@@ -754,6 +755,40 @@ def _parse_prr_milestones(xlsx_path: Path) -> list[tuple]:
     return rows
 
 
+def _first_col(headers_map: dict, *candidates: str):
+    """Return the first matching column index for any candidate name.
+
+    Tries exact match first, then case-insensitive match, then
+    diacritic-insensitive match (e.g. ``"cdigo"`` matches ``"código"``).
+    Returns None if no candidate matches.
+
+    Used by ``_parse_budget`` to robustly handle Portuguese header
+    names with/without accents and with/without the ``"Sntese"``
+    suffix that the 2021+ xlsx files use.
+    """
+    for c in candidates:
+        if c in headers_map:
+            return headers_map[c]
+    # Case-insensitive fallback
+    lower_map = {k.lower(): v for k, v in headers_map.items()}
+    for c in candidates:
+        cl = c.lower()
+        if cl in lower_map:
+            return lower_map[cl]
+    # Diacritic-insensitive fallback (handles Cdigo -> Código, etc.)
+    def _strip(s):
+        return "".join(
+            ch for ch in unicodedata.normalize("NFD", s)
+            if not unicodedata.combining(ch)
+        ).lower()
+    ascii_map = {_strip(k): v for k, v in headers_map.items()}
+    for c in candidates:
+        cs = _strip(c)
+        if cs in ascii_map:
+            return ascii_map[cs]
+    return None
+
+
 def _parse_budget(xlsx_path: Path, dataset_key: str) -> list[tuple]:
     """Parse a budget execution XLSX file into rows."""
     wb, ws = _safe_workbook(xlsx_path)
@@ -768,23 +803,34 @@ def _parse_budget(xlsx_path: Path, dataset_key: str) -> list[tuple]:
     year_match = re.search(r"(\d{4})", fname)
     default_year = int(year_match.group(1)) if year_match else None
 
+    # Resolve column indices (robust to accent / case / "Síntese" suffix
+    # variations across the 2021+ xlsx files).
+    nivel_key = _first_col(h, "Nível Orçamental", "Nível orçamental",
+                           "Classificação", "Código", "Codigo")
+    desc_key = _first_col(h, "Descrição", "Descricao",
+                          "Descrição da Despesa", "Descrição da Receita")
+    ano_key = _first_col(h, "Ano", "Ano Síntese", "Ano Sintese",
+                         "ano", "ano síntese", "ano sintese")
+    mes_key = _first_col(h, "Mês", "Mês Síntese", "Mês Sintese",
+                         "mes", "mês", "mês síntese", "mês sintese",
+                         "Mês Atual", "Mês atual")
+
     rows = []
     try:
         for row in ws.iter_rows(min_row=2, values_only=True):
             if not row:
                 continue
 
-            nivel_key = (h.get("Nível Orçamental") or h.get("Nível orçamental")
-                         or h.get("Classificação") or h.get("Código"))
             nivel = str(_cell(row, nivel_key)).strip()
-            desc_key = (h.get("Descrição") or h.get("Descrição da Despesa")
-                        or h.get("Descrição da Receita"))
             desc = str(_cell(row, desc_key)).strip()
             if not nivel and not desc:
                 continue
 
-            ano = _cell_int(row, h.get("Ano", h.get("ano")), default_year)
-            mes = _cell_int(row, h.get("Mês", h.get("mes")), 0)
+            # Column-value lookups: prefer the xlsx value (more reliable
+            # than the filename year) but fall back to the filename year
+            # for the small number of files without a year column.
+            ano = _cell_int(row, ano_key, default_year)
+            mes = _cell_int(row, mes_key, 0)
 
             rows.append((
                 dataset_key,
@@ -792,15 +838,12 @@ def _parse_budget(xlsx_path: Path, dataset_key: str) -> list[tuple]:
                 mes,
                 nivel[:200],
                 desc[:500],
-                _cell_num(row, h.get("Valor Previsto",
-                           h.get("Despesa prevista",
-                           h.get("Receita prevista")))),
-                _cell_num(row, h.get("Valor Realizado",
-                           h.get("Despesa realizada",
-                           h.get("Receita realizada")))),
-                _cell_num(row, h.get("Percentagem",
-                           h.get("% Execução",
-                           h.get("%")))),
+                _cell_num(row, _first_col(h, "Valor Previsto", "Despesa prevista",
+                                          "Receita prevista", "Dotacao", "Orcamento")),
+                _cell_num(row, _first_col(h, "Valor Realizado", "Despesa realizada",
+                                          "Receita realizada", "Executado", "Pago")),
+                _cell_num(row, _first_col(h, "Percentagem", "% Execucao",
+                                          "Percentagem de Execucao", "Taxa de Execucao", "%")),
             ))
     finally:
         wb.close()
