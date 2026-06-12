@@ -332,7 +332,7 @@ export default function OverviewTab({ data, loading, procurement }: Props) {
           visible even when the data isn't materialised yet, so the user
           can see the feature exists and what to do about it. */}
       {data.top_risk_municipalities && (data.top_risk_municipalities.municipalities.length > 0 || data.top_risk_municipalities.note) && (
-        <div className="section-card" style={{ marginTop: 16 }}>
+        <div className={`section-card${data.top_risk_municipalities.municipalities.length === 0 ? " is-pending" : ""}`} style={{ marginTop: 16 }}>
           <h3 className="section-title">
             Top Risk Municipalities
             {data.top_risk_municipalities.municipalities.length > 0 && (
