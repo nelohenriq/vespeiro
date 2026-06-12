@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# Pre-commit hook: fail if any new `sqlite3.connect(` lands outside the
+# allow-list of files that legitimately use the raw API.
+#
+# The 54-file sweep (commit 2bbff68) migrated every other call site to
+# utils_db.connect (which centralizes PRAGMAs + row_factory + connection
+# tuning). This hook enforces that the sweep sticks.
+#
+# Allow-list (the ONLY files that may use raw sqlite3.connect):
+#   - utils_db.py                   the centralized helper itself
+#   - add_adjudicatario_nif.py      standalone one-time migration script
+#   - _sweep_*.py                   the sweep tool itself (dry-run reporting)
+#
+# Install: run `scripts/install-git-hooks.sh` (POSIX) or
+#          `scripts\install-git-hooks.bat` (Windows) once per clone, OR
+#          `git config core.hooksPath .githooks`
+#
+# Skip with: `git commit --no-verify` (escape hatch for emergencies)
+
+set -e
+
+# Files where raw sqlite3.connect is allowed
+ALLOWLIST_REGEX='^(docs/analisa-pt/tools/utils_db\.py|docs/analisa-pt/tools/add_adjudicatario_nif\.py|docs/analisa-pt/tools/_sweep_.*\.py)$'
+
+# Get the list of staged .py files (added, copied, or modified — not deleted)
+STAGED_PY=$(git diff --cached --name-only --diff-filter=ACM -- '*.py' || true)
+
+if [ -z "$STAGED_PY" ]; then
+    exit 0
+fi
+
+VIOLATIONS=""
+
+for file in $STAGED_PY; do
+    # Skip allow-listed files
+    if echo "$file" | grep -qE "$ALLOWLIST_REGEX"; then
+        continue
+    fi
+    # Get the staged version of the file (what's about to be committed)
+    staged_content=$(git show ":$file" 2>/dev/null) || continue
+    # Grep for raw sqlite3.connect( / _sqlite3.connect(
+    # Also catch the `from sqlite3 import connect` bypass pattern (someone
+    # could otherwise import the function directly and use it without ever
+    # writing the literal `sqlite3.connect(`).
+    if echo "$staged_content" | grep -nE '(^|[^a-zA-Z0-9_])(sqlite3|_sqlite3)\.connect\(|from sqlite3 import[^\n]*\bconnect\b' >/dev/null 2>&1; then
+        # Find the line numbers in the staged content
+        matches=$(echo "$staged_content" | grep -nE '(^|[^a-zA-Z0-9_])(sqlite3|_sqlite3)\.connect\(|from sqlite3 import[^\n]*\bconnect\b' || true)
+        while IFS= read -r line; do
+            lineno=$(echo "$line" | cut -d: -f1)
+            code=$(echo "$line" | cut -d: -f2-)
+            VIOLATIONS="${VIOLATIONS}  ${file}:${lineno}: ${code}"$'\n'
+        done <<< "$matches"
+    fi
+done
+
+if [ -n "$VIOLATIONS" ]; then
+    echo ""
+    echo "❌ Pre-commit hook: raw sqlite3.connect( detected outside the allow-list."
+    echo ""
+    echo "The sweep centralized every connection through utils_db.connect so"
+    echo "PRAGMAs + row_factory + connection tuning live in one place. New code"
+    echo "should use the helper too:"
+    echo ""
+    echo "    from utils_db import connect as db_connect"
+    echo "    conn = db_connect('data/foo.db')"
+    echo ""
+    echo "Allowed files (raw sqlite3.connect is intentional):"
+    echo "    - docs/analisa-pt/tools/utils_db.py"
+    echo "    - docs/analisa-pt/tools/add_adjudicatario_nif.py"
+    echo "    - docs/analisa-pt/tools/_sweep_*.py"
+    echo ""
+    echo "Violations:"
+    printf "%b" "$VIOLATIONS"
+    echo ""
+    echo "Fix: replace with db_connect(...), or use --no-verify if intentional."
+    echo ""
+    exit 1
+fi
+
+exit 0
