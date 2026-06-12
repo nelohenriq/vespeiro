@@ -1,6 +1,6 @@
 # Query Performance Baseline
 
-**Snapshot:** post-Tier 1 wire-up (Q1 2026)
+**Snapshot:** post-Tier 1 wire-up (Q2 2026)
 **Platform:** Windows 10 (10.0.19045)
 **Purpose:** canonical reference numbers for the hot query patterns in
 the analisa-pt tools. **Re-measure after any schema/optimization
@@ -76,8 +76,8 @@ Before the Tier 1 wire-up and the add_adjudicatario_nif.py migration:
 
 - **`transparency_scraper.py crossref`** — 3+ minutes (180 s+). Was
   scanning all 1.6 M contratos and running a Python regex on
-  `adjudicatarios` per row to extract the first supplier NIF. Now
-  266 ms (Q2 above) — a **~400× speedup**.
+  `  adjudicatarios` per row to extract the first supplier NIF. Now
+  266 ms (Q2 above) — a **~700× speedup** (180 s → 266 ms).
 - **per-buyer aggregate** — hundreds of ms using the single-column
   `idx_c_adjudicante_nif` (no composite covering the value column).
   Now 342 ms with `idx_contratos_buyer_value` as a covering index.
@@ -189,4 +189,4 @@ Append new snapshots here. **Never overwrite the section above.**
 
 | Date | Commit | Q1 | Q2 | Q3 | Notes |
 |------|--------|----|----|----|----|
-| 2026-06-12 | (Tier 1 wire-up) | 342 ms (stdev 36) | 266 ms (stdev 31) | < 1 ms | Initial baseline, n=10, Windows 10, mmap disabled |
+| 2026-06-12 | `3994b2a` | 342 ms (stdev 36) | 266 ms (stdev 31) | < 1 ms | Initial baseline, n=10, Windows 10, mmap disabled |
