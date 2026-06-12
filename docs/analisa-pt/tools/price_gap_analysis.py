@@ -17,10 +17,10 @@ Usage:
 
 import sys
 import json
-import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -40,7 +40,7 @@ def load_anuncios() -> dict[tuple[str, str], dict]:
         print(f"  ERROR: Anúncios index not found at {ANUNCIOS_DB}")
         print(f"  Run: python announce_index.py index")
         sys.exit(1)
-    conn = sqlite3.connect(str(ANUNCIOS_DB))
+    conn = db_connect(str(ANUNCIOS_DB))
     rows = conn.execute(
         "SELECT nAnuncio, nifEntidade, designacaoEntidade, PrecoBase, "
         "tiposContrato, dataPublicacao, CPVs, tipoActo "
@@ -73,7 +73,7 @@ def load_contratos() -> list[dict]:
         print(f"  ERROR: procurement.db not found at {PROCUREMENT_DB}")
         print(f"  Run: python procurement_db.py build")
         sys.exit(1)
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(PROCUREMENT_DB))
     rows = conn.execute(
         "SELECT idcontrato, nAnuncio, precoContratual, adjudicante_nif, adjudicante_nome,"
         " adjudicatarios, objectoContrato, tipoContrato, dataPublicacao, dataCelebracaoContrato"

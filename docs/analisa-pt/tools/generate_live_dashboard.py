@@ -30,6 +30,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -69,8 +70,7 @@ def open_db(name):
     if not path or not path.exists():
         return None
     try:
-        conn = sqlite3.connect(str(path))
-        conn.row_factory = sqlite3.Row
+        conn = db_connect(str(path))
         return conn
     except Exception:
         return None

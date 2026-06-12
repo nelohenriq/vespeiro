@@ -17,6 +17,7 @@ from pathlib import Path
 from collections import defaultdict
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -28,8 +29,7 @@ FUNDAO_NIF = "506215695"
 
 def query_all_data() -> dict:
     """Query all data needed for the Fundão audit report."""
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
 
     # 1. All Fundao contracts
     fundao_contracts = conn.execute(

@@ -35,6 +35,7 @@ from entity_profile import (
 )
 
 from utils import fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -50,8 +51,7 @@ def load_bep_entities():
     if not BEP_DB.exists():
         print(f"ERROR: BEP database not found at {BEP_DB}")
         sys.exit(1)
-    conn = sqlite3.connect(str(BEP_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(BEP_DB))
     entities = {}
     for r in conn.execute(
         "SELECT nif, display_name, listing_count, id FROM bep_entities "
@@ -71,8 +71,7 @@ def load_procurement_stats():
     if not PROCUREMENT_DB.exists():
         print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
         sys.exit(1)
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
     stats = {}
     for r in conn.execute(
         """SELECT adjudicante_nif, adjudicante_nome,
@@ -115,8 +114,7 @@ def get_entity_contracts_from_db(nif):
     """Get procurement contracts directly from procurement.db by buyer NIF."""
     if not PROCUREMENT_DB.exists():
         return []
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
     rows = conn.execute(
         """SELECT idcontrato, adjudicante_nif, adjudicante_nome, objectoContrato,
                   adjudicatarios, precoContratual, precoBaseProcedimento,

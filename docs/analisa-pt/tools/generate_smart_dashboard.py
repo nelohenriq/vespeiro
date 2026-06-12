@@ -21,7 +21,6 @@ Usage:
 import sys
 import json
 import html as html_mod
-import sqlite3
 import argparse
 import webbrowser
 from pathlib import Path
@@ -32,6 +31,7 @@ try:
 except ImportError:
     pass  # fallback: use local definition if available
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -56,7 +56,7 @@ def _safe_int(val, default=0):
 # ---------------------------------------------------------------------------
 
 def search_entities(query="", nif="", limit=20):
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     if nif:
         rows = conn.execute(
             "SELECT id, display_name, entidade, organismo, nif, listing_count "
@@ -85,7 +85,7 @@ def search_entities(query="", nif="", limit=20):
 
 
 def get_entity_listings(entity_id):
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT titulo, estado, categoria, tipo_oferta, remuneracao, "
         "total_postos, local_trabalho, data_publicacao, data_limite, url "

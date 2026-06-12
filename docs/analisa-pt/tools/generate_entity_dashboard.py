@@ -16,6 +16,7 @@ import argparse
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -25,8 +26,7 @@ DEFAULT_OUTPUT = DATA_DIR / "entity_dashboard.html"
 
 def query_data(top_n: int = 50) -> dict:
     """Query procurement.db for entity ranking data."""
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
 
     # Top buyers
     buyers = conn.execute(

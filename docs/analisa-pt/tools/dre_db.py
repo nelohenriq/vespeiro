@@ -11,6 +11,7 @@ Tables:
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
+from utils_db import connect as db_connect
 
 DB_PATH = Path(__file__).parent / "dre_index.db"
 
@@ -52,7 +53,7 @@ def _now_iso() -> str:
 def init_db(db_path: str | Path | None = None) -> sqlite3.Connection:
     """Create tables if needed and return a connection."""
     path = db_path or DB_PATH
-    conn = sqlite3.connect(str(path), timeout=10)
+    conn = db_connect(str(path), timeout=10)
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA busy_timeout=5000")
     conn.execute("PRAGMA foreign_keys=ON")

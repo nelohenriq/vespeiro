@@ -16,7 +16,6 @@ Usage:
 import sys
 import json
 import re
-import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict
@@ -68,7 +67,7 @@ camara_to_municipio, municipio_to_camara = _load_nif_mapping()
 
 def search_entities(query: str = "", nif: str = "", limit: int = 20) -> list[dict]:
     """Search BEP entities by name or NIF."""
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     if nif:
         rows = conn.execute(
             "SELECT id, display_name, entidade, organismo, nif, listing_count "
@@ -98,7 +97,7 @@ def search_entities(query: str = "", nif: str = "", limit: int = 20) -> list[dic
 
 def get_entity_listings(entity_id: str) -> list[dict]:
     """Get all BEP job listings for an entity."""
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT cod_oferta, titulo, estado, categoria, tipo_oferta, "
         "remuneracao, total_postos, local_trabalho, data_publicacao, "
@@ -151,6 +150,7 @@ def get_entity_contracts(nif: str, entity_name: str = "", entidade: str = "") ->
 
 
 from utils import extract_location as _extract_location
+from utils_db import connect as db_connect
 
 
 def _find_contracts_by_name(index: dict, entity_name: str,
@@ -194,7 +194,7 @@ def get_entity_dre(entity_name: str) -> list[dict]:
     """Search DRE publications for mentions of the entity name."""
     if not DRE_DB.exists():
         return []
-    conn = sqlite3.connect(str(DRE_DB))
+    conn = db_connect(str(DRE_DB))
     # Search in publication titles and document titles
     rows = conn.execute(
         "SELECT pub_id, serie, numero, year, title, eli_url, redirect_url "
@@ -214,7 +214,7 @@ def get_entity_laws(entity_name: str) -> list[dict]:
     """Search law projects for mentions of the entity name."""
     if not LAW_DB.exists():
         return []
-    conn = sqlite3.connect(str(LAW_DB))
+    conn = db_connect(str(LAW_DB))
     rows = conn.execute(
         "SELECT ini_id, ini_nr, legislatura, ini_desc_tipo, ini_titulo, "
         "autor_gp, latest_fase, latest_fase_date, vote_result "

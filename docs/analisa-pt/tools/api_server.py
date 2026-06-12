@@ -24,6 +24,7 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse, parse_qs
+from utils_db import connect as db_connect
 
 # Top-level import (procurement_cache.py doesn't import api_server, so
 # no circular risk). Used by the live handler to compute top_sellers
@@ -167,8 +168,7 @@ def _get_db(name: str) -> Optional[sqlite3.Connection]:
     if not path or not path.exists():
         return None
     timeout = 60 if name == "procurement" else 10
-    conn = sqlite3.connect(str(path), timeout=timeout)
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(path), timeout=timeout)
     conn.execute("PRAGMA journal_mode=WAL")
     return conn
 

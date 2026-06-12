@@ -25,6 +25,7 @@ import re
 from pathlib import Path
 from collections import Counter
 from difflib import get_close_matches
+from utils_db import connect as db_connect
 from caop_codes import (
     DISTRICT_CODES, CODE_TO_DISTRICT, MUNICIPALITY_CODES,
     CODE_TO_MUNICIPALITY, resolve_municipality, resolve_municipality_6digit,
@@ -142,7 +143,7 @@ def _ensure_database():
     # Quick check: does the file exist and have the contratos table?
     if DB_PATH.exists():
         try:
-            conn = sqlite3.connect(str(DB_PATH))
+            conn = db_connect(str(DB_PATH))
             has_table = conn.execute(
                 "SELECT name FROM sqlite_master WHERE type='table' AND name='contratos'"
             ).fetchone()
@@ -194,7 +195,7 @@ class FreguesiaResolver:
 
     def __init__(self):
         _ensure_database()
-        self.conn = sqlite3.connect(str(DB_PATH))
+        self.conn = db_connect(str(DB_PATH))
         self.conn.row_factory = sqlite3.Row
         self.muni_map = self._load_municipality_map()
         self.local_exec_map = self._load_existing_mapping()

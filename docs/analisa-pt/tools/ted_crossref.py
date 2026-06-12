@@ -26,6 +26,7 @@ import argparse
 import time
 from pathlib import Path
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -75,7 +76,7 @@ CPV_SERVICES_PREFIXES = ("5", "6", "7", "8", "9")  # Services
 def init_ted_db(db_path: Path = TED_DB) -> sqlite3.Connection:
     """Initialize the TED notices cache database."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = db_connect(str(db_path))
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ted_notices (
@@ -308,8 +309,7 @@ def cmd_check(args):
         print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
         sys.exit(1)
     
-    conn_proc = sqlite3.connect(str(PROCUREMENT_DB))
-    conn_proc.row_factory = sqlite3.Row
+    conn_proc = db_connect(str(PROCUREMENT_DB))
     
     min_value = args.min_value
     

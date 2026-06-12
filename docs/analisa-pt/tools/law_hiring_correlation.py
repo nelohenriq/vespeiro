@@ -14,13 +14,13 @@ Usage:
 """
 
 import sys
-import sqlite3
 import json
 import re
 import argparse
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timedelta
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 LAW_DB = SCRIPT_DIR / "law_index.db"
@@ -108,7 +108,7 @@ def classify_bep(categoria: str, funcoes: str = "", organismo: str = "") -> list
 
 def load_law_timeline(db_path: Path) -> dict:
     """Load law projects and events into a timeline."""
-    conn = sqlite3.connect(str(db_path))
+    conn = db_connect(str(db_path))
 
     projects = conn.execute(
         "SELECT ini_id, ini_desc_tipo, ini_titulo, latest_fase, latest_fase_date "
@@ -154,7 +154,7 @@ def load_law_timeline(db_path: Path) -> dict:
 
 def load_bep_timeline(db_path: Path) -> dict:
     """Load BEP listings into a daily timeline grouped by sector."""
-    conn = sqlite3.connect(str(db_path))
+    conn = db_connect(str(db_path))
 
     rows = conn.execute(
         "SELECT data_publicacao, categoria, funcoes, organismo "

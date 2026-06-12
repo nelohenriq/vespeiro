@@ -6,6 +6,7 @@ from pathlib import Path
 from unidecode import unidecode
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -46,7 +47,7 @@ def audit_nif_mapping():
 def audit_bep():
     if not BEP_DB.exists(): return {"error": "not found"}
     try:
-        conn = sqlite3.connect(str(BEP_DB))
+        conn = db_connect(str(BEP_DB))
         t = conn.execute("SELECT COUNT(*) FROM bep_entities WHERE nif IS NOT NULL AND nif != ''").fetchone()[0]
         c = conn.execute("SELECT COUNT(DISTINCT nif) FROM bep_entities WHERE nif IS NOT NULL AND nif != '' AND (lower(display_name) LIKE 'camara municipal%' OR lower(display_name) LIKE 'municipio%')").fetchone()[0]
         conn.close()

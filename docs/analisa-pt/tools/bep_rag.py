@@ -30,6 +30,7 @@ from pathlib import Path
 
 import lancedb
 import pyarrow as pa
+from utils_db import connect as db_connect
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -206,7 +207,7 @@ def cmd_index(args):
         print("Run `bep_scraper.py collect` first to build the index.")
         sys.exit(1)
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA foreign_keys=ON")
     listings = _all_listings(conn, entity_filter=args.entity)
     conn.close()

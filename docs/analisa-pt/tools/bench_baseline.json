@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "timestamp": "2026-06-12T03:23:49",
+  "platform": "win32",
+  "python": "3.12.10",
+  "db_path": "D:\\vespeiro\\docs\\analisa-pt\\tools\\data\\procurement.db",
+  "db_size_mb": 2108.6,
+  "pragma_tuning": [
+    "journal_mode=WAL",
+    "synchronous=NORMAL",
+    "temp_store=MEMORY",
+    "cache_size=-200000"
+  ],
+  "n_runs": 5,
+  "queries": {
+    "q1": {
+      "name": "Q1 per-buyer aggregate",
+      "description": "9,794 buyers grouped with contract counts and total value",
+      "rows": 9794,
+      "n_runs": 5,
+      "min_ms": 358.9,
+      "median_ms": 367.4,
+      "max_ms": 410.3,
+      "stdev_ms": 20.3,
+      "index_used": "SEARCH contratos USING COVERING INDEX idx_contratos_buyer_value (ANY(adjudicante_nif) AND precoContratual>?)"
+    },
+    "q2": {
+      "name": "Q2 crossref regex scan (pre-Tier 1 pattern)",
+      "description": "1.6 M rows scanned, Python regex extracts supplier NIFs per row",
+      "rows": 79065,
+      "n_runs": 5,
+      "min_ms": 177871.4,
+      "median_ms": 186228.8,
+      "max_ms": 194244.4,
+      "stdev_ms": 6123.1,
+      "index_used": "none (full table scan + Python regex)"
+    },
+    "q3": {
+      "name": "Q3 PRR entities streaming (openpyxl)",
+      "description": "Parse prr_entities_listagem-de-entidades-prr-20260605.xlsx (40 MB) via openpyxl read_only=True",
+      "rows": 764018,
+      "n_runs": 3,
+      "min_ms": 79451.2,
+      "median_ms": 113943.0,
+      "max_ms": 120590.3,
+      "stdev_ms": 22084.3,
+      "index_used": "n/a (xlsx parsing, not SQL)"
+    }
+  }
+}

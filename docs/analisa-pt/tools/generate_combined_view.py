@@ -19,11 +19,11 @@ Usage:
 import sys
 import json
 import html as html_mod
-import sqlite3
 import argparse
 import webbrowser
 from pathlib import Path
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -48,7 +48,7 @@ def _safe_int(val, default=0):
 def load_all_entities():
     if not BEP_DB.exists():
         return []
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT id, display_name, entidade, organismo, nif, listing_count "
         "FROM bep_entities WHERE listing_count > 0 ORDER BY listing_count DESC"
@@ -64,7 +64,7 @@ def load_all_entities():
 def load_all_listings():
     if not BEP_DB.exists():
         return {}
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT entity_id, titulo, estado, categoria, tipo_oferta, "
         "remuneracao, total_postos, data_publicacao, local_trabalho "
@@ -86,7 +86,7 @@ def load_listings_for_network():
     """Lighter load for the network graph (categories, dates, locations)."""
     if not BEP_DB.exists():
         return {}
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT entity_id, categoria, tipo_oferta, local_trabalho, data_publicacao "
         "FROM bep_listings"

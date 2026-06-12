@@ -18,6 +18,7 @@ from pathlib import Path
 from collections import defaultdict
 
 from utils import fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -28,8 +29,7 @@ DEFAULT_OUTPUT = DATA_DIR / "entity_network_viz.html"
 
 def query_network(top_n: int = 50, min_contracts: int = 2, entity_filter: str = "") -> dict:
     """Query procurement.db for network relationship data."""
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
 
     # Aggregate in SQL first, then parse adjudicatarios only for top groups
     rows = conn.execute("""

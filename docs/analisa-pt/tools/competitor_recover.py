@@ -34,6 +34,7 @@ from collections import defaultdict
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from urllib.parse import quote
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -51,8 +52,7 @@ MAX_RETRIES = 3
 
 
 def get_db():
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
     return conn
 
 

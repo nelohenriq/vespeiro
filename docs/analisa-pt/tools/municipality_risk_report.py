@@ -21,6 +21,7 @@ from collections import defaultdict
 # Import shared helpers from anomaly_scanner
 sys.path.insert(0, str(Path(__file__).parent))
 from utils import fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -51,7 +52,6 @@ NUTS_REGIONS = {
 
 def list_regions(conn):
     """Print available NUTS regions."""
-    conn.row_factory = sqlite3.Row
     rows = conn.execute("""
         SELECT NUTs, COUNT(*) as cnt, COUNT(DISTINCT adjudicante_nif) as entities
         FROM contratos WHERE NUTs IS NOT NULL AND NUTs != ''
@@ -68,12 +68,11 @@ def list_regions(conn):
 
 def scan_municipalities(min_contracts=5, region=None):
     """Scan all municipalities for combined procurement risk signals."""
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
 
     bep_map = {}
     if BEP_DB.exists():
-        bep_conn = sqlite3.connect(str(BEP_DB))
+        bep_conn = db_connect(str(BEP_DB))
         for r in bep_conn.execute(
             "SELECT nif, listing_count FROM bep_entities WHERE nif IS NOT NULL AND nif != ''"
         ).fetchall():
@@ -324,8 +323,7 @@ def main():
     args = parser.parse_args()
 
     if args.list_regions:
-        conn = sqlite3.connect(str(PROCUREMENT_DB))
-        conn.row_factory = sqlite3.Row
+        conn = db_connect(str(PROCUREMENT_DB))
         list_regions(conn)
         conn.close()
         return

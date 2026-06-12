@@ -25,6 +25,7 @@ from pathlib import Path
 from urllib.parse import urlparse, urljoin, quote
 from collections import defaultdict
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -81,7 +82,7 @@ PLATFORMS = {
 def init_db() -> sqlite3.Connection:
     """Initialize the tender platforms database."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(SCRAPER_DB))
+    conn = db_connect(str(SCRAPER_DB))
     conn.execute("PRAGMA journal_mode=WAL")
 
     conn.execute("""

@@ -22,7 +22,6 @@ Usage:
 
 import json
 import re
-import sqlite3
 import argparse
 import sys
 import textwrap
@@ -31,6 +30,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -104,8 +104,8 @@ def load_base_n_anuncio(proc_conn) -> dict:
 def analyze_cdgov_matches() -> dict:
     """Match PRR contracts to BASE contracts via cd_base_gov ↔ nAnuncio."""
     check_dbs()
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     print("Loading PRR contracts with cd_base_gov...", file=sys.stderr)
     prr_contracts = load_prr_cd_base_gov(conn)
@@ -375,8 +375,8 @@ def analyze_text_matches(min_similarity: float = 0.3) -> dict:
     Only reports matches above min_similarity threshold.
     """
     check_dbs()
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     print("Loading and pre-tokenizing PRR contract descriptions...", file=sys.stderr)
     prr_tokenized = _pretokenize_prr_texts(conn)
@@ -518,8 +518,8 @@ def analyze_composite_risk() -> dict:
     check_dbs()
 
     # --- Load cd_base_gov matches ---
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     # Load PRR contracts with cd_base_gov
     prr_cdbg = load_prr_cd_base_gov(conn)
@@ -780,8 +780,8 @@ def fundao_deep_dive() -> dict:
       - Execution gap analysis
     """
     check_dbs()
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     # --- Find Fundão PRR entities ---
     fundao_entities = conn.execute(

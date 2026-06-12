@@ -5,6 +5,7 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 from unidecode import unidecode
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 FINDINGS_MD = SCRIPT_DIR.parent / "FINDINGS.md"
@@ -41,7 +42,7 @@ def load_json(path):
 
 def load_bep():
     if not BEP_DB.exists(): return []
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute("SELECT display_name, nif, listing_count FROM bep_entities WHERE nif IS NOT NULL AND nif != ''").fetchall()
     conn.close()
     return rows

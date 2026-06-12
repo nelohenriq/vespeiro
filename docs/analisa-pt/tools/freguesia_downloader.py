@@ -15,11 +15,11 @@ Usage:
 
 import sys
 import json
-import sqlite3
 import argparse
 import urllib.request
 from pathlib import Path
 from typing import Dict, List, Optional
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -218,7 +218,7 @@ def _cross_validate_with_procurement(freguesias: Dict[str, Dict]):
         return
 
     try:
-        conn = sqlite3.connect(str(DB_PATH))
+        conn = db_connect(str(DB_PATH))
         cursor = conn.execute("SELECT COUNT(DISTINCT adjudicante_nif) FROM contratos WHERE adjudicante_nif IN ({})".format(
             ','.join(['?'] * len(freguesias))))
         match_count = cursor.fetchone()[0]

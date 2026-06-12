@@ -28,6 +28,7 @@ import time
 from pathlib import Path
 from collections import defaultdict
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -71,7 +72,7 @@ API_BASE = "https://dados.gov.pt/api/1/datasets/"
 def init_db() -> sqlite3.Connection:
     """Initialize the modifications database."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
 
     conn.execute("""

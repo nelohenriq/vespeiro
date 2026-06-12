@@ -34,7 +34,6 @@ Usage:
 import argparse
 import json
 import re
-import sqlite3
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -42,6 +41,7 @@ from typing import Dict, List, Optional, Tuple
 
 from unidecode import unidecode
 from utils import format_currency, normalize_name, extract_location_typed as extract_location
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -83,7 +83,7 @@ def load_bep_entities() -> Dict[str, List[Dict]]:
         print(f"Error: BEP database not found at {BEP_DB}", file=sys.stderr)
         return {}
 
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT display_name, nif, listing_count FROM bep_entities "
         "WHERE nif IS NOT NULL AND nif != ''"

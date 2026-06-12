@@ -31,6 +31,7 @@ from pathlib import Path
 
 import lancedb
 import pyarrow as pa
+from utils_db import connect as db_connect
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -256,7 +257,7 @@ def cmd_index(args):
         print("Run `law_tracker.py fetch --legislatura L17 --with-events` first.")
         sys.exit(1)
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA foreign_keys=ON")
     projects = _all_projects(conn, legislatura=args.legislatura)
     conn.close()

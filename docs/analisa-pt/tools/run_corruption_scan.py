@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 SCRIPT_DIR = Path(__file__).parent
@@ -660,7 +661,7 @@ def step_justice_crossref(step: PipelineStep):
     # ══════════════════════════════════════════════════════════════════════
     jconn = None
     try:
-        jconn = _sqlite3.connect(str(justice_db), timeout=30)
+        jconn = db_connect(str(justice_db), timeout=30)
         jconn.row_factory = _sqlite3.Row
 
         # ── 1. Corruption case trends ────────────────────────────────────
@@ -758,13 +759,13 @@ def step_justice_crossref(step: PipelineStep):
     # ══════════════════════════════════════════════════════════════════════
     pconn = None
     try:
-        pconn = _sqlite3.connect(str(PROCUREMENT_DB), timeout=60)
+        pconn = db_connect(str(PROCUREMENT_DB), timeout=60)
         pconn.row_factory = _sqlite3.Row
 
         # Create indexes in separate connection to avoid locking
         print("  Ensuring procurement indexes...")
         try:
-            idx_conn = _sqlite3.connect(str(PROCUREMENT_DB), timeout=30)
+            idx_conn = db_connect(str(PROCUREMENT_DB), timeout=30)
             idx_conn.execute("CREATE INDEX IF NOT EXISTS idx_proc_price ON contratos(precoContratual)")
             idx_conn.execute("CREATE INDEX IF NOT EXISTS idx_proc_base ON contratos(precoBaseProcedimento)")
             idx_conn.execute("CREATE INDEX IF NOT EXISTS idx_proc_ano ON contratos(Ano)")
@@ -955,8 +956,8 @@ def step_ine_crossref(step: PipelineStep):
     # Cross-reference summary
     try:
         import sqlite3 as _sqlite3
-        iconn = _sqlite3.connect(str(ine_db))
-        pconn = _sqlite3.connect(str(PROCUREMENT_DB))
+        iconn = db_connect(str(ine_db))
+        pconn = db_connect(str(PROCUREMENT_DB))
 
         ine_total = iconn.execute("SELECT COUNT(*) FROM ine_observations").fetchone()[0]
         ine_indicators = iconn.execute(
@@ -996,7 +997,7 @@ def step_freguesia_corruption(step: PipelineStep):
     # Check if ine_* columns exist — if not, run resolver update first
     try:
         import sqlite3 as _sqlite3
-        _conn = _sqlite3.connect(str(PROCUREMENT_DB))
+        _conn = db_connect(str(PROCUREMENT_DB))
         _conn.execute("SELECT ine_municipality FROM contratos LIMIT 1")
         _conn.close()
     except Exception:

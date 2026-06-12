@@ -24,6 +24,7 @@ import subprocess
 import time
 from pathlib import Path
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -73,7 +74,7 @@ def init_db(force: bool = False) -> sqlite3.Connection:
         DB_PATH.unlink()
         print("  Deleted existing database.")
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("PRAGMA synchronous=NORMAL")
     conn.execute("PRAGMA cache_size=-64000")  # 64MB cache
@@ -582,7 +583,7 @@ def cmd_status(args):
     mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
     age_days = (datetime.now() - mtime).days
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     tables = [r[0] for r in conn.execute(
         "SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
 
@@ -614,7 +615,7 @@ def cmd_stats(args):
         print("  Database not found. Run 'build' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*60}")
     print(f"  Procurement Database — Statistics")
@@ -672,8 +673,7 @@ def cmd_query(args):
         print("  Database not found. Run 'build' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
 
     try:
         rows = conn.execute(args.sql).fetchall()

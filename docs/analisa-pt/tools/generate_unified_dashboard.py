@@ -26,6 +26,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -63,8 +64,7 @@ def open_db(name):
     if not path or not path.exists():
         return None
     try:
-        conn = sqlite3.connect(str(path), timeout=30)
-        conn.row_factory = sqlite3.Row
+        conn = db_connect(str(path), timeout=30)
         conn.execute("PRAGMA journal_mode=WAL")
         conn.execute("PRAGMA busy_timeout=5000")
         conn.execute("PRAGMA cache_size=-64000")
@@ -448,7 +448,7 @@ def query_transparency(conn):
     ted_path = DATA_DIR / "ted_notices.db"
     if ted_path.exists():
         try:
-            tc = sqlite3.connect(str(ted_path), timeout=10)
+            tc = db_connect(str(ted_path), timeout=10)
             result["ted_notices"] = tc.execute("SELECT COUNT(*) FROM ted_notices").fetchone()[0]
             tc.close()
         except Exception:

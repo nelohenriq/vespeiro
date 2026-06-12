@@ -32,6 +32,7 @@ import argparse
 import time
 from pathlib import Path
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -131,7 +132,7 @@ def init_db(force: bool = False) -> sqlite3.Connection:
         DB_PATH.unlink()
         print("  Deleted existing database.")
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
 
     # Main observations table
@@ -520,7 +521,7 @@ def cmd_status(args):
     mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
     age_days = (datetime.now() - mtime).days
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     total = conn.execute("SELECT COUNT(*) FROM ine_observations").fetchone()[0]
     indicators = conn.execute("SELECT COUNT(DISTINCT indicator_code) FROM ine_observations").fetchone()[0]
     years = conn.execute("SELECT MIN(year), MAX(year) FROM ine_observations WHERE year > 0").fetchone()
@@ -549,7 +550,7 @@ def cmd_stats(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*70}")
     print(f"  INE Statistics — Overview")
@@ -634,7 +635,7 @@ def _cmd_category_analysis(args, category, label):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     top_n = getattr(args, "top", 10)
 
     print(f"\n{'='*70}")
@@ -731,11 +732,11 @@ def cmd_compare(args):
         return
 
     procurement_db = SCRIPT_DIR / "data" / "procurement.db"
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     has_procurement = procurement_db.exists()
     proc_conn = None
     if has_procurement:
-        proc_conn = sqlite3.connect(str(procurement_db))
+        proc_conn = db_connect(str(procurement_db))
 
     print(f"\n{'='*70}")
     print(f"  INE Statistics × Procurement Cross-Reference")
@@ -781,8 +782,7 @@ def cmd_query(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
 
     try:
         rows = conn.execute(args.sql).fetchall()
@@ -810,7 +810,7 @@ def cmd_export(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     data = {}
     rows = conn.execute("""

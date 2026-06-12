@@ -20,6 +20,7 @@ import json
 import sqlite3
 import argparse
 from pathlib import Path
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -31,8 +32,7 @@ def get_conn() -> sqlite3.Connection:
     if not DB_PATH.exists():
         print("ERROR: procurement.db not found. Run: python procurement_db.py build")
         sys.exit(1)
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
     return conn
 
 

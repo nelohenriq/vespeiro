@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 from utils import parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -51,7 +52,7 @@ def load_db_relationships() -> Tuple[Dict, List]:
         return {}, []
 
     print("Loading from procurement.db...", file=sys.stderr)
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(PROCUREMENT_DB))
     rows = conn.execute(
         "SELECT adjudicante_nif, adjudicante_nome, adjudicatarios,"
         " precoContratual, tipoContrato, objectoContrato"

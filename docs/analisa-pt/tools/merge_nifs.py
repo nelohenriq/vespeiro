@@ -11,12 +11,12 @@ Usage:
     python merge_nifs.py --threshold 80   # Lower fuzzy match threshold (default 75)
 """
 
-import sqlite3
 import re
 import sys
 import unicodedata
 from pathlib import Path
 from difflib import SequenceMatcher
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -71,7 +71,7 @@ def build_nif_lookup_from_db() -> dict[str, str]:
         return {}
     
     print(f"  Loading from procurement.db...")
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(PROCUREMENT_DB))
     rows = conn.execute(
         "SELECT adjudicante_nif, adjudicante_nome FROM contratos"
         " WHERE adjudicante_nif IS NOT NULL AND adjudicante_nif != ''"

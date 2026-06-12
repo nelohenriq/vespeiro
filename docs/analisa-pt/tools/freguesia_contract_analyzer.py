@@ -41,6 +41,7 @@ FREGUESIA_MAP = SCRIPT_DIR / "data" / "freguesia_mapping.json"
 # Import shared utilities (avoids code duplication)
 sys.path.insert(0, str(SCRIPT_DIR))
 from utils import fmt as _fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 
 # =============================================================================
@@ -92,8 +93,7 @@ def get_db() -> sqlite3.Connection:
     if not DB_PATH.exists():
         print(f"Error: {DB_PATH} not found", file=sys.stderr)
         sys.exit(1)
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
     return conn
 
 

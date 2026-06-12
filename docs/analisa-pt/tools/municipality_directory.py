@@ -32,7 +32,6 @@ Usage:
 import argparse
 import json
 import re
-import sqlite3
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -41,6 +40,7 @@ from typing import Dict, List, Optional
 from unidecode import unidecode
 from utils import format_currency
 from generate_directory_dashboard import generate_dashboard
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 BEP_DB = SCRIPT_DIR / "bep_index.db"
@@ -120,7 +120,7 @@ POPULATION = {
 
 def load_bep_camara() -> Dict[str, Dict]:
     """Load all Câmara Municipal entities from BEP."""
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT display_name, nif, listing_count FROM bep_entities "
         "WHERE nif IS NOT NULL AND nif != ''"

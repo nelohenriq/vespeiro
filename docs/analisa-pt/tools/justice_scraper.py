@@ -30,6 +30,7 @@ import argparse
 import time
 from pathlib import Path
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -193,7 +194,7 @@ def init_db(force: bool = False) -> sqlite3.Connection:
         DB_PATH.unlink()
         print("  Deleted existing database.")
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
 
     # Generic data table for all datasets
@@ -670,7 +671,7 @@ def cmd_status(args):
     mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
     age_days = (datetime.now() - mtime).days
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     total = conn.execute("SELECT COUNT(*) FROM justice_data").fetchone()[0]
     n_ds = conn.execute("SELECT COUNT(DISTINCT dataset) FROM justice_data").fetchone()[0]
 
@@ -694,7 +695,7 @@ def cmd_stats(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*70}")
     print(f"  Justice Data — Statistics")
@@ -755,7 +756,7 @@ def cmd_corruption(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     top_n = getattr(args, "top", 10)
 
     print(f"\n{'='*70}")
@@ -809,7 +810,7 @@ def cmd_courts(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*70}")
     print(f"  Court Case Flow — Analysis")
@@ -873,7 +874,7 @@ def cmd_prisons(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*70}")
     print(f"  Prison Population — Analysis")
@@ -905,8 +906,7 @@ def cmd_query(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
 
     try:
         rows = conn.execute(args.sql).fetchall()
@@ -934,7 +934,7 @@ def cmd_export(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     data = {}
     rows = conn.execute("""

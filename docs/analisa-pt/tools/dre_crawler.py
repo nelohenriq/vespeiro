@@ -26,6 +26,7 @@ import logging
 from urllib.request import urlopen, Request
 from urllib.error import HTTPError, URLError
 from pathlib import Path
+from utils_db import connect as db_connect
 
 logger = logging.getLogger("dre_crawler")
 
@@ -280,12 +281,12 @@ def _cmd_crossref(args):
     law_count = 0
 
     if bep_path.exists():
-        bep_conn = sqlite3.connect(str(bep_path))
+        bep_conn = db_connect(str(bep_path))
         bep_count = bep_conn.execute("SELECT COUNT(*) FROM bep_listings").fetchone()[0]
         bep_conn.close()
 
     if law_path.exists():
-        law_conn = sqlite3.connect(str(law_path))
+        law_conn = db_connect(str(law_path))
         law_count = law_conn.execute("SELECT COUNT(*) FROM law_projects").fetchone()[0]
         law_conn.close()
 

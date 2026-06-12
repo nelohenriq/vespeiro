@@ -23,6 +23,7 @@ import time
 from pathlib import Path
 from urllib.parse import urlparse, urljoin
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -53,7 +54,7 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (compatible; AnalisaPT/1.0)"}
 def init_pdf_cache(db_path: Path = PDF_CACHE_DB) -> sqlite3.Connection:
     """Initialize the PDF cache database."""
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(db_path))
+    conn = db_connect(str(db_path))
     conn.execute("PRAGMA journal_mode=WAL")
     conn.execute("""
         CREATE TABLE IF NOT EXISTS contract_pdfs (
@@ -416,7 +417,7 @@ def main():
 
         import sqlite3 as _sqlite3
         print(f"  Loading contracts from procurement.db...")
-        _conn = _sqlite3.connect(str(PROCUREMENT_DB))
+        _conn = db_connect(str(PROCUREMENT_DB))
         _rows = _conn.execute(
             "SELECT idcontrato, linkPecasProc, adjudicante_nif, adjudicante_nome"
             " FROM contratos WHERE linkPecasProc IS NOT NULL AND linkPecasProc != ''"

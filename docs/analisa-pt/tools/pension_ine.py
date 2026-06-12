@@ -26,6 +26,7 @@ import argparse
 import time
 from pathlib import Path
 from datetime import datetime, timezone
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -104,7 +105,7 @@ def init_db(force: bool = False) -> sqlite3.Connection:
         DB_PATH.unlink()
         print("  Deleted existing database.")
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     conn.execute("PRAGMA journal_mode=WAL")
 
     # Pension observations — one row per (indicator, year, period, geography, type)
@@ -526,7 +527,7 @@ def cmd_status(args):
     mtime = datetime.fromtimestamp(DB_PATH.stat().st_mtime)
     age_days = (datetime.now() - mtime).days
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
     total = conn.execute("SELECT COUNT(*) FROM pension_data").fetchone()[0]
     indicators = conn.execute("SELECT COUNT(DISTINCT indicator_code) FROM pension_data").fetchone()[0]
     years = conn.execute("SELECT MIN(year), MAX(year) FROM pension_data WHERE year > 0").fetchone()
@@ -556,7 +557,7 @@ def cmd_stats(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     print(f"\n{'='*70}")
     print(f"  Pension INE Data — Statistics")
@@ -622,8 +623,7 @@ def cmd_query(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(DB_PATH))
 
     try:
         rows = conn.execute(args.sql).fetchall()
@@ -655,7 +655,7 @@ def cmd_export(args):
         print("  Database not found. Run 'download' then 'index' first.")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = db_connect(str(DB_PATH))
 
     data = {}
     rows = conn.execute("""
@@ -702,8 +702,8 @@ def cmd_compare(args):
         print(f"  procurement.db not found at {procurement_db}")
         return
 
-    conn = sqlite3.connect(str(DB_PATH))
-    proc_conn = sqlite3.connect(str(procurement_db))
+    conn = db_connect(str(DB_PATH))
+    proc_conn = db_connect(str(procurement_db))
 
     print(f"\n{'='*70}")
     print(f"  Pension × Procurement Cross-Reference")

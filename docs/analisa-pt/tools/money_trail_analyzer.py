@@ -37,6 +37,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -945,8 +946,8 @@ def cmd_concelho(args):
     """Run full money trail analysis for a single concelho."""
     check_dbs()
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     concelho = args.concelho
 
@@ -1012,8 +1013,8 @@ def cmd_rank(args):
     """Rank all concelhos by PRR allocation."""
     check_dbs()
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     print(f"\n  Computing concelho rankings...", file=sys.stderr)
     rankings = rank_concelhos(conn, proc_conn, top_n=args.top)

@@ -29,6 +29,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -445,8 +446,7 @@ def cmd_build(args):
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     # Read-only connection — we never write to procurement.db
-    conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(f"file:{DB_PATH}?mode=ro", uri=True)
 
     # 256MB page cache for the big DB
     conn.execute("PRAGMA cache_size=-256000")

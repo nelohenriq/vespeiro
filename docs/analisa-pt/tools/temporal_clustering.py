@@ -25,6 +25,7 @@ from collections import defaultdict
 from datetime import timedelta
 
 from utils import fmt, parse_entity_field, parse_date, days_between
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -57,7 +58,7 @@ class TemporalAnalyzer:
         if not PROCUREMENT_DB.exists():
             print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
             sys.exit(1)
-        self.conn = sqlite3.connect(str(PROCUREMENT_DB))
+        self.conn = db_connect(str(PROCUREMENT_DB))
         self.conn.row_factory = sqlite3.Row
 
     def close(self):

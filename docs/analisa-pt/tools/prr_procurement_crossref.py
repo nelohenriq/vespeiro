@@ -35,7 +35,6 @@ Usage:
 
 import json
 import re
-import sqlite3
 import argparse
 import sys
 import textwrap
@@ -44,6 +43,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -254,8 +254,8 @@ def analyze_dual_roles(top_n: int = 30, min_score: float = 0) -> list[dict]:
         print("ERROR: procurement.db not found.")
         sys.exit(1)
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     print("Loading PRR entities...", file=sys.stderr)
     prr_entities = load_prr_entities(conn)
@@ -511,8 +511,8 @@ def analyze_trends(results: list[dict]) -> dict:
     if not TRANSPARENCY_DB.exists() or not PROCUREMENT_DB.exists():
         return {"error": "Databases not found"}
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     # Get entity codes and NIFs from dual-role results
     entity_codes = set(r["cd_entidade"] for r in results if r.get("cd_entidade"))
@@ -770,7 +770,7 @@ def load_modifications() -> dict:
     if not MODIFICACOES_DB.exists():
         return {}
 
-    conn = sqlite3.connect(str(MODIFICACOES_DB))
+    conn = db_connect(str(MODIFICACOES_DB))
     rows = conn.execute(
         "SELECT idcontrato, fundamento, tipo_acto, data_modificacao, "
         "COALESCE(preco_alterado, 0), prazo_execucao, ano "
@@ -938,7 +938,7 @@ def analyze_geo_flow(results: list[dict]) -> dict:
     if not TRANSPARENCY_DB.exists():
         return {"error": "transparency.db not found"}
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
     prr_locations_data = load_prr_locations(conn)
 
     # Aggregate PRR investment by concelho
@@ -1072,7 +1072,7 @@ def profile_entity(nif: str) -> dict | None:
         print("ERROR: transparency.db not found")
         return None
 
-    conn = sqlite3.connect(str(TRANSPARENCY_DB))
+    conn = db_connect(str(TRANSPARENCY_DB))
     entity = conn.execute(
         "SELECT cd_entidade, ds_entidade, nif, papel, atividade_economica, "
         "localizacao, COALESCE(valor_contratado, 0), COALESCE(valor_pago, 0) "

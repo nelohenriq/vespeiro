@@ -18,11 +18,11 @@ Usage:
 import argparse
 import json
 import re
-import sqlite3
 import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 CONTRACT_INDEX = SCRIPT_DIR / "data" / "contract_index.json"
@@ -116,7 +116,7 @@ def load_freguesia_from_bep() -> Dict[str, Dict]:
     if not BEP_DB.exists():
         return {}
 
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT display_name, nif, listing_count FROM bep_entities "
         "WHERE nif IS NOT NULL AND nif != '' "

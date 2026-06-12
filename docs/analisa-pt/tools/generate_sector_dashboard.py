@@ -16,11 +16,11 @@ Usage:
 import sys
 import json
 import html as html_mod
-import sqlite3
 import argparse
 import webbrowser
 from pathlib import Path
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -45,7 +45,7 @@ def get_all_entities() -> list[dict]:
     """Get all BEP entities with their entidade grouping."""
     if not BEP_DB.exists():
         return []
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT id, display_name, entidade, organismo, nif, listing_count "
         "FROM bep_entities ORDER BY listing_count DESC"
@@ -106,7 +106,7 @@ def load_all_listings(region: str = "") -> dict[str, list[dict]]:
     """
     if not BEP_DB.exists():
         return {}
-    conn = sqlite3.connect(str(BEP_DB))
+    conn = db_connect(str(BEP_DB))
     rows = conn.execute(
         "SELECT entity_id, titulo, estado, categoria, tipo_oferta, "
         "remuneracao, total_postos, data_publicacao, local_trabalho "

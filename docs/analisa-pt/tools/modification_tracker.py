@@ -30,6 +30,7 @@ from collections import defaultdict, Counter
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
 from difflib import SequenceMatcher
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -66,15 +67,13 @@ VALUE_CHANGE_KEYWORDS = [
 
 
 def get_proc_db():
-    conn = sqlite3.connect(str(PROC_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROC_DB))
     return conn
 
 
 def get_mod_db():
     """Get or create modifications database."""
-    conn = sqlite3.connect(str(MOD_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(MOD_DB))
     conn.execute("""
         CREATE TABLE IF NOT EXISTS modifications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -242,8 +241,7 @@ class ModificationTracker:
             print("  DRE database not found. Run dre_crawler.py first.")
             return
 
-        dre_conn = sqlite3.connect(str(DRE_DB))
-        dre_conn.row_factory = sqlite3.Row
+        dre_conn = db_connect(str(DRE_DB))
 
         # Get existing modification publication IDs
         existing_ids = set()

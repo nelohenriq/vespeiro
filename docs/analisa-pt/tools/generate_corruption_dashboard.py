@@ -22,6 +22,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from utils import fmt
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -36,8 +37,7 @@ DEFAULT_OUTPUT = DATA_DIR / "corruption_dashboard.html"
 
 def query_all_data(top_n: int = 30) -> dict:
     """Query all corruption signals from procurement.db."""
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
     data = {}
 
     # --- Overall Stats ---
@@ -163,10 +163,10 @@ def _query_ted_compliance() -> dict:
     result = {"thresholds": [], "ted_total": 0}
     if not TED_DB.exists():
         return result
-    ted_conn = sqlite3.connect(str(TED_DB))
+    ted_conn = db_connect(str(TED_DB))
     result["ted_total"] = ted_conn.execute("SELECT COUNT(*) FROM ted_notices").fetchone()[0]
     ted_conn.close()
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
     for threshold, label in [(5538000, "Works >= €5.5M"), (143000, "Central Services >= €143K"), (221000, "Sub-central Services >= €221K")]:
         row = proc_conn.execute("SELECT COUNT(*), SUM(precoContratual) FROM contratos WHERE precoContratual >= ?", (threshold,)).fetchone()
         result["thresholds"].append({"label": label, "threshold": threshold, "count": row[0], "value": row[1] or 0})

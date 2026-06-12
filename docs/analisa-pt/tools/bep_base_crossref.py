@@ -20,6 +20,7 @@ import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict
+from utils_db import connect as db_connect
 
 # Paths
 SCRIPT_DIR = Path(__file__).parent
@@ -44,7 +45,7 @@ def extract_nif_from_adjudicante(text: str) -> tuple[str, str]:
 def load_bep_entities_with_nif(db_path: Path) -> list[dict]:
     """Load BEP entities that have NIFs."""
     import sqlite3
-    conn = sqlite3.connect(str(db_path))
+    conn = db_connect(str(db_path))
     rows = conn.execute(
         "SELECT id, entidade, organismo, display_name, nif, listing_count "
         "FROM bep_entities WHERE nif IS NOT NULL AND nif != '' "
@@ -72,8 +73,7 @@ def build_contract_index() -> dict[str, list[dict]]:
         return {}
 
     print(f"  Querying procurement.db...")
-    conn = sqlite3.connect(str(PROCUREMENT_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(PROCUREMENT_DB))
     rows = conn.execute(
         "SELECT adjudicante_nif, adjudicante_nome, idcontrato, objectoContrato, "
         "precoContratual, tipoContrato, linkPecasProc, dataPublicacao, "
