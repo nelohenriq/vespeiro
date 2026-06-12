@@ -16,6 +16,7 @@ Public helpers:
     parse_entity_field        — "NIF - Name; NIF - Name" → list[dict]
     parse_date                — 7+ common date formats incl. timezone-aware ISO (Z, +HH:MM) → datetime
     days_between              — abs() days between two dates/datetimes
+    signed_days_between       — signed (end - start) days; sign carries order
 """
 
 import re
@@ -132,6 +133,34 @@ def days_between(start: Union[str, datetime, date, None],
     if s is None or e is None:
         return None
     return abs((e - s).days)
+
+
+def signed_days_between(start: Union[str, datetime, date, None],
+                        end: Union[str, datetime, date, None]) -> Optional[int]:
+    """Return the signed number of whole days between two dates.
+
+    Positive when ``end`` is after ``start``, negative when ``end`` is
+    before, zero when they are equal. Returns ``None`` if either side is
+    unparseable (same contract as ``days_between``).
+
+    Use this when the *order* of the two dates carries meaning
+    (e.g. "is this contract dated after the law took effect?", or
+    "how many days *overdue* is this deadline?"). For plain distance
+    use ``days_between``.
+
+    Argument order matters here, unlike ``days_between``.
+
+    Examples:
+        signed_days_between('2025-01-01', '2025-01-15')  -> 14   (end is later)
+        signed_days_between('2025-01-15', '2025-01-01')  -> -14  (end is earlier)
+        signed_days_between('2025-01-15', '2025-01-15')  -> 0    (same day)
+        signed_days_between(None, '2025-01-15')          -> None
+    """
+    s = parse_date(start)
+    e = parse_date(end)
+    if s is None or e is None:
+        return None
+    return (e - s).days
 
 
 # =============================================================================
