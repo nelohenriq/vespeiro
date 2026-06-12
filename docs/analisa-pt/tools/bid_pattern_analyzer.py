@@ -18,13 +18,13 @@ Usage:
 import sys
 import json
 import re
-import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict, Counter
 from datetime import datetime
 
 from utils import fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -71,8 +71,8 @@ class BidPatternAnalyzer:
         if not PROCUREMENT_DB.exists():
             print(f"ERROR: procurement.db not found at {PROCUREMENT_DB}")
             sys.exit(1)
-        self.conn = sqlite3.connect(str(PROCUREMENT_DB))
-        self.conn.row_factory = sqlite3.Row
+        # PRAGMA-tuned connect via utils_db.connect (WAL, 200MB cache, 256MB mmap).
+        self.conn = db_connect(str(PROCUREMENT_DB))
 
     def close(self):
         if self.conn:

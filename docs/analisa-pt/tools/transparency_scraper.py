@@ -26,8 +26,9 @@ import sqlite3
 import argparse
 import time
 from pathlib import Path
-from collections import defaultdict
 from datetime import datetime, timezone
+
+from utils_db import connect as db_connect
 
 try:
     import urllib.request
@@ -90,8 +91,8 @@ PRR_DATASETS = {
 def init_db() -> sqlite3.Connection:
     """Initialize the transparency database."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(str(DB_PATH))
-    conn.execute("PRAGMA journal_mode=WAL")
+    # PRAGMA-tuned connect via utils_db.connect (WAL, 200MB cache, mmap on POSIX).
+    conn = db_connect(str(DB_PATH))
 
     # PRR contracts table (from prr_contracts_*.xlsx)
     conn.execute("""
@@ -1328,8 +1329,8 @@ def cmd_crossref(args):
         conn.close()
         return
 
-    # Open procurement.db
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    # Open procurement.db (PRAGMA-tuned via utils_db.connect).
+    proc_conn = db_connect(str(PROCUREMENT_DB))
     tables = [r[0] for r in proc_conn.execute(
         "SELECT name FROM sqlite_master WHERE type='table'").fetchall()]
 
@@ -1375,20 +1376,22 @@ def cmd_crossref(args):
         print(f"    {m['name'][:45]:45s} NIF={m['nif']}  PRR €{m['prr_value']:>12,.0f}  BASE {m['proc_count']:>5} contracts  [{m['papel']}]")
 
     # --- Match 2: PRR entity NIFs in adjudicatarios text ---
-    # Extract all NIFs from adjudicatarios in one pass (regex), then O(1) lookup
+    # Use the indexed ``adjudicatario_nif`` column (populated by
+    # ``add_adjudicatario_nif.py``). The column stores the FIRST 9-digit
+    # NIF from each contract's ``adjudicatarios`` text. Multi-NIF joint
+    # ventures are not fully captured — add a ``contrato_nif`` junction
+    # table if joint-venture coverage is required (see ROADMAP P3.3).
     print(f"\n  --- Match 2: PRR entity NIFs in adjudicatarios text ---")
-    nif_pattern = re.compile(r'\b(\d{9})\b')
-    supplier_nif_counts = defaultdict(int)
-    all_rows = proc_conn.execute(
-        "SELECT idcontrato, adjudicatarios FROM contratos "
-        "WHERE adjudicatarios IS NOT NULL AND adjudicatarios != ''"
-    ).fetchall()
-    print(f"  Scanning {len(all_rows):,} contracts for NIFs in adjudicatarios...")
-    for cid, adj_text in all_rows:
-        found_nifs = set(nif_pattern.findall(adj_text))
-        for nif in found_nifs:
-            supplier_nif_counts[nif] += 1
-    print(f"  Unique supplier NIFs found in adjudicatarios: {len(supplier_nif_counts):,}")
+    supplier_nif_counts = {}
+    t_nif = time.time()
+    rows = proc_conn.execute("""
+        SELECT adjudicatario_nif, COUNT(*) AS cnt
+        FROM contratos
+        WHERE adjudicatario_nif IS NOT NULL AND adjudicatario_nif != ''
+        GROUP BY adjudicatario_nif
+    """).fetchall()
+    supplier_nif_counts = {r["adjudicatario_nif"]: r["cnt"] for r in rows}
+    print(f"  Unique supplier NIFs (indexed first-NIF lookup): {len(supplier_nif_counts):,} in {time.time() - t_nif:.2f}s")
 
     supplier_matches = []
     for cd_ent, name, nif, prr_val, papel in prr_entities:

@@ -31,7 +31,6 @@ Usage:
 import json
 import os
 import re
-import sqlite3
 import argparse
 import sys
 import textwrap
@@ -40,6 +39,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from utils import fmt, days_between
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -87,8 +87,7 @@ def load_appointments() -> list[dict]:
 
     Joins appointments.organization + role with people.name.
     """
-    conn = sqlite3.connect(str(VESPEIRO_DB))
-    conn.row_factory = sqlite3.Row
+    conn = db_connect(str(VESPEIRO_DB))
 
     rows = conn.execute("""
         SELECT a.id, a.person_id, a.organization, a.role,
@@ -129,7 +128,7 @@ def load_appointments() -> list[dict]:
     # Also try dre_index.db for broader coverage
     if DRE_DB.exists():
         try:
-            dre_conn = sqlite3.connect(str(DRE_DB))
+            dre_conn = db_connect(str(DRE_DB))
             dre_conn.row_factory = sqlite3.Row
             # Look for publication titles that mention appointments (nomeação)
             dre_rows = dre_conn.execute("""
@@ -164,7 +163,8 @@ def load_appointments() -> list[dict]:
                     })
 
             dre_conn.close()
-        except (sqlite3.OperationalError, Exception):
+        except Exception:
+            pass  # dre_index.db may not have the expected schema
             pass  # dre_index.db may not have the expected schema
 
     return result
@@ -436,7 +436,7 @@ def check_dual_role(conn, nif: str) -> dict:
     try:
         if not TRANSPARENCY_DB.exists():
             return {"in_prr": False}
-        prr_conn = sqlite3.connect(str(TRANSPARENCY_DB))
+        prr_conn = db_connect(str(TRANSPARENCY_DB))
         row = prr_conn.execute(
             "SELECT COUNT(*) FROM prr_entities WHERE nif = ?", (nif,)
         ).fetchone()
@@ -594,7 +594,7 @@ def analyze_revolving_doors(top_n: int = 30, min_score: float = 0,
     """
     check_dbs(cli_path_provided=cli_path_provided)
 
-    proc_conn = sqlite3.connect(str(PROCUREMENT_DB))
+    proc_conn = db_connect(str(PROCUREMENT_DB))
 
     print("Loading appointments from vespeiro.db...", file=sys.stderr)
     appointments = load_appointments()

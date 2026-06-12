@@ -27,12 +27,12 @@ Usage:
 
 import sys
 import json
-import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict, Counter
 
 from utils import fmt, parse_entity_field
+from utils_db import connect as db_connect
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -52,11 +52,11 @@ class AnomalyScanner:
         self.signals = []
 
     def connect(self):
-        self.conn = sqlite3.connect(str(PROCUREMENT_DB))
-        self.conn.row_factory = sqlite3.Row
+        # PRAGMA-tuned connect (WAL, cache_size=200MB, mmap=256MB, etc.)
+        # via utils_db.connect — see utils_db.py for the rationale.
+        self.conn = db_connect(str(PROCUREMENT_DB))
         if BEP_DB.exists():
-            self.bep_conn = sqlite3.connect(str(BEP_DB))
-            self.bep_conn.row_factory = sqlite3.Row
+            self.bep_conn = db_connect(str(BEP_DB))
         else:
             self.bep_conn = None
 
