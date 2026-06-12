@@ -157,11 +157,7 @@ function TopRiskMunicipalitiesTable({
   const top = useMemo(() => rows.slice(0, 5), [rows]);
 
   if (top.length === 0) {
-    return (
-      <p className="section-empty">
-        No municipality data. Run <code>_build_top_risk_municipalities.py</code> to populate.
-      </p>
-    );
+    return null;  // parent component renders the empty state with the build-script hint
   }
 
   return (
@@ -332,25 +328,36 @@ export default function OverviewTab({ data, loading, procurement }: Props) {
 
       {/* Top Risk Municipalities table — side-by-side with Top Findings so
           the reader can immediately see which concelhos are driving the
-          national direct-award concentration. Conditional render: hidden
-          when the build script hasn't materialised the data yet. */}
-      {data.top_risk_municipalities && data.top_risk_municipalities.municipalities.length > 0 && (
+          national direct-award concentration. The section-card stays
+          visible even when the data isn't materialised yet, so the user
+          can see the feature exists and what to do about it. */}
+      {data.top_risk_municipalities && (data.top_risk_municipalities.municipalities.length > 0 || data.top_risk_municipalities.note) && (
         <div className="section-card" style={{ marginTop: 16 }}>
           <h3 className="section-title">
             Top Risk Municipalities
-            <span style={{ marginLeft: 12, fontSize: 14, color: "var(--danger)" }}>
-              {data.top_risk_municipalities.by_risk_level.critical + data.top_risk_municipalities.by_risk_level.high} high-risk
-            </span>
+            {data.top_risk_municipalities.municipalities.length > 0 && (
+              <span style={{ marginLeft: 12, fontSize: 14, color: "var(--danger)" }}>
+                {data.top_risk_municipalities.by_risk_level.critical + data.top_risk_municipalities.by_risk_level.high} high-risk
+              </span>
+            )}
           </h3>
-          <p className="section-empty" style={{ fontSize: 12, margin: "4px 0 12px", lineHeight: 1.4 }}>
-            Top 5 concelhos by composite risk score (60% direct-award share + 40% relative contract
-            volume, normalised against the 65% national baseline). <strong>DA%</strong> = share of
-            contracts awarded via <em>ajuste direto</em>.
-          </p>
-          <TopRiskMunicipalitiesTable
-            rows={data.top_risk_municipalities.municipalities}
-            generatedAt={data.top_risk_municipalities.generated_at}
-          />
+          {data.top_risk_municipalities.municipalities.length > 0 ? (
+            <>
+              <p className="section-empty" style={{ fontSize: 12, margin: "4px 0 12px", lineHeight: 1.4 }}>
+                Top 5 concelhos by composite risk score (60% direct-award share + 40% relative contract
+                volume, normalised against the 65% national baseline). <strong>DA%</strong> = share of
+                contracts awarded via <em>ajuste direto</em>.
+              </p>
+              <TopRiskMunicipalitiesTable
+                rows={data.top_risk_municipalities.municipalities}
+                generatedAt={data.top_risk_municipalities.generated_at}
+              />
+            </>
+          ) : (
+            <p className="section-empty" style={{ fontSize: 12, margin: "4px 0 12px", lineHeight: 1.4 }}>
+              {data.top_risk_municipalities.note ?? "Municipality risk data not yet available."}
+            </p>
+          )}
         </div>
       )}
 
