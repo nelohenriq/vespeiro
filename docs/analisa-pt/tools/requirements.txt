@@ -1,0 +1,19 @@
+# Pinned dependencies for bep_rag.py and law_rag.py.
+#
+# These two files are the only ones in docs/analisa-pt/tools/ that import
+# the lancedb stack (vector search over BEP job listings + parliament law
+# projects with sentence-transformers embeddings). They were the two
+# pre-existing import failures in the 54-file sweep verify (commit 2bbff68);
+# pinning these lets a fresh `pip install -r requirements.txt` resolve the
+# env cleanly:
+#
+#   pip install -r requirements.txt
+#
+# For a full env freeze (includes the ~15 other deps the rest of the
+# 54 swept files use: pandas, openpyxl, requests, flask, etc.), run:
+#
+#   pip-compile requirements.in   # generates a fully-pinned freeze
+#
+lancedb==0.33.0
+pyarrow==24.0.0
+sentence-transformers==5.5.1
