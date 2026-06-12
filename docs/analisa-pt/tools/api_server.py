@@ -247,6 +247,18 @@ def handle_overview() -> dict:
         }
         iconn.close()
 
+    # Top Findings (from the run_corruption_scan.py pipeline, consolidated
+    # into data/summary/top_findings.json). Read once, fail-soft — if the
+    # file doesn't exist yet (no scan has ever run) we just omit the field
+    # rather than blocking the rest of the overview.
+    top_findings_path = DATA_DIR / "summary" / "top_findings.json"
+    if top_findings_path.exists():
+        try:
+            with open(top_findings_path, encoding="utf-8") as _tf:
+                result["top_findings"] = json.load(_tf)
+        except (json.JSONDecodeError, OSError, UnicodeDecodeError):
+            pass  # corrupt file — silently skip rather than 500
+
     # Procurement summary — prefer the pre-computed cache
     cached_stats = _read_cache_json("stats")
     if cached_stats:

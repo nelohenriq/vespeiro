@@ -305,6 +305,74 @@ body {
 /* ── Mini Charts ─────────────────────────────────────────────────────────── */
 .mini-chart { width: 100%; height: auto; margin-bottom: 12px; }
 
+/* ── Top Findings panel (Overview tab) ────────────────────────────────── */
+.findings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.findings-meta {
+  font-size: 11px;
+  color: var(--text-dim, #8a92a6);
+  margin-bottom: 4px;
+}
+.finding-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease;
+}
+.finding-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.finding-item.severity-critical { border-left-color: var(--danger); }
+.finding-item.severity-high     { border-left-color: #ff6b35; }
+.finding-item.severity-medium   { border-left-color: var(--warning); }
+.finding-item.severity-low      { border-left-color: var(--info); }
+.finding-item.severity-info     { border-left-color: #8a92a6; }
+
+.finding-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #0e1320;
+  min-width: 56px;
+  text-align: center;
+}
+.finding-body {
+  flex: 1;
+  min-width: 0;
+}
+.finding-signal {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, #e8ecf2);
+  margin-bottom: 2px;
+  text-transform: capitalize;
+}
+.finding-detail {
+  font-size: 12px;
+  color: var(--text-dim, #a0a8b8);
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+.finding-source {
+  font-size: 10px;
+  color: var(--text-dim, #8a92a6);
+  margin-top: 4px;
+  font-style: italic;
+}
+
 /* ── Donut + Legend (Overview headline tiles) ───────────────────────────── */
 .donut-layout {
   display: flex; align-items: center; gap: 24px; flex-wrap: wrap;

@@ -40,6 +40,7 @@ export interface OverviewResponse {
     year_max: number | null;
     total_value: number | null;
   };
+  top_findings?: TopFindings;
 }
 
 // ── Justice ─────────────────────────────────────────────────────────────────
@@ -225,6 +226,25 @@ export interface CrossRefResponse {
   immigration_crime_correlation: ImmigrationCrimeCorrelation;
   risk_signals: RiskSignal[];
   _server_ms?: number;
+}
+
+// ── Top Findings (from run_corruption_scan.py → data/summary/top_findings.json) ──
+
+export type FindingSeverity = "critical" | "high" | "medium" | "low" | "info";
+
+export interface Finding {
+  source: string;        // e.g. "justice_xref", "bid_pattern", "anomaly_scanner"
+  severity: FindingSeverity;
+  category: string;      // e.g. "crossref", "bidding", "anomaly", "temporal", "geographic", "supplier", "procurement", "composite"
+  signal: string;        // short machine label, e.g. "money_laundering_rising"
+  detail: string;        // human-readable explanation, e.g. "+200% over 3-year trend"
+}
+
+export interface TopFindings {
+  generated_at: string;
+  total_findings: number;
+  by_severity: Record<FindingSeverity, number>;
+  findings: Finding[];
 }
 
 // ── Health ──────────────────────────────────────────────────────────────────

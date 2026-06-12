@@ -1,7 +1,19 @@
 import { useEffect, useMemo, useRef } from "react";
 import { fmtNum, fmtEur, fmtPct, fmtYear } from "../api";
-import type { OverviewResponse, ProcurementResponse } from "../types";
+import type { OverviewResponse, ProcurementResponse, Finding, FindingSeverity } from "../types";
 import SparkLine from "./SparkLine";
+
+// ── Severity palette ────────────────────────────────────────────────────────
+// Mirrors the existing CSS variables where possible so badges visually
+// harmonize with the rest of the dashboard. The "info" level is a muted
+// slate so it reads as a soft observation, not an alert.
+const SEVERITY_COLORS: Record<FindingSeverity, string> = {
+  critical: "var(--danger)",
+  high: "#ff6b35",  // matches the "orange" used elsewhere on the dashboard
+  medium: "var(--warning)",
+  low: "var(--info)",
+  info: "#8a92a6",  // muted slate
+};
 
 interface Props {
   data: OverviewResponse;
@@ -59,6 +71,59 @@ function DonutChart({ rows, total, size = 160 }: {
   }, [rows, total, size]);
 
   return <svg ref={svgRef} viewBox={`0 0 ${size} ${size}`} className="donut-chart" />;
+}
+
+// ── Top Findings panel ──────────────────────────────────────────────────────
+// Renders a vertical list of the most actionable risk signals. Each row
+// gets a colored severity badge (critical/high/medium/low/info) so the
+// reader can scan severity at a glance. Limited to the top 7 so the panel
+// doesn't push the rest of the Overview tab off-screen.
+function TopFindingsPanel({ findings, generatedAt }: { findings: Finding[]; generatedAt?: string }) {
+  // Sort: critical → high → medium → low → info, then by source. Memoize
+  // because the parent re-renders on every keystroke / poll tick.
+  const sorted = useMemo(() => {
+    const order: Record<FindingSeverity, number> = {
+      critical: 0, high: 1, medium: 2, low: 3, info: 4,
+    };
+    return [...findings]
+      .sort((a, b) => {
+        const sa = order[a.severity] ?? 9;
+        const sb = order[b.severity] ?? 9;
+        if (sa !== sb) return sa - sb;
+        return a.source.localeCompare(b.source);
+      })
+      .slice(0, 7);
+  }, [findings]);
+
+  if (sorted.length === 0) {
+    return <p className="section-empty">No findings available. Run the corruption scan to populate.</p>;
+  }
+
+  return (
+    <div className="findings-list">
+      {generatedAt && (
+        <div className="findings-meta">
+          Last scan: {new Date(generatedAt).toLocaleString("pt-PT")}
+        </div>
+      )}
+      {sorted.map((f, i) => (
+        <div key={`${f.source}:${f.signal}:${i}`} className={`finding-item severity-${f.severity}`}>
+          <span
+            className="finding-badge"
+            style={{ background: SEVERITY_COLORS[f.severity] ?? "#8a92a6" }}
+            aria-label={`Severity ${f.severity}`}
+          >
+            {f.severity}
+          </span>
+          <div className="finding-body">
+            <div className="finding-signal">{f.signal.replace(/_/g, " ")}</div>
+            <div className="finding-detail">{f.detail}</div>
+            <div className="finding-source">via {f.source}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // ── Main component ──────────────────────────────────────────────────────────
@@ -185,6 +250,30 @@ export default function OverviewTab({ data, loading, procurement }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Top Findings panel — the most actionable risk signals, sorted by
+          severity. Reads from data/summary/top_findings.json (produced by
+          run_corruption_scan.py). Hidden when no scan has run yet so the
+          panel never shows an empty state. */}
+      {data.top_findings && data.top_findings.findings.length > 0 && (
+        <div className="section-card" style={{ marginTop: 16 }}>
+          <h3 className="section-title">
+            Top Findings
+            <span style={{ marginLeft: 12, fontSize: 14, color: "var(--danger)" }}>
+              {data.top_findings.by_severity.critical + data.top_findings.by_severity.high} high-priority
+            </span>
+          </h3>
+          <p className="section-empty" style={{ fontSize: 12, margin: "4px 0 12px", lineHeight: 1.4 }}>
+            Most actionable risk signals from the corruption-scan pipeline (anomaly, bid-pattern,
+            temporal, supplier, justice cross-reference). Re-run <code>python run_corruption_scan.py</code>
+            to refresh.
+          </p>
+          <TopFindingsPanel
+            findings={data.top_findings.findings}
+            generatedAt={data.top_findings.generated_at}
+          />
+        </div>
+      )}
 
       {/* Headline finding tiles: direct-award share + YoY growth */}
       {proc && procRows.length > 0 && (
