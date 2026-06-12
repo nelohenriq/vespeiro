@@ -39,7 +39,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-from utils import fmt
+from utils import fmt, days_between
 
 SCRIPT_DIR = Path(__file__).parent
 DATA_DIR = SCRIPT_DIR / "data"
@@ -386,13 +386,14 @@ def find_contracts_after_date(proc_conn, buyer_nifs: set, after_date: str) -> li
 
 
 def _days_between(date1: str, date2: str) -> int:
-    """Compute days between two date strings (YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS)."""
-    try:
-        d1 = datetime.strptime(date1[:10], "%Y-%m-%d")
-        d2 = datetime.strptime(date2[:10], "%Y-%m-%d")
-        return abs((d2 - d1).days)
-    except (ValueError, TypeError):
-        return 99999
+    """Days between two date strings (any format accepted by utils.parse_date).
+
+    Thin wrapper over ``utils.days_between`` that keeps the historical
+    ``99999`` sentinel for unparseable inputs (so risk-factor thresholds
+    like ``<= 30`` don't trigger on bad data).
+    """
+    result = days_between(date1, date2)
+    return result if result is not None else 99999
 
 
 def check_prior_history(proc_conn, buyer_nif: str, supplier_nif: str,

@@ -20,7 +20,7 @@ from collections import defaultdict
 
 # Import shared helpers from anomaly_scanner
 sys.path.insert(0, str(Path(__file__).parent))
-from anomaly_scanner import parse_entity_field, fmt
+from utils import fmt, parse_entity_field
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
