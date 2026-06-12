@@ -458,6 +458,16 @@ body {
   min-width: 44px;
   text-align: center;
 }
+
+/* Pending state: used when the build script hasn't materialised data
+   yet, so the user can see the feature exists but knows it's not live. */
+.section-card.is-pending {
+  opacity: 0.75;
+  border-style: dashed;
+}
+.section-card.is-pending .section-title {
+  color: var(--text-secondary);
+}
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
