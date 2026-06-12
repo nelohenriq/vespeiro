@@ -114,6 +114,20 @@ def parse_date(value: Union[str, datetime, date, None]) -> Optional[datetime]:
     return None
 
 
+def _raw_days_between(start: Union[str, datetime, date, None],
+                      end: Union[str, datetime, date, None]) -> Optional[int]:
+    """Return the signed ``(end - start).days``, or ``None`` if either side is unparseable.
+
+    Private helper shared by :func:`days_between` (which applies ``abs()``)
+    and :func:`signed_days_between` (which returns the raw signed value).
+    """
+    s = parse_date(start)
+    e = parse_date(end)
+    if s is None or e is None:
+        return None
+    return (e - s).days
+
+
 def days_between(start: Union[str, datetime, date, None],
                  end: Union[str, datetime, date, None]) -> Optional[int]:
     """Return the absolute number of whole days between two dates.
@@ -128,11 +142,8 @@ def days_between(start: Union[str, datetime, date, None],
         days_between('2025-01-15', '2025-01-01')  -> 14  (same — abs)
         days_between(None, '2025-01-15')          -> None
     """
-    s = parse_date(start)
-    e = parse_date(end)
-    if s is None or e is None:
-        return None
-    return abs((e - s).days)
+    delta = _raw_days_between(start, end)
+    return None if delta is None else abs(delta)
 
 
 def signed_days_between(start: Union[str, datetime, date, None],
@@ -156,11 +167,7 @@ def signed_days_between(start: Union[str, datetime, date, None],
         signed_days_between('2025-01-15', '2025-01-15')  -> 0    (same day)
         signed_days_between(None, '2025-01-15')          -> None
     """
-    s = parse_date(start)
-    e = parse_date(end)
-    if s is None or e is None:
-        return None
-    return (e - s).days
+    return _raw_days_between(start, end)
 
 
 # =============================================================================
