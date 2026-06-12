@@ -48,9 +48,18 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).parent
 DB_PATH = SCRIPT_DIR / "data" / "procurement.db"
 
-# Match the first NIF in "NIF - Name" format. Same pattern as
-# utils.parse_entity_field, anchored at the start of a ;-separated entry.
-_NIF_RE = re.compile(r"(\d{9})\s*-\s*(.+)")
+# Use utils.parse_entity_field for the NIF extraction so the backfilled
+# values can never drift from what anomaly_scanner / bid_pattern_analyzer
+# / transparency_scraper.crossref extract at runtime. Falls back to the
+# bare regex if utils can't be imported (e.g. running the script outside
+# the tools/ directory).
+try:
+    from utils import parse_entity_field as _parse_entity_field
+except ImportError:
+    _NIF_RE = re.compile(r"(\d{9})\s*-\s*(.+)")
+    def _parse_entity_field(text):
+        m = _NIF_RE.match((text or "").split(";", 1)[0].strip())
+        return [{"nif": m.group(1), "name": m.group(2).strip()}] if m else []
 
 
 def _tune_conn(conn: sqlite3.Connection) -> None:
@@ -106,10 +115,11 @@ def step_backfill(conn: sqlite3.Connection) -> int:
     BATCH = 10_000
     for r in rows:
         # adjudicatarios may be "NIF1 - Name1; NIF2 - Name2"; take the first
-        first_entry = str(r["adjudicatarios"]).strip().split(";", 1)[0].strip()
-        m = _NIF_RE.match(first_entry)
-        if m:
-            batch.append((m.group(1), r["idcontrato"]))
+        # via utils.parse_entity_field (same parser the scanners use at
+        # runtime — guarantees the backfilled values match).
+        entities = _parse_entity_field(r["adjudicatarios"])
+        if entities and entities[0]["nif"]:
+            batch.append((entities[0]["nif"], r["idcontrato"]))
         if len(batch) >= BATCH:
             conn.executemany(
                 "UPDATE contratos SET adjudicatario_nif = ? WHERE idcontrato = ?",
@@ -182,7 +192,9 @@ def verify(conn: sqlite3.Connection) -> None:
         "WHERE adjudicatario_nif IS NOT NULL LIMIT 3"
     ).fetchall():
         adj = (r["adjudicatarios"] or "")[:50]
-        print(f"    {r['idcontrato'][:18]:<20} nif={r['adjudicatario_nif']}  adj={adj!r}")
+        # idcontrato is INTEGER PRIMARY KEY -> returned as int; coerce to
+        # str before slicing so verify() works on rerun too.
+        print(f"    {str(r['idcontrato'])[:18]:<20} nif={r['adjudicatario_nif']}  adj={adj!r}")
 
     # EXPLAIN QUERY PLAN on the crossref-style aggregation
     print("  EXPLAIN QUERY PLAN (crossref-style GROUP BY):")
