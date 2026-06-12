@@ -22,9 +22,9 @@ import sqlite3
 import argparse
 from pathlib import Path
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 
-from utils import fmt, parse_entity_field
+from utils import fmt, parse_entity_field, parse_date, days_between
 
 SCRIPT_DIR = Path(__file__).parent
 PROCUREMENT_DB = SCRIPT_DIR / "data" / "procurement.db"
@@ -41,30 +41,6 @@ ELECTION_DATES = [
 # Fiscal year-end (Portuguese government fiscal year ends Dec 31)
 FISCAL_YEAR_END_MONTH = 12
 FISCAL_YEAR_END_DAY = 31
-
-
-# =============================================================================
-# PARSING
-# =============================================================================
-
-
-def parse_date(date_str):
-    """Parse date string to datetime. Returns None if invalid."""
-    if not date_str:
-        return None
-    for fmt_str in ("%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%d/%m/%Y"):
-        try:
-            return datetime.strptime(date_str[:10], fmt_str)
-        except (ValueError, IndexError):
-            continue
-    return None
-
-
-def days_between(d1, d2):
-    """Days between two datetime objects."""
-    if d1 and d2:
-        return abs((d2 - d1).days)
-    return None
 
 
 # =============================================================================
